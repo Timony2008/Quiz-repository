@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../api'
 import UploadPanel from '../components/UploadPanel' // ✅ 新增 import
+import ExportPanel from '../components/ExportPanel' // 支持导出
 
 interface Tag {
   id: number
@@ -40,8 +41,8 @@ export default function QuizSetDetail() {
   const [showAddForm, setShowAddForm] = useState(false)
   const [showUpload, setShowUpload] = useState(false) // ✅ 新增 state
   const [filterTag, setFilterTag] = useState('')
-
   const currentUserId = Number(localStorage.getItem('userId'))
+  const [showExport, setShowExport] = useState(false)
 
   useEffect(() => {
     fetchQuizSet()
@@ -171,13 +172,23 @@ export default function QuizSetDetail() {
       {/* ✅ 新增：作者操作按钮区（添加题目 + 上传文件） */}
       {isAuthor && (
         <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
-          <button onClick={() => { setShowAddForm(v => !v); setShowUpload(false) }}>
+          <button onClick={() => { setShowAddForm(v => !v); setShowUpload(false); setShowExport(false) }}>
             {showAddForm ? '取消' : '+ 添加题目'}
           </button>
-          <button onClick={() => { setShowUpload(v => !v); setShowAddForm(false) }}>
+          <button onClick={() => { setShowUpload(v => !v); setShowAddForm(false); setShowExport(false) }}>
             {showUpload ? '取消上传' : '📄 上传文件'}
           </button>
+          <button onClick={() => { setShowExport(v => !v); setShowAddForm(false); setShowUpload(false) }}>
+            {showExport ? '取消导出' : '📤 导出'}
+          </button>
         </div>
+      )}
+
+      {showExport && (
+        <ExportPanel
+          quizzes={quizSet.quizzes}
+          onClose={() => setShowExport(false)}
+        />
       )}
 
       {/* 新增题目表单 */}
