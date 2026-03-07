@@ -3,12 +3,13 @@ import api from '../api'
 
 interface Props {
   quizSetId: number
-  onDone: () => void   // 解析完成后通知父组件刷新列表
+  onClose: () => void
+  onSuccess: () => void
 }
 
 type Status = 'idle' | 'uploading' | 'processing' | 'done' | 'failed'
 
-export default function UploadPanel({ quizSetId, onDone }: Props) {
+export default function UploadPanel({ quizSetId, onClose, onSuccess }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<Status>('idle')
   const [message, setMessage] = useState('')
@@ -25,13 +26,12 @@ export default function UploadPanel({ quizSetId, onDone }: Props) {
           setStatus('done')
           setCount(quizCount)
           setMessage(`解析完成，共导入 ${quizCount} 道题`)
-          onDone()
+          onSuccess()
         } else if (s === 'FAILED') {
           clearInterval(interval)
           setStatus('failed')
           setMessage(errorMsg || '解析失败，请检查文件格式')
         }
-        // PROCESSING 状态继续等待
       } catch {
         clearInterval(interval)
         setStatus('failed')
@@ -64,7 +64,6 @@ export default function UploadPanel({ quizSetId, onDone }: Props) {
       setMessage(err.response?.data?.error || '上传失败')
     }
 
-    // 清空 input，允许重复上传同名文件
     if (inputRef.current) inputRef.current.value = ''
   }
 
@@ -85,26 +84,36 @@ export default function UploadPanel({ quizSetId, onDone }: Props) {
         style={{ display: 'none' }}
         onChange={handleUpload}
       />
-      <button
-        onClick={() => inputRef.current?.click()}
-        disabled={status === 'uploading' || status === 'processing'}
-        style={{ fontSize: 13 }}
-      >
-        📎 上传题目文件（.tex / .pdf）
-      </button>
 
-    {status !== 'idle' && (
-    <p style={{ marginTop: 8, fontSize: 13, color: statusColor[status] }}>
-        {status === 'processing' && '⏳ '}
-        {status === 'done' && '✅ '}
-        {status === 'failed' && '❌ '}
-        {message}
-        {/* 👇 加这一行 */}
-        {status === 'done' && count !== null && (
-        <span style={{ marginLeft: 8, fontWeight: 'bold' }}>（共 {count} 道）</span>
-        )}
-    </p>
-    )}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={status === 'uploading' || status === 'processing'}
+          style={{ fontSize: 13 }}
+        >
+          📎 上传题目文件（.tex / .pdf）
+        </button>
+
+        <button
+          onClick={onClose}
+          disabled={status === 'uploading' || status === 'processing'}
+          style={{ fontSize: 13 }}
+        >
+          取消
+        </button>
+      </div>
+
+      {status !== 'idle' && (
+        <p style={{ marginTop: 8, fontSize: 13, color: statusColor[status] }}>
+          {status === 'processing' && '⏳ '}
+          {status === 'done' && '✅ '}
+          {status === 'failed' && '❌ '}
+          {message}
+          {status === 'done' && count !== null && (
+            <span style={{ marginLeft: 8, fontWeight: 'bold' }}>（共 {count} 道）</span>
+          )}
+        </p>
+      )}
 
       <p style={{ fontSize: 11, color: '#555', marginTop: 4 }}>
         支持格式：LaTeX（\begin&#123;question&#125;...&#125;）或 Q:/A: 纯文本

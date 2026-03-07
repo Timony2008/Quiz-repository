@@ -1,318 +1,248 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import api from '../api'
-import UploadPanel from '../components/UploadPanel' // ✅ 新增 import
-import ExportPanel from '../components/ExportPanel' // 支持导出
+import api, { updateVisibility } from '../api'
+import UploadPanel from '../components/UploadPanel'
+import ExportPanel from '../components/ExportPanel'
 
-interface Tag {
-  id: number
-  name: string
-}
+type Visibility = 'PRIVATE' | 'PUBLIC' | 'PUBLIC_EDIT'
 
+interface Tag { id: number; name: string }
 interface Quiz {
   id: number
   question: string
   answer: string
   tags: { tag: Tag }[]
 }
-
 interface QuizSet {
   id: number
   title: string
   description?: string
+  visibility: Visibility
   author: { id: number; username: string }
   quizzes: Quiz[]
+}
+
+const VISIBILITY_LABEL: Record<Visibility, string> = {
+  PRIVATE: '🔒 私有',
+  PUBLIC: '🌐 公开只读',
+  PUBLIC_EDIT: '✏️ 公开可编辑'
 }
 
 export default function QuizSetDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+
   const [quizSet, setQuizSet] = useState<QuizSet | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [revealedIds, setRevealedIds] = useState<Set<number>>(new Set())
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null)
+
+  // 面板互斥
+  const [showUpload, setShowUpload] = useState(false)
+  const [showExport, setShowExport] = useState(false)
+
+  // 新增题目
+  const [question, setQuestion] = useState('')
+  const [answer, setAnswer] = useState('')
+  const [tagInput, setTagInput] = useState('')
+  const [showAddForm, setShowAddForm] = useState(false)
+
+  // 编辑题目
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editQuestion, setEditQuestion] = useState('')
   const [editAnswer, setEditAnswer] = useState('')
-  const [editTags, setEditTags] = useState('')
-  const [newQuestion, setNewQuestion] = useState('')
-  const [newAnswer, setNewAnswer] = useState('')
-  const [newTags, setNewTags] = useState('')
-  const [showAddForm, setShowAddForm] = useState(false)
-  const [showUpload, setShowUpload] = useState(false) // ✅ 新增 state
-  const [filterTag, setFilterTag] = useState('')
-  const currentUserId = Number(localStorage.getItem('userId'))
-  const [showExport, setShowExport] = useState(false)
+  const [editTagInput, setEditTagInput] = useState('')
 
   useEffect(() => {
+    const raw = localStorage.getItem('user')
+    if (raw) setCurrentUserId(JSON.parse(raw).id)
     fetchQuizSet()
   }, [id])
 
   async function fetchQuizSet() {
     try {
-      setLoading(true)
       const res = await api.get(`/quiz/${id}`)
       setQuizSet(res.data)
     } catch {
-      setError('加载失败')
-    } finally {
-      setLoading(false)
+      navigate('/')
     }
   }
 
-  function toggleReveal(quizId: number) {
-    setRevealedIds(prev => {
-      const next = new Set(prev)
-      next.has(quizId) ? next.delete(quizId) : next.add(quizId)
-      return next
-    })
-  }
-
-  function startEdit(quiz: Quiz) {
-    setEditingId(quiz.id)
-    setEditQuestion(quiz.question)
-    setEditAnswer(quiz.answer)
-    setEditTags(quiz.tags.map(t => t.tag.name).join(', '))
-  }
-
-  async function handleSaveEdit(quizId: number) {
-    try {
-      const tags = editTags.split(',').map(t => t.trim()).filter(Boolean)
-      await api.put(`/quiz/item/${quizId}`, {
-        question: editQuestion,
-        answer: editAnswer,
-        tags
-      })
-      setEditingId(null)
-      fetchQuizSet()
-    } catch {
-      setError('保存失败')
-    }
-  }
-
-  async function handleDelete(quizId: number) {
-    if (!confirm('确定删除这道题？')) return
-    try {
-      await api.delete(`/quiz/item/${quizId}`)
-      fetchQuizSet()
-    } catch {
-      setError('删除失败')
-    }
-  }
-
-  async function handleAddQuiz(e: React.FormEvent) {
-    e.preventDefault()
-    if (!newQuestion.trim() || !newAnswer.trim()) return
-    try {
-      const tags = newTags.split(',').map(t => t.trim()).filter(Boolean)
-      await api.post('/quiz/item', {
-        question: newQuestion,
-        answer: newAnswer,
-        quizSetId: Number(id),
-        tags
-      })
-      setNewQuestion('')
-      setNewAnswer('')
-      setNewTags('')
-      setShowAddForm(false)
-      fetchQuizSet()
-    } catch {
-      setError('添加失败')
-    }
-  }
-
-  if (loading) return <div style={{ padding: 32 }}>加载中...</div>
-  if (error) return <div style={{ padding: 32, color: 'red' }}>{error}</div>
-  if (!quizSet) return null
+  if (!quizSet) return <div style={{ padding: 40 }}>加载中...</div>
 
   const isAuthor = quizSet.author.id === currentUserId
+  const canEdit = isAuthor || quizSet.visibility === 'PUBLIC_EDIT'
 
-  const allTags = Array.from(
-    new Set(quizSet.quizzes.flatMap(q => q.tags.map(t => t.tag.name)))
-  )
+  // ── 权限修改 ──────────────────────────────────────────────────
+  async function handleVisibilityChange(v: Visibility) {
+    await updateVisibility(quizSet!.id, v)
+    setQuizSet(prev => prev ? { ...prev, visibility: v } : prev)
+  }
 
-  const filteredQuizzes = filterTag
-    ? quizSet.quizzes.filter(q => q.tags.some(t => t.tag.name === filterTag))
-    : quizSet.quizzes
+  // ── 添加题目 ──────────────────────────────────────────────────
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault()
+    if (!question.trim() || !answer.trim()) return
+    const tags = tagInput.split(',').map(t => t.trim()).filter(Boolean)
+    await api.post(`/quiz/${id}/items`, { question, answer, tags })
+    setQuestion(''); setAnswer(''); setTagInput('')
+    setShowAddForm(false)
+    fetchQuizSet()
+  }
+
+  // ── 删除题目 ──────────────────────────────────────────────────
+  async function handleDelete(quizId: number) {
+    if (!confirm('确定删除这道题？')) return
+    await api.delete(`/quiz/item/${quizId}`)
+    fetchQuizSet()
+  }
+
+  // ── 编辑题目 ──────────────────────────────────────────────────
+  function startEdit(q: Quiz) {
+    setEditingId(q.id)
+    setEditQuestion(q.question)
+    setEditAnswer(q.answer)
+    setEditTagInput(q.tags.map(t => t.tag.name).join(', '))
+  }
+
+  async function handleEditSave(quizId: number) {
+    const tags = editTagInput.split(',').map(t => t.trim()).filter(Boolean)
+    await api.put(`/quiz/item/${quizId}`, {
+      question: editQuestion,
+      answer: editAnswer,
+      tags
+    })
+    setEditingId(null)
+    fetchQuizSet()
+  }
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: 32 }}>
+    <div style={{ maxWidth: 700, margin: '40px auto', padding: '0 16px' }}>
 
-      {/* 题库信息 */}
-      <div style={{ marginBottom: 24 }}>
-        <button onClick={() => navigate('/')} style={{ marginBottom: 12 }}>← 返回</button>
-        <h1 style={{ margin: '0 0 4px' }}>{quizSet.title}</h1>
-        {quizSet.description && (
-          <p style={{ color: '#666', margin: '0 0 4px' }}>{quizSet.description}</p>
-        )}
-        <small style={{ color: '#999' }}>作者：{quizSet.author.username}</small>
+      {/* 顶栏 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <button onClick={() => navigate('/')}>← 返回</button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {canEdit && (
+            <button onClick={() => { setShowAddForm(v => !v); setShowUpload(false); setShowExport(false) }}>
+              {showAddForm ? '取消' : '＋ 添加题目'}
+            </button>
+          )}
+          {canEdit && (
+            <button onClick={() => { setShowUpload(v => !v); setShowAddForm(false); setShowExport(false) }}>
+              {showUpload ? '取消上传' : '📂 上传文件'}
+            </button>
+          )}
+          <button onClick={() => { setShowExport(v => !v); setShowAddForm(false); setShowUpload(false) }}>
+            {showExport ? '关闭导出' : '📤 导出'}
+          </button>
+        </div>
       </div>
 
-      {/* 标签筛选 */}
-      {allTags.length > 0 && (
-        <div style={{ marginBottom: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button
-            onClick={() => setFilterTag('')}
-            style={{ fontWeight: !filterTag ? 'bold' : 'normal' }}
-          >
-            全部
-          </button>
-          {allTags.map(tag => (
-            <button
-              key={tag}
-              onClick={() => setFilterTag(tag)}
-              style={{ fontWeight: filterTag === tag ? 'bold' : 'normal' }}
+      {/* 题库标题 + 权限 */}
+      <div style={{ marginBottom: 20 }}>
+        <h2 style={{ margin: '0 0 4px' }}>{quizSet.title}</h2>
+        {quizSet.description && (
+          <div style={{ color: '#666', fontSize: 14, marginBottom: 6 }}>{quizSet.description}</div>
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, color: '#888' }}>
+          <span>作者：{quizSet.author.username}</span>
+
+          {/* 作者可修改权限，非作者只显示标签 */}
+          {isAuthor ? (
+            <select
+              value={quizSet.visibility}
+              onChange={e => handleVisibilityChange(e.target.value as Visibility)}
+              style={{ fontSize: 13, padding: '2px 6px', borderRadius: 4 }}
             >
-              {tag}
-            </button>
-          ))}
+              <option value="PRIVATE">🔒 私有</option>
+              <option value="PUBLIC">🌐 公开只读</option>
+              <option value="PUBLIC_EDIT">✏️ 公开可编辑</option>
+            </select>
+          ) : (
+            <span>{VISIBILITY_LABEL[quizSet.visibility]}</span>
+          )}
         </div>
-      )}
+      </div>
 
-      {/* ✅ 新增：作者操作按钮区（添加题目 + 上传文件） */}
-      {isAuthor && (
-        <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
-          <button onClick={() => { setShowAddForm(v => !v); setShowUpload(false); setShowExport(false) }}>
-            {showAddForm ? '取消' : '+ 添加题目'}
-          </button>
-          <button onClick={() => { setShowUpload(v => !v); setShowAddForm(false); setShowExport(false) }}>
-            {showUpload ? '取消上传' : '📄 上传文件'}
-          </button>
-          <button onClick={() => { setShowExport(v => !v); setShowAddForm(false); setShowUpload(false) }}>
-            {showExport ? '取消导出' : '📤 导出'}
-          </button>
-        </div>
-      )}
-
-      {showExport && (
-        <ExportPanel
-          quizzes={quizSet.quizzes}
-          onClose={() => setShowExport(false)}
+      {/* 面板区 */}
+      {showUpload && canEdit && (
+        <UploadPanel
+          quizSetId={quizSet.id}
+          onClose={() => setShowUpload(false)}
+          onSuccess={() => { setShowUpload(false); fetchQuizSet() }}
         />
       )}
+      {showExport && (
+        <ExportPanel quizzes={quizSet.quizzes} onClose={() => setShowExport(false)} />
+      )}
 
-      {/* 新增题目表单 */}
-      {showAddForm && (
-        <form
-          onSubmit={handleAddQuiz}
-          style={{ marginBottom: 24, padding: 16, border: '1px solid #ddd', borderRadius: 8 }}
-        >
-          <div style={{ marginBottom: 8 }}>
-            <textarea
-              placeholder="题目 *"
-              value={newQuestion}
-              onChange={e => setNewQuestion(e.target.value)}
-              style={{ width: '100%', padding: 8 }}
-              rows={2}
-            />
-          </div>
-          <div style={{ marginBottom: 8 }}>
-            <textarea
-              placeholder="答案 *"
-              value={newAnswer}
-              onChange={e => setNewAnswer(e.target.value)}
-              style={{ width: '100%', padding: 8 }}
-              rows={2}
-            />
-          </div>
-          <div style={{ marginBottom: 8 }}>
-            <input
-              placeholder="标签（逗号分隔，可选）"
-              value={newTags}
-              onChange={e => setNewTags(e.target.value)}
-              style={{ width: '100%', padding: 8 }}
-            />
-          </div>
-          <button type="submit">确认添加</button>
+      {/* 添加题目表单 */}
+      {showAddForm && canEdit && (
+        <form onSubmit={handleAdd} style={{
+          marginBottom: 20, padding: 14,
+          border: '1px solid #ddd', borderRadius: 8
+        }}>
+          <input placeholder="题目 *" value={question} onChange={e => setQuestion(e.target.value)}
+            style={{ width: '100%', marginBottom: 8, padding: '6px 10px', boxSizing: 'border-box' }} />
+          <input placeholder="答案 *" value={answer} onChange={e => setAnswer(e.target.value)}
+            style={{ width: '100%', marginBottom: 8, padding: '6px 10px', boxSizing: 'border-box' }} />
+          <input placeholder="标签（逗号分隔）" value={tagInput} onChange={e => setTagInput(e.target.value)}
+            style={{ width: '100%', marginBottom: 10, padding: '6px 10px', boxSizing: 'border-box' }} />
+          <button type="submit">保存</button>
         </form>
       )}
 
-      {/* ✅ 新增：上传面板 */}
-      {showUpload && (
-        <div style={{ marginBottom: 24 }}>
-          <UploadPanel
-            quizSetId={Number(id)}
-            onDone={() => {
-              setShowUpload(false)
-              fetchQuizSet()
-            }}
-          />
-        </div>
-      )}
-
       {/* 题目列表 */}
-      {filteredQuizzes.length === 0 ? (
-        <p>暂无题目</p>
+      {quizSet.quizzes.length === 0 ? (
+        <div style={{ color: '#999', textAlign: 'center', marginTop: 40 }}>暂无题目</div>
       ) : (
-        filteredQuizzes.map(quiz => (
-          <div
-            key={quiz.id}
-            style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16, marginBottom: 12 }}
-          >
-            {editingId === quiz.id ? (
+        quizSet.quizzes.map(q => (
+          <div key={q.id} style={{
+            padding: '12px 14px', marginBottom: 10,
+            border: '1px solid #eee', borderRadius: 8
+          }}>
+            {editingId === q.id ? (
+              // 编辑态
               <div>
-                <textarea
-                  value={editQuestion}
-                  onChange={e => setEditQuestion(e.target.value)}
-                  style={{ width: '100%', padding: 8, marginBottom: 8 }}
-                  rows={2}
-                />
-                <textarea
-                  value={editAnswer}
-                  onChange={e => setEditAnswer(e.target.value)}
-                  style={{ width: '100%', padding: 8, marginBottom: 8 }}
-                  rows={2}
-                />
-                <input
-                  value={editTags}
-                  onChange={e => setEditTags(e.target.value)}
+                <input value={editQuestion} onChange={e => setEditQuestion(e.target.value)}
+                  style={{ width: '100%', marginBottom: 6, padding: '5px 8px', boxSizing: 'border-box' }} />
+                <input value={editAnswer} onChange={e => setEditAnswer(e.target.value)}
+                  style={{ width: '100%', marginBottom: 6, padding: '5px 8px', boxSizing: 'border-box' }} />
+                <input value={editTagInput} onChange={e => setEditTagInput(e.target.value)}
                   placeholder="标签（逗号分隔）"
-                  style={{ width: '100%', padding: 8, marginBottom: 8 }}
-                />
+                  style={{ width: '100%', marginBottom: 8, padding: '5px 8px', boxSizing: 'border-box' }} />
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => handleSaveEdit(quiz.id)}>保存</button>
+                  <button onClick={() => handleEditSave(q.id)}>保存</button>
                   <button onClick={() => setEditingId(null)}>取消</button>
                 </div>
               </div>
             ) : (
-              <div>
-                <p style={{ margin: '0 0 8px', fontWeight: 500 }}>{quiz.question}</p>
-                {revealedIds.has(quiz.id) && (
-                  <p style={{ margin: '0 0 8px', color: '#444' }}>{quiz.answer}</p>
-                )}
-                {quiz.tags.length > 0 && (
-                  <div style={{ marginBottom: 8, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                    {quiz.tags.map(t => (
-                      <span
-                        key={t.tag.id}
-                        style={{
-                          background: '#f0f0f0',
-                          padding: '2px 8px',
-                          borderRadius: 12,
-                          fontSize: 12
-                        }}
-                      >
-                        {t.tag.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => toggleReveal(quiz.id)}>
-                    {revealedIds.has(quiz.id) ? '隐藏答案' : '显示答案'}
-                  </button>
-                  {isAuthor && (
-                    <>
-                      <button onClick={() => startEdit(quiz)}>编辑</button>
-                      <button
-                        onClick={() => handleDelete(quiz.id)}
-                        style={{ color: 'red' }}
-                      >
-                        删除
-                      </button>
-                    </>
+              // 展示态
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div style={{ fontWeight: 500, marginBottom: 4 }}>{q.question}</div>
+                  <div style={{ color: '#555', fontSize: 14, marginBottom: 6 }}>{q.answer}</div>
+                  {q.tags.length > 0 && (
+                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                      {q.tags.map(t => (
+                        <span key={t.tag.id} style={{
+                          background: '#f0f0f0', padding: '1px 8px',
+                          borderRadius: 10, fontSize: 12
+                        }}>
+                          {t.tag.name}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
+                {canEdit && (
+                  <div style={{ display: 'flex', gap: 8, flexShrink: 0, marginLeft: 12 }}>
+                    <button onClick={() => startEdit(q)} style={{ fontSize: 13 }}>编辑</button>
+                    <button onClick={() => handleDelete(q.id)}
+                      style={{ fontSize: 13, color: '#ff4d4f', background: 'none', border: 'none', cursor: 'pointer' }}>
+                      删除
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

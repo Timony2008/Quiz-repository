@@ -15,48 +15,50 @@ model User {
 }
 
 model QuizSet {
-  id          Int      @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   title       String
   description String?
+  visibility  String     @default("PRIVATE")
   authorId    Int
-  author      User     @relation(fields: [authorId], references: [id])
+  author      User       @relation(fields: [authorId], references: [id])
   quizzes     Quiz[]
 }
 
 model Quiz {
-  id           Int          @id @default(autoincrement())
+  id           Int         @id @default(autoincrement())
   question     String
   answer       String
   quizSetId    Int
-  quizSet      QuizSet      @relation(fields: [quizSetId], references: [id])
-  tags         TagOnQuiz[]
-  sourceFileId Int?
-  sourceFile   SourceFile?  @relation(fields: [sourceFileId], references: [id])
+  quizSet      QuizSet     @relation(fields: [quizSetId], references: [id], onDelete: Cascade)
+  tags         QuizTag[]
+  sourceFileId Int?                                                          // ✅ 新增
+  sourceFile   SourceFile? @relation(fields: [sourceFileId], references: [id]) // ✅ 新增
 }
 
 model Tag {
-  id      Int         @id @default(autoincrement())
-  name    String      @unique
-  quizzes TagOnQuiz[]
+  id      Int       @id @default(autoincrement())
+  name    String    @unique
+  quizzes QuizTag[]
 }
 
-model TagOnQuiz {
+model QuizTag {
   quizId Int
   tagId  Int
-  quiz   Quiz @relation(fields: [quizId], references: [id])
+  quiz   Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
   tag    Tag  @relation(fields: [tagId], references: [id])
 
   @@id([quizId, tagId])
 }
 
+// ✅ 全新模型
 model SourceFile {
   id         Int      @id @default(autoincrement())
   filename   String
   storedPath String
-  fileType   String
-  status     String   @default("PROCESSING")
-  errorMsg   String?
+  fileType   String   // "TEX" | "PDF"
+  status     String   // "PROCESSING" | "DONE" | "FAILED"
   quizCount  Int?
+  errorMsg   String?
   createdAt  DateTime @default(now())
   quizzes    Quiz[]
 }

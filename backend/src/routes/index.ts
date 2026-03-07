@@ -1,12 +1,12 @@
 import { Router } from 'express'
-import authRoutes from './auth'
-import quizRoutes from './quiz'
-import uploadRoutes from './upload'
+import authRouter from './auth'
+import quizRouter from './quiz'
+import uploadRouter from './upload'
 
 const router = Router()
 
-router.use('/auth', authRoutes)
-router.use('/quiz', quizRoutes)
-router.use('/upload', uploadRoutes)
+router.use('/auth', authRouter)
+router.use('/quiz', quizRouter)
+router.use('/upload', uploadRouter)
 
 export default router
