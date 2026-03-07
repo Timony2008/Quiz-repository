@@ -94,9 +94,9 @@ router.post('/', upload.single('file'), async (req: AuthRequest, res: Response) 
             data: {
               question: q.question,
               answer: q.answer,
-              authorId: req.userId!,
-              sourceFileId: sourceFile.id,
-              quizSetId: quizBankId   // ✅ 关键修复：题目归属到指定题库
+              quizSetId: quizBankId,
+              sourceFileId: sourceFile.id
+              // ✅ 移除了 authorId，Quiz model 里没有这个字段
             }
           })
         )

@@ -39,6 +39,7 @@ export default function QuizSetDetail() {
   const [showAddForm, setShowAddForm] = useState(false)
   const [filterTag, setFilterTag] = useState('')
 
+  // ✅ 修复：从 localStorage 读取 userId
   const currentUserId = Number(localStorage.getItem('userId'))
 
   useEffect(() => {
@@ -122,6 +123,7 @@ export default function QuizSetDetail() {
   if (error) return <div style={{ padding: 32, color: 'red' }}>{error}</div>
   if (!quizSet) return null
 
+  // ✅ 修复：author.id 与 currentUserId 比对
   const isAuthor = quizSet.author.id === currentUserId
 
   const allTags = Array.from(
@@ -134,11 +136,14 @@ export default function QuizSetDetail() {
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: 32 }}>
+
       {/* 题库信息 */}
       <div style={{ marginBottom: 24 }}>
         <button onClick={() => navigate('/')} style={{ marginBottom: 12 }}>← 返回</button>
         <h1 style={{ margin: '0 0 4px' }}>{quizSet.title}</h1>
-        {quizSet.description && <p style={{ color: '#666', margin: '0 0 4px' }}>{quizSet.description}</p>}
+        {quizSet.description && (
+          <p style={{ color: '#666', margin: '0 0 4px' }}>{quizSet.description}</p>
+        )}
         <small style={{ color: '#999' }}>作者：{quizSet.author.username}</small>
       </div>
 
@@ -174,7 +179,10 @@ export default function QuizSetDetail() {
 
       {/* 新增题目表单 */}
       {showAddForm && (
-        <form onSubmit={handleAddQuiz} style={{ marginBottom: 24, padding: 16, border: '1px solid #ddd', borderRadius: 8 }}>
+        <form
+          onSubmit={handleAddQuiz}
+          style={{ marginBottom: 24, padding: 16, border: '1px solid #ddd', borderRadius: 8 }}
+        >
           <div style={{ marginBottom: 8 }}>
             <textarea
               placeholder="题目 *"
@@ -210,7 +218,10 @@ export default function QuizSetDetail() {
         <p>暂无题目</p>
       ) : (
         filteredQuizzes.map(quiz => (
-          <div key={quiz.id} style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16, marginBottom: 12 }}>
+          <div
+            key={quiz.id}
+            style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16, marginBottom: 12 }}
+          >
             {editingId === quiz.id ? (
               <div>
                 <textarea
@@ -245,7 +256,15 @@ export default function QuizSetDetail() {
                 {quiz.tags.length > 0 && (
                   <div style={{ marginBottom: 8, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                     {quiz.tags.map(t => (
-                      <span key={t.tag.id} style={{ background: '#f0f0f0', padding: '2px 8px', borderRadius: 12, fontSize: 12 }}>
+                      <span
+                        key={t.tag.id}
+                        style={{
+                          background: '#f0f0f0',
+                          padding: '2px 8px',
+                          borderRadius: 12,
+                          fontSize: 12
+                        }}
+                      >
                         {t.tag.name}
                       </span>
                     ))}
@@ -255,10 +274,16 @@ export default function QuizSetDetail() {
                   <button onClick={() => toggleReveal(quiz.id)}>
                     {revealedIds.has(quiz.id) ? '隐藏答案' : '显示答案'}
                   </button>
+                  {/* ✅ 修复：只有作者才显示编辑/删除 */}
                   {isAuthor && (
                     <>
                       <button onClick={() => startEdit(quiz)}>编辑</button>
-                      <button onClick={() => handleDelete(quiz.id)} style={{ color: 'red' }}>删除</button>
+                      <button
+                        onClick={() => handleDelete(quiz.id)}
+                        style={{ color: 'red' }}
+                      >
+                        删除
+                      </button>
                     </>
                   )}
                 </div>

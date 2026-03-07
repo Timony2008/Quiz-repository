@@ -6,7 +6,7 @@ import uploadRoutes from './upload'
 const router = Router()
 
 router.use('/auth', authRoutes)
-router.use('/quizzes', quizRoutes)
+router.use('/quiz', quizRoutes)
 router.use('/upload', uploadRoutes)
 
 export default router

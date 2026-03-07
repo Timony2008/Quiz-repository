@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api'
 
-
 interface QuizSet {
   id: number
   title: string
@@ -122,7 +121,7 @@ export default function Dashboard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div
                 style={{ cursor: 'pointer', flex: 1 }}
-                onClick={() => navigate(`/quiz/${qs.id}`)}
+                onClick={() => navigate(`/quizset/${qs.id}`)}
               >
                 <h3 style={{ margin: '0 0 4px' }}>{qs.title}</h3>
                 {qs.description && <p style={{ margin: '0 0 4px', color: '#666' }}>{qs.description}</p>}
@@ -142,6 +141,7 @@ export default function Dashboard() {
           </div>
         ))
       )}
+
 
     </div>
   )

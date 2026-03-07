@@ -24,17 +24,19 @@ model QuizSet {
 }
 
 model Quiz {
-  id       Int          @id @default(autoincrement())
-  question String
-  answer   String
-  quizSetId Int
-  quizSet  QuizSet      @relation(fields: [quizSetId], references: [id])
-  tags     TagOnQuiz[]
+  id           Int          @id @default(autoincrement())
+  question     String
+  answer       String
+  quizSetId    Int
+  quizSet      QuizSet      @relation(fields: [quizSetId], references: [id])
+  tags         TagOnQuiz[]
+  sourceFileId Int?
+  sourceFile   SourceFile?  @relation(fields: [sourceFileId], references: [id])
 }
 
 model Tag {
-  id     Int          @id @default(autoincrement())
-  name   String       @unique
+  id      Int         @id @default(autoincrement())
+  name    String      @unique
   quizzes TagOnQuiz[]
 }
 
@@ -45,4 +47,16 @@ model TagOnQuiz {
   tag    Tag  @relation(fields: [tagId], references: [id])
 
   @@id([quizId, tagId])
+}
+
+model SourceFile {
+  id         Int      @id @default(autoincrement())
+  filename   String
+  storedPath String
+  fileType   String
+  status     String   @default("PROCESSING")
+  errorMsg   String?
+  quizCount  Int?
+  createdAt  DateTime @default(now())
+  quizzes    Quiz[]
 }

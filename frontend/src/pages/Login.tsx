@@ -16,7 +16,9 @@ export default function Login() {
     try {
       const res = await api.post('/auth/login', { username, password })
       localStorage.setItem('token', res.data.token)
-      navigate('/')           // ← 修正：跳到 / 而不是 /dashboard
+      // ✅ 修复：存 userId
+      localStorage.setItem('userId', String(res.data.userId))
+      navigate('/')
     } catch (err: any) {
       setError(err.response?.data?.error || '登录失败')
     } finally {
@@ -30,16 +32,29 @@ export default function Login() {
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: 12 }}>
           <label>用户名<br />
-            <input value={username} onChange={e => setUsername(e.target.value)} required style={{ width: '100%' }} />
+            <input
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              required
+              style={{ width: '100%' }}
+            />
           </label>
         </div>
         <div style={{ marginBottom: 12 }}>
           <label>密码<br />
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required style={{ width: '100%' }} />
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              style={{ width: '100%' }}
+            />
           </label>
         </div>
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" disabled={loading}>{loading ? '登录中...' : '登录'}</button>
+        <button type="submit" disabled={loading}>
+          {loading ? '登录中...' : '登录'}
+        </button>
       </form>
       <p>没有账号？<Link to="/register">注册</Link></p>
     </div>
