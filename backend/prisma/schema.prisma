@@ -8,80 +8,41 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  username  String    @unique
-  password  String
-  quizzes   Quiz[]
-  quizSets  QuizSet[]
-  createdAt DateTime  @default(now())
+  id       Int       @id @default(autoincrement())
+  username String    @unique
+  password String
+  quizSets QuizSet[]
 }
 
 model QuizSet {
-  id          Int             @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   title       String
   description String?
-  author      User            @relation(fields: [authorId], references: [id])
   authorId    Int
+  author      User     @relation(fields: [authorId], references: [id])
   quizzes     Quiz[]
-  tags        TagOnQuizSet[]  // ✅ 新增：题库标签
-  createdAt   DateTime        @default(now())
 }
 
 model Quiz {
-  id           Int          @id @default(autoincrement())
-  question     String
-  answer       String
-  isLabeled    Boolean      @default(false)
-  author       User         @relation(fields: [authorId], references: [id])
-  authorId     Int
-  quizSet      QuizSet?     @relation(fields: [quizSetId], references: [id])
-  quizSetId    Int?
-  sourceFile   SourceFile?  @relation(fields: [sourceFileId], references: [id])
-  sourceFileId Int?
-  tags         TagOnQuiz[]
-  createdAt    DateTime     @default(now())
-
-  @@index([sourceFileId])
-  @@index([isLabeled])
-  @@index([createdAt])
+  id       Int          @id @default(autoincrement())
+  question String
+  answer   String
+  quizSetId Int
+  quizSet  QuizSet      @relation(fields: [quizSetId], references: [id])
+  tags     TagOnQuiz[]
 }
 
 model Tag {
-  id          Int            @id @default(autoincrement())
-  name        String         @unique
-  color       String?
-  quizzes     TagOnQuiz[]
-  quizSets    TagOnQuizSet[] // ✅ 新增：反向关联
-  createdAt   DateTime       @default(now())
+  id     Int          @id @default(autoincrement())
+  name   String       @unique
+  quizzes TagOnQuiz[]
 }
 
 model TagOnQuiz {
-  quiz   Quiz @relation(fields: [quizId], references: [id])
   quizId Int
-  tag    Tag  @relation(fields: [tagId], references: [id])
   tagId  Int
+  quiz   Quiz @relation(fields: [quizId], references: [id])
+  tag    Tag  @relation(fields: [tagId], references: [id])
 
   @@id([quizId, tagId])
-}
-
-// ✅ 新增：题库 <-> 标签 中间表
-model TagOnQuizSet {
-  quizSet   QuizSet @relation(fields: [quizSetId], references: [id])
-  quizSetId Int
-  tag       Tag     @relation(fields: [tagId], references: [id])
-  tagId     Int
-
-  @@id([quizSetId, tagId])
-}
-
-model SourceFile {
-  id         Int      @id @default(autoincrement())
-  filename   String
-  storedPath String
-  fileType   String
-  status     String   @default("PROCESSING")
-  errorMsg   String?
-  quizCount  Int      @default(0)
-  quizzes    Quiz[]
-  createdAt  DateTime @default(now())
 }

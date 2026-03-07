@@ -20,7 +20,6 @@ interface QuizSet {
   description?: string
   author: { id: number; username: string }
   quizzes: Quiz[]
-  tags: { tag: Tag }[]
 }
 
 export default function QuizSetDetail() {
@@ -34,20 +33,31 @@ export default function QuizSetDetail() {
   const [editQuestion, setEditQuestion] = useState('')
   const [editAnswer, setEditAnswer] = useState('')
   const [editTags, setEditTags] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set())
+  const [newQuestion, setNewQuestion] = useState('')
+  const [newAnswer, setNewAnswer] = useState('')
+  const [newTags, setNewTags] = useState('')
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [filterTag, setFilterTag] = useState('')
 
-  const fetchQuizSet = () => {
-    setLoading(true)
-    api.get(`/quizzes/${id}`)
-      .then(res => setQuizSet(res.data))
-      .catch(() => setError('获取题库失败'))
-      .finally(() => setLoading(false))
+  const currentUserId = Number(localStorage.getItem('userId'))
+
+  useEffect(() => {
+    fetchQuizSet()
+  }, [id])
+
+  async function fetchQuizSet() {
+    try {
+      setLoading(true)
+      const res = await api.get(`/quiz/${id}`)
+      setQuizSet(res.data)
+    } catch {
+      setError('加载失败')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  useEffect(() => { fetchQuizSet() }, [id])
-
-  const toggleReveal = (quizId: number) => {
+  function toggleReveal(quizId: number) {
     setRevealedIds(prev => {
       const next = new Set(prev)
       next.has(quizId) ? next.delete(quizId) : next.add(quizId)
@@ -55,305 +65,208 @@ export default function QuizSetDetail() {
     })
   }
 
-  const revealAll = () => {
-    if (!quizSet) return
-    setRevealedIds(new Set(filteredQuizzes.map(q => q.id)))
-  }
-
-  const hideAll = () => setRevealedIds(new Set())
-
-  const handleDeleteQuiz = async (quizId: number) => {
-    if (!confirm('确定删除这道题？')) return
-    try {
-      await api.delete(`/quizzes/item/${quizId}`)
-      fetchQuizSet()
-    } catch {
-      setError('删除失败')
-    }
-  }
-
-  const startEdit = (quiz: Quiz) => {
+  function startEdit(quiz: Quiz) {
     setEditingId(quiz.id)
     setEditQuestion(quiz.question)
     setEditAnswer(quiz.answer)
     setEditTags(quiz.tags.map(t => t.tag.name).join(', '))
   }
 
-  const cancelEdit = () => {
-    setEditingId(null)
-    setEditQuestion('')
-    setEditAnswer('')
-    setEditTags('')
-  }
-
-  const handleSaveEdit = async (quizId: number) => {
-    setSaving(true)
+  async function handleSaveEdit(quizId: number) {
     try {
       const tags = editTags.split(',').map(t => t.trim()).filter(Boolean)
-      await api.put(`/quizzes/item/${quizId}`, {
+      await api.put(`/quiz/item/${quizId}`, {
         question: editQuestion,
         answer: editAnswer,
         tags
       })
-      cancelEdit()
+      setEditingId(null)
       fetchQuizSet()
     } catch {
       setError('保存失败')
-    } finally {
-      setSaving(false)
     }
   }
 
-  const toggleTag = (tagName: string) => {
-    setSelectedTags(prev => {
-      const next = new Set(prev)
-      next.has(tagName) ? next.delete(tagName) : next.add(tagName)
-      return next
-    })
+  async function handleDelete(quizId: number) {
+    if (!confirm('确定删除这道题？')) return
+    try {
+      await api.delete(`/quiz/item/${quizId}`)
+      fetchQuizSet()
+    } catch {
+      setError('删除失败')
+    }
   }
 
-  if (loading) return <p style={{ padding: 40, color: '#555' }}>加载中...</p>
-  if (error)   return <p style={{ padding: 40, color: '#e53935' }}>{error}</p>
+  async function handleAddQuiz(e: React.FormEvent) {
+    e.preventDefault()
+    if (!newQuestion.trim() || !newAnswer.trim()) return
+    try {
+      const tags = newTags.split(',').map(t => t.trim()).filter(Boolean)
+      await api.post('/quiz/item', {
+        question: newQuestion,
+        answer: newAnswer,
+        quizSetId: Number(id),
+        tags
+      })
+      setNewQuestion('')
+      setNewAnswer('')
+      setNewTags('')
+      setShowAddForm(false)
+      fetchQuizSet()
+    } catch {
+      setError('添加失败')
+    }
+  }
+
+  if (loading) return <div style={{ padding: 32 }}>加载中...</div>
+  if (error) return <div style={{ padding: 32, color: 'red' }}>{error}</div>
   if (!quizSet) return null
 
-  // 聚合所有题目的标签，去重
+  const isAuthor = quizSet.author.id === currentUserId
+
   const allTags = Array.from(
-    new Map(
-      quizSet.quizzes
-        .flatMap(q => q.tags.map(t => t.tag))
-        .map(tag => [tag.id, tag])
-    ).values()
+    new Set(quizSet.quizzes.flatMap(q => q.tags.map(t => t.tag.name)))
   )
 
-  // 过滤后的题目
-  const filteredQuizzes = selectedTags.size === 0
-    ? quizSet.quizzes
-    : quizSet.quizzes.filter(q =>
-        q.tags.some(t => selectedTags.has(t.tag.name))
-      )
+  const filteredQuizzes = filterTag
+    ? quizSet.quizzes.filter(q => q.tags.some(t => t.tag.name === filterTag))
+    : quizSet.quizzes
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#f5f6fa',
-      fontFamily: 'system-ui, sans-serif',
-      color: '#222'
-    }}>
-      {/* ── 顶栏 ── */}
-      <div style={{
-        background: '#fff',
-        borderBottom: '1px solid #e0e0e0',
-        padding: '0 32px',
-        height: 56,
-        display: 'flex',
-        alignItems: 'center',
-        position: 'sticky',
-        top: 0,
-        zIndex: 10
-      }}>
-        <button onClick={() => navigate('/')} style={{
-          background: 'none', border: '1px solid #ccc', borderRadius: 6,
-          padding: '5px 14px', cursor: 'pointer', fontSize: 13, color: '#555'
-        }}>
-          ← 返回题库列表
-        </button>
+    <div style={{ maxWidth: 800, margin: '0 auto', padding: 32 }}>
+      {/* 题库信息 */}
+      <div style={{ marginBottom: 24 }}>
+        <button onClick={() => navigate('/')} style={{ marginBottom: 12 }}>← 返回</button>
+        <h1 style={{ margin: '0 0 4px' }}>{quizSet.title}</h1>
+        {quizSet.description && <p style={{ color: '#666', margin: '0 0 4px' }}>{quizSet.description}</p>}
+        <small style={{ color: '#999' }}>作者：{quizSet.author.username}</small>
       </div>
 
-      {/* ── 主体 ── */}
-      <div style={{ maxWidth: 860, margin: '0 auto', padding: '32px 24px' }}>
-
-        {/* 题库信息 */}
-        <div style={{
-          background: '#fff', borderRadius: 12, padding: '20px 24px',
-          marginBottom: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.07)',
-          border: '1px solid #e8eaf6'
-        }}>
-          <h2 style={{ margin: '0 0 4px', fontSize: 22, color: '#1a1a1a' }}>{quizSet.title}</h2>
-          {quizSet.description && (
-            <p style={{ color: '#888', margin: '4px 0', fontSize: 14 }}>{quizSet.description}</p>
-          )}
-          <p style={{ color: '#aaa', fontSize: 13, margin: '4px 0 0' }}>
-            共 {quizSet.quizzes.length} 道题 · 作者：{quizSet.author.username}
-          </p>
+      {/* 标签筛选 */}
+      {allTags.length > 0 && (
+        <div style={{ marginBottom: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setFilterTag('')}
+            style={{ fontWeight: !filterTag ? 'bold' : 'normal' }}
+          >
+            全部
+          </button>
+          {allTags.map(tag => (
+            <button
+              key={tag}
+              onClick={() => setFilterTag(tag)}
+              style={{ fontWeight: filterTag === tag ? 'bold' : 'normal' }}
+            >
+              {tag}
+            </button>
+          ))}
         </div>
+      )}
 
-        {/* 标签筛选栏 */}
-        {allTags.length > 0 && (
-          <div style={{
-            background: '#fff', borderRadius: 12, padding: '12px 20px',
-            marginBottom: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.07)',
-            border: '1px solid #e8eaf6',
-            display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8
-          }}>
-            <span style={{ fontSize: 13, color: '#888', marginRight: 4 }}>按标签筛选：</span>
-            {allTags.map(tag => {
-              const active = selectedTags.has(tag.name)
-              return (
-                <button
-                  key={tag.id}
-                  onClick={() => toggleTag(tag.name)}
-                  style={{
-                    fontSize: 12, padding: '3px 12px', borderRadius: 999,
-                    cursor: 'pointer', transition: 'all 0.15s',
-                    background: active ? '#3949ab' : '#e8eaf6',
-                    color: active ? '#fff' : '#3949ab',
-                    border: `1px solid ${active ? '#3949ab' : '#c5cae9'}`,
-                    fontWeight: active ? 600 : 400,
-                  }}
-                >
-                  {tag.name}
-                </button>
-              )
-            })}
-            {selectedTags.size > 0 && (
-              <button
-                onClick={() => setSelectedTags(new Set())}
-                style={{
-                  fontSize: 12, padding: '3px 10px', borderRadius: 999,
-                  cursor: 'pointer', background: 'none',
-                  border: '1px solid #e0e0e0', color: '#aaa'
-                }}
-              >
-                清除筛选
-              </button>
+      {/* 新增题目按钮 */}
+      {isAuthor && (
+        <div style={{ marginBottom: 16 }}>
+          <button onClick={() => setShowAddForm(v => !v)}>
+            {showAddForm ? '取消' : '+ 添加题目'}
+          </button>
+        </div>
+      )}
+
+      {/* 新增题目表单 */}
+      {showAddForm && (
+        <form onSubmit={handleAddQuiz} style={{ marginBottom: 24, padding: 16, border: '1px solid #ddd', borderRadius: 8 }}>
+          <div style={{ marginBottom: 8 }}>
+            <textarea
+              placeholder="题目 *"
+              value={newQuestion}
+              onChange={e => setNewQuestion(e.target.value)}
+              style={{ width: '100%', padding: 8 }}
+              rows={2}
+            />
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <textarea
+              placeholder="答案 *"
+              value={newAnswer}
+              onChange={e => setNewAnswer(e.target.value)}
+              style={{ width: '100%', padding: 8 }}
+              rows={2}
+            />
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <input
+              placeholder="标签（逗号分隔，可选）"
+              value={newTags}
+              onChange={e => setNewTags(e.target.value)}
+              style={{ width: '100%', padding: 8 }}
+            />
+          </div>
+          <button type="submit">确认添加</button>
+        </form>
+      )}
+
+      {/* 题目列表 */}
+      {filteredQuizzes.length === 0 ? (
+        <p>暂无题目</p>
+      ) : (
+        filteredQuizzes.map(quiz => (
+          <div key={quiz.id} style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16, marginBottom: 12 }}>
+            {editingId === quiz.id ? (
+              <div>
+                <textarea
+                  value={editQuestion}
+                  onChange={e => setEditQuestion(e.target.value)}
+                  style={{ width: '100%', padding: 8, marginBottom: 8 }}
+                  rows={2}
+                />
+                <textarea
+                  value={editAnswer}
+                  onChange={e => setEditAnswer(e.target.value)}
+                  style={{ width: '100%', padding: 8, marginBottom: 8 }}
+                  rows={2}
+                />
+                <input
+                  value={editTags}
+                  onChange={e => setEditTags(e.target.value)}
+                  placeholder="标签（逗号分隔）"
+                  style={{ width: '100%', padding: 8, marginBottom: 8 }}
+                />
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => handleSaveEdit(quiz.id)}>保存</button>
+                  <button onClick={() => setEditingId(null)}>取消</button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p style={{ margin: '0 0 8px', fontWeight: 500 }}>{quiz.question}</p>
+                {revealedIds.has(quiz.id) && (
+                  <p style={{ margin: '0 0 8px', color: '#444' }}>{quiz.answer}</p>
+                )}
+                {quiz.tags.length > 0 && (
+                  <div style={{ marginBottom: 8, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                    {quiz.tags.map(t => (
+                      <span key={t.tag.id} style={{ background: '#f0f0f0', padding: '2px 8px', borderRadius: 12, fontSize: 12 }}>
+                        {t.tag.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => toggleReveal(quiz.id)}>
+                    {revealedIds.has(quiz.id) ? '隐藏答案' : '显示答案'}
+                  </button>
+                  {isAuthor && (
+                    <>
+                      <button onClick={() => startEdit(quiz)}>编辑</button>
+                      <button onClick={() => handleDelete(quiz.id)} style={{ color: 'red' }}>删除</button>
+                    </>
+                  )}
+                </div>
+              </div>
             )}
           </div>
-        )}
-
-        {/* 全部展开 / 收起 */}
-        {filteredQuizzes.length > 0 && (
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-            <button onClick={revealAll} style={secondaryBtn}>全部显示答案</button>
-            <button onClick={hideAll} style={mutedBtn}>全部隐藏答案</button>
-          </div>
-        )}
-
-        {/* 题目列表 */}
-        {quizSet.quizzes.length === 0 ? (
-          <p style={{ color: '#999', textAlign: 'center', marginTop: 60 }}>还没有题目，回到列表上传吧 🎉</p>
-        ) : filteredQuizzes.length === 0 ? (
-          <p style={{ color: '#999', textAlign: 'center', marginTop: 60 }}>没有符合条件的题目</p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {filteredQuizzes.map((quiz, index) => (
-              <div key={quiz.id} style={{
-                background: '#fff', borderRadius: 12, padding: '16px 20px',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.07)',
-                border: '1px solid #e8eaf6'
-              }}>
-                {editingId === quiz.id ? (
-                  /* 编辑模式 */
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <label style={{ fontSize: 13, color: '#555' }}>题目
-                      <textarea
-                        value={editQuestion}
-                        onChange={e => setEditQuestion(e.target.value)}
-                        rows={2}
-                        style={{ ...textareaStyle, marginTop: 4 }}
-                      />
-                    </label>
-                    <label style={{ fontSize: 13, color: '#555' }}>答案
-                      <textarea
-                        value={editAnswer}
-                        onChange={e => setEditAnswer(e.target.value)}
-                        rows={2}
-                        style={{ ...textareaStyle, marginTop: 4 }}
-                      />
-                    </label>
-                    <label style={{ fontSize: 13, color: '#555' }}>标签（逗号分隔）
-                      <input
-                        value={editTags}
-                        onChange={e => setEditTags(e.target.value)}
-                        placeholder="例：数学, 微积分"
-                        style={{ ...inputStyle, marginTop: 4 }}
-                      />
-                    </label>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <button onClick={() => handleSaveEdit(quiz.id)} disabled={saving} style={primaryBtn}>
-                        {saving ? '保存中...' : '保存'}
-                      </button>
-                      <button onClick={cancelEdit} style={mutedBtn}>取消</button>
-                    </div>
-                  </div>
-                ) : (
-                  /* 查看模式 */
-                  <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <p style={{ margin: '0 0 8px', fontWeight: 600, fontSize: 15, flex: 1 }}>
-                        Q{index + 1}. {quiz.question}
-                      </p>
-                      <div style={{ display: 'flex', gap: 6, flexShrink: 0, marginLeft: 12 }}>
-                        <button onClick={() => startEdit(quiz)} style={secondaryBtn}>编辑</button>
-                        <button onClick={() => handleDeleteQuiz(quiz.id)} style={dangerBtn}>删除</button>
-                      </div>
-                    </div>
-
-                    {quiz.tags?.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
-                        {quiz.tags.map(({ tag }) => (
-                          <span key={tag.id} style={{
-                            fontSize: 11, padding: '2px 8px', borderRadius: 999,
-                            background: selectedTags.has(tag.name) ? '#3949ab' : '#e8eaf6',
-                            color: selectedTags.has(tag.name) ? '#fff' : '#3949ab',
-                            border: `1px solid ${selectedTags.has(tag.name) ? '#3949ab' : '#c5cae9'}`
-                          }}>{tag.name}</span>
-                        ))}
-                      </div>
-                    )}
-
-                    <button onClick={() => toggleReveal(quiz.id)} style={mutedBtn}>
-                      {revealedIds.has(quiz.id) ? '隐藏答案' : '显示答案'}
-                    </button>
-
-                    {revealedIds.has(quiz.id) && (
-                      <div style={{
-                        marginTop: 10, padding: '10px 14px', borderRadius: 8,
-                        background: '#f0f4ff', borderLeft: '3px solid #3949ab',
-                        fontSize: 14, color: '#333', lineHeight: 1.6
-                      }}>
-                        {quiz.answer}
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+        ))
+      )}
     </div>
   )
-}
-
-// ── 样式常量 ──────────────────────────────────────────
-const primaryBtn: React.CSSProperties = {
-  background: '#3949ab', color: '#fff', border: 'none',
-  borderRadius: 6, padding: '6px 16px', cursor: 'pointer', fontSize: 13
-}
-
-const secondaryBtn: React.CSSProperties = {
-  background: '#e8eaf6', color: '#3949ab', border: '1px solid #c5cae9',
-  borderRadius: 6, padding: '5px 14px', cursor: 'pointer', fontSize: 13
-}
-
-const mutedBtn: React.CSSProperties = {
-  background: '#f5f5f5', color: '#777', border: '1px solid #e0e0e0',
-  borderRadius: 6, padding: '5px 14px', cursor: 'pointer', fontSize: 13
-}
-
-const dangerBtn: React.CSSProperties = {
-  background: '#fff0f0', color: '#e53935', border: '1px solid #ffcdd2',
-  borderRadius: 6, padding: '5px 14px', cursor: 'pointer', fontSize: 13
-}
-
-const textareaStyle: React.CSSProperties = {
-  width: '100%', padding: '8px 10px', borderRadius: 6,
-  border: '1px solid #ddd', fontSize: 14, resize: 'vertical',
-  fontFamily: 'system-ui, sans-serif', boxSizing: 'border-box', display: 'block'
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '7px 10px', borderRadius: 6,
-  border: '1px solid #ddd', fontSize: 14,
-  fontFamily: 'system-ui, sans-serif', boxSizing: 'border-box', display: 'block'
 }
