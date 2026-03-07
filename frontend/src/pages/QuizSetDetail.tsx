@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../api'
+import UploadPanel from '../components/UploadPanel' // ✅ 新增 import
 
 interface Tag {
   id: number
@@ -37,9 +38,9 @@ export default function QuizSetDetail() {
   const [newAnswer, setNewAnswer] = useState('')
   const [newTags, setNewTags] = useState('')
   const [showAddForm, setShowAddForm] = useState(false)
+  const [showUpload, setShowUpload] = useState(false) // ✅ 新增 state
   const [filterTag, setFilterTag] = useState('')
 
-  // ✅ 修复：从 localStorage 读取 userId
   const currentUserId = Number(localStorage.getItem('userId'))
 
   useEffect(() => {
@@ -123,7 +124,6 @@ export default function QuizSetDetail() {
   if (error) return <div style={{ padding: 32, color: 'red' }}>{error}</div>
   if (!quizSet) return null
 
-  // ✅ 修复：author.id 与 currentUserId 比对
   const isAuthor = quizSet.author.id === currentUserId
 
   const allTags = Array.from(
@@ -168,11 +168,14 @@ export default function QuizSetDetail() {
         </div>
       )}
 
-      {/* 新增题目按钮 */}
+      {/* ✅ 新增：作者操作按钮区（添加题目 + 上传文件） */}
       {isAuthor && (
-        <div style={{ marginBottom: 16 }}>
-          <button onClick={() => setShowAddForm(v => !v)}>
+        <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
+          <button onClick={() => { setShowAddForm(v => !v); setShowUpload(false) }}>
             {showAddForm ? '取消' : '+ 添加题目'}
+          </button>
+          <button onClick={() => { setShowUpload(v => !v); setShowAddForm(false) }}>
+            {showUpload ? '取消上传' : '📄 上传文件'}
           </button>
         </div>
       )}
@@ -211,6 +214,19 @@ export default function QuizSetDetail() {
           </div>
           <button type="submit">确认添加</button>
         </form>
+      )}
+
+      {/* ✅ 新增：上传面板 */}
+      {showUpload && (
+        <div style={{ marginBottom: 24 }}>
+          <UploadPanel
+            quizSetId={Number(id)}
+            onDone={() => {
+              setShowUpload(false)
+              fetchQuizSet()
+            }}
+          />
+        </div>
       )}
 
       {/* 题目列表 */}
@@ -274,7 +290,6 @@ export default function QuizSetDetail() {
                   <button onClick={() => toggleReveal(quiz.id)}>
                     {revealedIds.has(quiz.id) ? '隐藏答案' : '显示答案'}
                   </button>
-                  {/* ✅ 修复：只有作者才显示编辑/删除 */}
                   {isAuthor && (
                     <>
                       <button onClick={() => startEdit(quiz)}>编辑</button>

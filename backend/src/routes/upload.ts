@@ -2,7 +2,7 @@ import { Router, Response } from 'express'
 import path from 'path'
 import fs from 'fs'
 import multer from 'multer'
-import { AuthRequest } from '../middleware/auth'
+import { authMiddleware, AuthRequest } from '../middleware/auth'
 import { PrismaClient } from '@prisma/client'
 import { parseTexFile } from '../services/texParser'
 import { parsePdfFile } from '../services/pdfParser'
@@ -38,7 +38,7 @@ const upload = multer({
 })
 
 // ── 上传接口 ──────────────────────────────────────────────────
-router.post('/', upload.single('file'), async (req: AuthRequest, res: Response) => {
+router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest, res: Response) => {
   if (!req.file) {
     res.status(400).json({ error: '请上传文件' })
     return
