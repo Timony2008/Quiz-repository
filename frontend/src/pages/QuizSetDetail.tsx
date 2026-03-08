@@ -148,7 +148,10 @@ export default function QuizSetDetail() {
   }
 
   return (
-    <div style={{ maxWidth: 700, margin: '40px auto', padding: '0 16px' }}>
+      <div style={{
+        maxWidth: 900, margin: '0 auto',
+        padding: '32px 40px 0'   // ← 顶部加 24px
+      }}>
 
       {/* 顶栏 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>

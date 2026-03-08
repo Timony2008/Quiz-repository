@@ -63,10 +63,19 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={{ maxWidth: 700, margin: '40px auto', padding: '0 16px' }}>
+      <div style={{
+        maxWidth: 900, margin: '0 auto',
+        padding: '32px 40px 0'   // ← 顶部加 24px
+      }}>
 
       {/* 顶栏 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+     <div style={{
+          display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '24px 0 20px',
+          borderBottom: '1px solid #f0f0f0',
+          marginBottom: 24
+        }}>
         <h2 style={{ margin: 0 }}>📚 我的题库</h2>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => setShowForm(v => !v)}>
