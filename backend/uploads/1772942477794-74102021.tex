@@ -1,0 +1,1262 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{hyperref}
+\usepackage[margin=1in]{geometry}
+
+\title{\textbf{\huge K\"oMaL Level A Math Problems \& Solutions} \\[1ex] \Large Year 2023/2024 Archive}
+\author{Auto-generated Archive}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{Month: 202309}
+\addcontentsline{toc}{section}{Month: 202309}
+
+\subsection*{Problem 1}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A857&l=en}\\[1em]
+
+
+Proposed byBoldizsar Varga,Veroce
+
+(7 pont)
+
+Deadline expired on October 10, 2023.
+
+We will show that all three points lie on the Euler line of triangle \(\displaystyle ABC\). It is known that \(\displaystyle H\) does, so it is sufficient to prove this for \(\displaystyle M\) and \(\displaystyle X\).
+
+Let \(\displaystyle K\) be the center of the Feuerbach circle of triangle \(\displaystyle ABC\). It is known that \(\displaystyle K\) also lies on the Euler line of triangle \(\displaystyle ABC\). Let \(\displaystyle P\) and \(\displaystyle Q\) be the second intersection points of the Feuerbach circle with segments \(\displaystyle BD\) and \(\displaystyle CE\), respectively. It is known that \(\displaystyle D,\) \(\displaystyle E,\) \(\displaystyle F,\) and \(\displaystyle G\) lie on the Feuerbach circle. Since \(\displaystyle \angle FEQ = 90^{\circ}\), it follows from the Thales' theorem that \(\displaystyle Q\) is the point opposite to \(\displaystyle F\) and similarly, \(\displaystyle P\) is opposite to \(\displaystyle G\) on the Feuerbach circle. Therefore, lines \(\displaystyle FQ\) and \(\displaystyle GP\) pass through point \(\displaystyle K\). Applying Pascal's theorem to the hexagon \(\displaystyle EQFDPG\) inscribed in the Feuerbach circle, we get that lines \(\displaystyle EQ\cap DP = H,\) \(\displaystyle QF\cap PG = K,\) and \(\displaystyle FD\cap GE = X\) are collinear, which means that \(\displaystyle X\) also lies on the Euler line of triangle \(\displaystyle ABC\).
+
+We finish the proof by showing that \(\displaystyle M\) is the midpoint of segment \(\displaystyle XK\). To prove this, we show that quadrilateral \(\displaystyle XO_1KO_2\) is a parallelogram, furthermore, its opposite sides are perpendicular to lines \(\displaystyle AC\) and \(\displaystyle AB\). Due to symmetry, it is sufficient to prove this for lines \(\displaystyle O_2K\) and \(\displaystyle O_1X\). It is clear that \(\displaystyle O_2K\) satisfies this condition since both \(\displaystyle O_2\) and \(\displaystyle K\) lie on the perpendicular bisector of segment \(\displaystyle DG\). Let \(\displaystyle S\) be the intersection of line \(\displaystyle O_1X\) and \(\displaystyle AC\), and let \(\displaystyle \angle DGE = \alpha\). Then, \(\displaystyle \angle DFE = \alpha\) since \(\displaystyle GDEF\) is a cyclic quadrilateral. From the fact that \(\displaystyle \angle XO_1E = 2\alpha\) since it is a central angle in the circumcircle of triangle \(\displaystyle XEF\), we have \(\displaystyle \angle EXO_1 = 90^{\circ}-\alpha\). Hence \(\displaystyle \angle GXS=90^{\circ}-\alpha\), which implies that \(\displaystyle \angle XSG\) is a right angle, as desired.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 2}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A858&l=en}\\[1em]
+
+A. 858.Prove that the only integer solution of the following system of equations is \(\displaystyle u=v=x=y=z=0\): \(\displaystyle uv=x^2-5y^2\), \(\displaystyle (u+v)(u+2v)=x^2-5z^2\).
+
+Proposed byBarnabas Szabo,Budapest
+
+(7 pont)
+
+Deadline expired on October 10, 2023.
+
+Suppose for the sake of contradiction that there exists a solution where not all variables are equal to 0. Let's pick one of these solutions where the sum of the absolute values is the smallest possible.
+
+First we show that none of \(\displaystyle u\), \(\displaystyle v\), \(\displaystyle u+v\) and \(\displaystyle u+2v\) can be divisible by 5.
+
+If at least one of \(\displaystyle u\), \(\displaystyle v\), \(\displaystyle u+v\) and  \(\displaystyle u+2v\) is divisible by 5, then \(\displaystyle x\) is divisible by 5. Thus the right hand side of both equations is divisible by 5, and then at least two of \(\displaystyle u\), \(\displaystyle v\), \(\displaystyle u+v\) and  \(\displaystyle u+2v\) is divisible by 5. A quick check shows that in this case both \(\displaystyle u\) and \(\displaystyle v\) must be divisible by 5, and thus the left hand sides of the equations are divisible by 25. This implies \(\displaystyle y\) and \(\displaystyle z\) must also be divisible by 5. However, this makes it possible to divide all variables by 5, and then we get a solution with a smaller sum of the absolute values, which contradicts our assumption. Thus none of \(\displaystyle u\), \(\displaystyle v\), \(\displaystyle u+v\) and  \(\displaystyle u+2v\) is divisible by 5.
+
+The next claim is the key to the solution: if \(\displaystyle p\) is an odd prime that divides \(\displaystyle x^2-5y^2\) and \(\displaystyle p\) does not divide \(\displaystyle x\) and \(\displaystyle y\), then \(\displaystyle p\) is 1 or -1 mod 5. The reason is that this is equivalent to 5 being a quadratic remainder mod \(\displaystyle p\) (being the square of \(\displaystyle x/y\)), and by applying quadratic reciprocity \(\displaystyle p\) is a quadratic remainder mod 5 since 5 is a prime that is 1 mod 4. Thus \(\displaystyle p\) must be 1 or -1 mod 5.
+
+This implies the following: if \(\displaystyle p\) is odd and it is 2 or 3 mod 5, then the exponent of \(\displaystyle p\) in \(\displaystyle x^2-5y^2\) is even. And this means that all powers of primes different from 5 in \(\displaystyle x^2-5y^2\) will be 1 or -1 mod 5. Notice that the same is also true for \(\displaystyle 2\): if \(\displaystyle x\) and \(\displaystyle y\) are both odd, then \(\displaystyle x^2-5y^2\) is 4 mod 8, so the exponent of 2 is 2, and if both are even, we can divide them by 2, and \(\displaystyle x^2-5y^2\) will be divided by 4.
+
+Now if both \(\displaystyle u\) and \(\displaystyle v\) are divisible by \(\displaystyle p\neq 5\), then all variables could be divided by \(\displaystyle p\), which is a contradiction. If only one of them is divisible by \(\displaystyle p\), then according to the above the power of \(\displaystyle p\) in the prime factorization of it will be 1 or -1 mod 5.
+
+If both \(\displaystyle u+v\) and \(\displaystyle u+2v\) are divisible \(\displaystyle p\neq 5\), then both \(\displaystyle u\) and \(\displaystyle v\) are divisible by \(\displaystyle p\), and we have seen that this is not possible. Thus the same is true for \(\displaystyle u+v\) and \(\displaystyle u+2v\) as before: each prime power in their prime factorization has to be 1 or -1 mod 5.
+
+Since none of \(\displaystyle u\), \(\displaystyle v\), \(\displaystyle u+v\) and \(\displaystyle u+2v\) can be divisible by 5, the above means that all of them  has to be 1 or -1 mod \(\displaystyle 5\). However, it is really easy to check that this cannot happen even for \(\displaystyle u\), \(\displaystyle v\) and \(\displaystyle u+v\), and thus we are done.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 3}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A859&l=en}\\[1em]
+
+A. 859.Path graph \(\displaystyle U\) is given, and a blindfolded player is standing on one of its vertices. The vertices of \(\displaystyle U\) are labeled with positive integers between \(\displaystyle 1\) and \(\displaystyle n\), not necessarily in the natural order. In each step of the game, the game master tells the player whether he is in a vertex with degree 1 or with degree 2. If he is in a vertex with degree 1, he has to move to its only neighbour, if he is in a vertex with degree 2, he can decide whether he wants to move to the adjacent vertex with the lower or with the higher number. All the information the player has during the game after \(\displaystyle k\) steps are the \(\displaystyle k\) degrees of the vertices he visited and his choice for each step. Is there a strategy for the player with which he can decide in finitely many steps how many vertices the path has?
+
+Proposed byMarton Nemeth,Budapest
+
+(7 pont)
+
+Deadline expired on October 10, 2023.
+
+Such a strategy does exist.
+
+An algorithm will decide in each step whether to choose the adjacent vertex with the smaller or the bigger label, and will predict whether we will arrive in a vertex with degree 1. We say that the algorithm made a mistake when it predicts a vertex with degree 1 and we actually step in a vertex with degree 2, or we arrive at a vertex with degree 1 without the algorithm predicting it.
+
+Lemma: for every possible labeling of a path with \(\displaystyle n\) vertices there exists an algorithm which makes no mistake in this path, but it will make a mistake in all other paths that are longer than \(\displaystyle n\).
+
+Based on this lemma it is easy to prove our claim. For every \(\displaystyle k\) there exists finitely many labelings of a path with \(\displaystyle k\) vertices. We will apply our algorithm for all possible labelings of the path for \(\displaystyle k=1\), then \(\displaystyle k=2\) and so on. If the path has length \(\displaystyle n\), we will see a mistake in all paths of length \(\displaystyle k<n\), so we know that the path has length at least \(\displaystyle n\). Now we try the algorithm for all possible labelings of the path with \(\displaystyle n\) vertices. The algorithm won't make a mistake when the assumed labeling coincides with the actual labeling. This will show that the path has length at most \(\displaystyle n\). Thus we found out that the length of the path is \(\displaystyle n\). So this strategy will find the length of the path in finitely many steps.
+
+Proof of the lemma:
+
+Let us consider a path with \(\displaystyle n\) vertices and a corresponding labeling and call it \(\displaystyle U\). We will create an algorithm correspondng to \(\displaystyle U\). We assume that we are at the vertex with label 1. We will perform a sequence of steps that takes us to an endpoint of the path. If we end up in an endpoint sooner, or we don't end up in an endpoint, we know that we haven't started from the vertex with label 1. Now we assume that we start at vertex 2, and follow a sequence of steps taking to an endpoint. If the result is not consistent with our assumption, we know that we haven't started at 2. Now we assume we start at 3, and follow the same algorithm, and so on. This is a finite algorithm (it cannot perform more than \(\displaystyle n^2\) steps), and if the actual path is \(\displaystyle U\), we will eventually find an endpoint.
+
+We can forget about the walk we have done so far, and now our aim is to create a finite algorithm that starts from an endpoint and can be performed in \(\displaystyle U\), but will lead to a mistake in every path that is longer than \(\displaystyle U\).
+
+Without loss of generality we can assume that we started from the left endpoint. In the first step we will surely land on the second vertex from the left.
+
+For \(\displaystyle k\le \frac{n+1}{2}\) we know that we stand on the \(\displaystyle k^{th}\) vertex from the left. After this we will perform the sequence of steps that would take us from the \(\displaystyle k^{th}\) vertex from the left to the left endpoint in \(\displaystyle U\), and the algorithm predicts that we are in a vertex with degree 1. This works in \(\displaystyle U\), however, in a path that is longer than \(\displaystyle U\) this will lead to a mistake, or we went straight back to the left endpoint, since \(\displaystyle k\le \frac{n+1}{2}\) guarantees that we cannot end up in the right endpoint in \(\displaystyle k-1\) steps. Now we perform those steps that took us to the \(\displaystyle k^{th}\) vertex from the left endpoint. This will take us there again. Now we check whether at the beginning of this step we moved to the smaller or the bigger neighbour from the \(\displaystyle k^{th}\) vertex. We know that this leads in the direction of the left endpoint, so we will make a move in the opposite direction. This guarantees that we are at the \(\displaystyle (k+1)^{th}\) vertex after this step.
+
+We iterate this until \(\displaystyle k\le \frac{n+1}{2}\).
+
+If \(\displaystyle n\) is even, we know that we will ultimately arrive at the \(\displaystyle \left(\frac{n}{2}+1\right)^{st}\) vertex from the left, and if \(\displaystyle n\) is odd, at the \(\displaystyle \left(\frac{n+3}{2}\right)^{nd}\) vertex. Now we perform the sequence of steps that would take us to the right endpoint from here in \(\displaystyle U\), and predict that we will arrive in a vertex with degree 1. This is correct in \(\displaystyle U\), however in path that is longer than \(\displaystyle U\) we don't perform enough steps to end up in an endpoint, so we will encounter a mistake.
+
+Thus this algorithm that works correctly in \(\displaystyle U\), however, it will make a mistake in longer paths, thus finishing our proof.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section*{Month: 202310}
+\addcontentsline{toc}{section}{Month: 202310}
+
+\subsection*{Problem 1}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A860&l=en}\\[1em]
+
+A. 860.A 0\(\displaystyle \,\)–\(\displaystyle \,\)1 sequence of length \(\displaystyle 2^k\) is given. Alice can pick a member from the sequence, and reveal it (its place and its value) to Bob. Find the largest number \(\displaystyle s\) for which Bob can always pick \(\displaystyle s\) members of the sequence, and guess all their values correctly.
+
+Alice and Bob can discuss a strategy before the game with the aim of maximizing the number of correct guesses of Bob. The only information Bob has is the length of the sequence and the member of the sequence picked by Alice.
+
+Submitted byGabor Szucs,Szikszo
+
+(7 pont)
+
+Deadline expired on November 10, 2023.
+
+We call \(\displaystyle 0-1\) sequences bit sequences, and the elements of the sequence bits. Let \(\displaystyle x\) be a bit sequence of length \(\displaystyle 2^k\), and let \(\displaystyle \sigma(x)\) denote the number formed by the last \(\displaystyle k\) digits. Let \(\displaystyle E\) be the set of \(\displaystyle k\)-length bit sequences in which exactly one bit value is one. Let \(\displaystyle H\) be the complement of the set \(\displaystyle E\). Since \(\displaystyle |H|=2^k-k\), there is a bijection between \(\displaystyle H\) and \(\displaystyle \{1, 2, \ldots, 2^k-k\}\), denoted as \(\displaystyle g:H\rightarrow \{1, 2, \ldots, 2^k-k\}\).
+
+We will use the following strategy when we receive a bit sequence \(\displaystyle x\).
+
+Why is this strategy good?
+
+Now consider why it's impossible to send more than \(\displaystyle k+1\) bits. Let's assume indirectly that Bob can always determine \(\displaystyle k+2\) digits. Bob can receive \(\displaystyle 2^{k+1}\) different messages, since the received bit can have \(\displaystyle 2^k\) locations, and it can have \(\displaystyle 2\) possible values, let this set of (location, value) pairs be \(\displaystyle A\). For each such information, Bob can tell the value of \(\displaystyle k+2\) bits. Let for every \(\displaystyle a \in A\), \(\displaystyle S_a\) be the set of \(\displaystyle 2^k\) long bit sequences whose \(\displaystyle k+2\) digits, which Bob guesses for \(\displaystyle a\), match the values guessed by Bob. Clearly, \(\displaystyle |S_a| \leq 2^{2^k-(k+2)}\). Furthermore, for any \(\displaystyle x\) bit sequence of length \(\displaystyle 2^k\), Alice sends a message \(\displaystyle a \in A\) for which Bob correctly gives \(\displaystyle k+2\) digits of the sequence, i.e., \(\displaystyle x \in S_a\). Therefore, \(\displaystyle \bigcup_{a \in A} S_a\) is precisely all \(\displaystyle 2^k\) long bit sequences. However,
+
+\(\displaystyle \left|\bigcup_{a \in A} S_a \right| \leq \sum_{a \in A} |S_a| \leq 2^{k+1} \cdot 2^{2^k-(k+2)}<2^{2^k},\)
+
+which is a contradiction.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 2}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A861&l=en}\\[1em]
+
+A. 861.Let \(\displaystyle f(x)=x^2-2\). Let \(\displaystyle f^{(n)}(x)\) denote the \(\displaystyle n^{\text{th}}\) iterate of \(\displaystyle f\) (i.e. \(\displaystyle f^{(1)}(x)=f(x)\) and \(\displaystyle f^{(k+1)}(x)=f\big(f^{(k)}(x)\big)\)).
+
+Let \(\displaystyle H=\big\{x\colon f^{(100)}(x)\le -1\big\}\). Find the length of \(\displaystyle H\) (the sum of the lengths of the intervals in \(\displaystyle H\)). We expect the solution as a closed-form expression.
+
+Submitted byDavid Matolcsi,Budapest
+
+(7 pont)
+
+Deadline expired on November 10, 2023.
+
+If \(\displaystyle |x|>2\), then \(\displaystyle x^2-2>2\), thus all the iterated values will be bigger than 2, and so \(\displaystyle f^{(100)}(x)>2>-1\).
+
+If \(\displaystyle |x|\le 2\), then it is easy to check that \(\displaystyle |x^2-2|\le 2\), and so all the iterated values will be between -2 and 2.
+
+With \(\displaystyle y(x)=\frac{x+2}{4}\) we can transform \(\displaystyle x\) to be between 0 and 1. Also, \(\displaystyle y(f(x))=\frac{x^2}{4}=(2y(x)-1)^2\), and \(\displaystyle x\le -1\) is equivalent to \(\displaystyle y\le\frac{1}{4}\).
+
+With these steps we rephrased the problem as finding the total length of the intervals where \(\displaystyle g^{(n)}(y)\in [0,\frac{1}{4}]\) for \(\displaystyle g(y)=(2y-1)^2\).
+
+Let \(\displaystyle \alpha(y)=\arccos{(\sqrt{y})}\). Clearly \(\displaystyle \alpha(y)\in [0,\frac{\pi}{2}]\), and \(\displaystyle y=\cos^2(\alpha)\) and \(\displaystyle g(y)=\cos^2(2\alpha)\). This immediately gives \(\displaystyle g^{(n)}(y)=\cos^2(2^n \alpha)\).
+
+\(\displaystyle g^{(n)}(y)\in [0,c]\) is equivalent to \(\displaystyle 2^n\alpha\in [r,\pi-r]\) mod \(\displaystyle \pi\), where \(\displaystyle r=\arccos{\sqrt{c}}\), and this means
+
+\(\displaystyle \alpha\in \left[\frac{r}{2^n}, \frac{\pi-r}{2^n}\right]\cup \left[\frac{\pi+r}{2^n}, \frac{2\pi-r}{2^n}\right]\cup ... \cup \left[\frac{(2^{n-1}-1)\pi+r}{2^n}, \frac{2^{n-1}\pi-r}{2^n}\right].\)
+
+Translating this to \(\displaystyle y\) we get
+
+\(\displaystyle y\in \left[\cos^2(\frac{\pi-r}{2^n}), \cos^2(\frac{r}{2^n})\right]\cup \left[\cos^2(\frac{2\pi-r}{2^n}), \cos^2(\frac{\pi+r}{2^n})\right]\cup ... \cup \left[\cos^2(\frac{2^{n-1}\pi-r}{2^n}), \cos^2(\frac{(2^{n-1}-1)\pi+r}{2^n})\right].\)
+
+Using identity \(\displaystyle \cos^2\alpha=\frac{1}{2}(1+\cos(2\alpha))\) and summation formula
+
+\(\displaystyle \cos(a)+\cos(a+d)+...+\cos(a+(m-1)d)=\frac{\sin\left(\frac{md}{2}\right)\cos\left(a+\frac{(m-1)d}{2}\right)}{\sin\left(\frac{d}{2}\right)}\)
+
+with \(\displaystyle a=\frac{r}{2^{n-1}}\) and \(\displaystyle \frac{\pi-r}{2^{n-1}}\), \(\displaystyle d=\frac{\pi}{2^{n-1}}\), \(\displaystyle m=2^{n-1}\), we get that this sum is
+
+\(\displaystyle \frac{1}{2}\frac{\sin(\frac{\pi}{2})}{\sin(\frac{\pi}{2^n})}\left(\cos(\frac{\pi}{2}-\frac{\pi}{2^n}+\frac{2r}{2^n})-\cos(\frac{\pi}{2}+\frac{\pi}{2^n}-\frac{2r}{2^n})\right)=\frac{\sin\left(\frac{\pi-2r}{2^n}\right)}{\sin\left(\frac{\pi}{2^n}\right)}.\)
+
+Since \(\displaystyle x=4y-2\), every interval for \(\displaystyle y\) corresponds to an interval four times as long for \(\displaystyle x\). In our problem \(\displaystyle n=100\) and \(\displaystyle r=\arccos{\sqrt{\frac{1}{4}}}=\frac{\pi}{3}\), and thus the answer to our problem is
+
+\(\displaystyle \frac{4\sin\left(\frac{\pi}{3\cdot 2^{100}}\right)}{\sin\left(\frac{\pi}{2^{100}}\right)}.\)
+
+Since for small values \(\displaystyle \sin x\) can be approximated with \(\displaystyle x\), this value is very close to \(\displaystyle \frac{4}{3}\).
+
+Imagine that on the interval \(\displaystyle [-2,2]\), a value \(\displaystyle x_1\) represents the true state of a particle. We measure it, but commit an inevitable measurement error of the magnitude \(\displaystyle 2^{-20}\), and start our calculations with the obtained value \(\displaystyle x_2\). Then, as it is clear from the proof, approximately after the \(\displaystyle 20^{\text{th}}\) iteration, the value calculated from \(\displaystyle x_2\) tells us nothing about where the actual \(\displaystyle x_1\) particle is in the \(\displaystyle 20^{\text{th}}\) iteration.
+
+This is a classic example of chaos theory: it is impossible to model the process accurately over the long term, as the smallest measurement errors at the starting state can completely distort the result. It is said that the laws describing the operation of weather work in a similar way, which is why it is impossible to predict the weather beyond a few weeks. The famous saying is more or less true: ``If a butterfly flaps its wings in New York, it can cause a typhoon in Shanghai a month later.´´
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 3}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A862&l=en}\\[1em]
+
+A. 862.Let \(\displaystyle ABCD\) be a cyclic quadrilateral inscribed in circle \(\displaystyle \omega\). Let \(\displaystyle F_A\), \(\displaystyle F_B\), \(\displaystyle F_C\) and \(\displaystyle F_D\) be the midpoints of arcs \(\displaystyle AB\), \(\displaystyle BC\), \(\displaystyle CD\) and \(\displaystyle DA\) of \(\displaystyle \omega\). Let \(\displaystyle I_A\), \(\displaystyle I_B\), \(\displaystyle I_C\) and \(\displaystyle I_D\) be the incenters of triangles \(\displaystyle DAB\), \(\displaystyle ABC\), \(\displaystyle BCD\) and \(\displaystyle CDA\), respectively.
+
+Let \(\displaystyle \omega_A\) denote the circle that is tangent to \(\displaystyle \omega\) at \(\displaystyle F_A\) and also tangent to line segment \(\displaystyle CD\). Similarly, let \(\displaystyle \omega_C\) denote the circle that is tangent to \(\displaystyle \omega\) at \(\displaystyle F_C\) and tangent to line segment \(\displaystyle AB\).
+
+Finally, let \(\displaystyle T_B\) denote the second intersection of \(\displaystyle \omega\) and circle \(\displaystyle F_BI_BI_C\) different from \(\displaystyle F_B\), and let \(\displaystyle T_D\) denote the second intersection of \(\displaystyle \omega\) and circle \(\displaystyle F_DI_DI_A\).
+
+Prove that the radical axis of circles \(\displaystyle \omega_A\) and \(\displaystyle \omega_C\) passes through points \(\displaystyle T_B\) and \(\displaystyle T_D\).
+
+Submitted byGeza Kos,Budapest
+
+(7 pont)
+
+Deadline expired on November 10, 2023.
+
+We will show that the radical axis passes through point \(\displaystyle T_D\), a similar argument will work for \(\displaystyle T_D\). Our solution does not work when \(\displaystyle AB\) and \(\displaystyle CD\) are parallel: in this case \(\displaystyle X\) and \(\displaystyle Y\) coincide (both are the ideal point), and in our solution we will need the line formed by them. The problem is hard even when \(\displaystyle AB\) and \(\displaystyle CD\) are parallel to each other. In this solution we will give a non-rigorous proof for this case. Suppose that the statement turned out to be true when \(\displaystyle AB\) and \(\displaystyle CD\) are not parallel to each other. If we fix \(\displaystyle A\), \(\displaystyle B\) and \(\displaystyle C\), and move \(\displaystyle D\) on the circumcircle of \(\displaystyle ABC\), it can be proved that the radical axis and point \(\displaystyle T_D\) both move continuously. Thus it has to true in the case \(\displaystyle AB\) and \(\displaystyle CD\) are parallel, too.
+
+From now on let's assume that \(\displaystyle AB\) and \(\displaystyle CD\) are not parallel to each other, and let \(\displaystyle X\) be the intersection of these lines. The tangents at \(\displaystyle F_A\) and \(\displaystyle F_C\) also intersect each other, let their intersection be \(\displaystyle Y\). The first key statement is that the radical axis of circles \(\displaystyle \omega_A\) and \(\displaystyle \omega_C\) is \(\displaystyle XY\). Since \(\displaystyle Y\) is the radical center of circles \(\displaystyle \omega_A\), \(\displaystyle \omega_C\) and circle \(\displaystyle ABCD\), thus it has to be on the radical axis of \(\displaystyle \omega_A\) and \(\displaystyle \omega_C\).
+
+Now let's show the same for point \(\displaystyle X\). Let points \(\displaystyle H\) and \(\displaystyle G\) be the points of tangency of \(\displaystyle \omega_A\) and \(\displaystyle \omega_C\) on \(\displaystyle CD\) and \(\displaystyle AB\), respectively. If we enlarge circle \(\displaystyle \omega_A\) from point \(\displaystyle F_A\) such that we get circle \(\displaystyle ABCD\), the image of \(\displaystyle H\) will \(\displaystyle F_C\). This shows that \(\displaystyle F_A\), \(\displaystyle H\) and \(\displaystyle F_C\) are collinear, and \(\displaystyle CD\) and \(\displaystyle F_CY\) are parallel to each other. Similarly, \(\displaystyle AB\) and \(\displaystyle F_AY\) are parallel, and \(\displaystyle G\) is on line segment \(\displaystyle F_AF_C\). Thus triangles \(\displaystyle HGX\) and \(\displaystyle F_AF_CY\) are similar. This implies \(\displaystyle GX=HX\) (from \(\displaystyle F_AY=F_CY\)), thus the tangents from \(\displaystyle X\) to circles \(\displaystyle \omega_A\) and \(\displaystyle \omega_C\) have the same length, and so \(\displaystyle X\) is on the radical axis of \(\displaystyle \omega_A\) and \(\displaystyle \omega_C\).
+
+We will use the following two well known facts about the incenters: a vertex, the incenter and the midpoint of the opposite arc are collinear, and the midpoint of an arc has the same distance from the two adjacent vertices and the incenter. Thus triples\(\displaystyle (B,I_A,F_D)\), \(\displaystyle (C,I_D,F_D)\), \(\displaystyle (D,I_A,F_A)\) and \(\displaystyle (A,I_D,F_C)\) are collinear, and \(\displaystyle F_DA=F_DI_A=F_DD\) and \(\displaystyle F_DA=F_DI_D=F_DD\), and thus points \(\displaystyle A\), \(\displaystyle I_A\), \(\displaystyle I_D\) and \(\displaystyle D\) are on circle with center \(\displaystyle F_D\).
+
+Applying inscribed angle theorem in circles \(\displaystyle AI_AI_DD\) and \(\displaystyle ABCD\), we get that \(\displaystyle \angle DI_AI_D=\angle DAI_D=\angle DAF_C=DF_AF_C\), which implies \(\displaystyle I_AI_D\) and \(\displaystyle F_AF_C\) are parallel.
+
+Considering the radical center of circles \(\displaystyle AI_AI_DD\), \(\displaystyle ABCD\) and \(\displaystyle F_DT_DI_AI_D\) we get that lines \(\displaystyle T_DF_D\), \(\displaystyle AD\) and \(\displaystyle I_AI_D\) are concurrent. Let's apply Pascal's theorem to hexagon \(\displaystyle DABF_DT_DF_A\). We get that points \(\displaystyle DA\cap F_DT_D\), \(\displaystyle M=AB\cap T_DF_A\) and \(\displaystyle I_A=BF_D\cap F_AD\) are collinear. Similarly we get that point \(\displaystyle N=CD\cap F_CT_D\) is also on \(\displaystyle IAI_D\).
+
+Thus line \(\displaystyle MN\) is parallel to line \(\displaystyle F_AF_C\), and so triangles \(\displaystyle NMX\) and \(\displaystyle F_CF_AY\) have parallel sides, thus they have a center of similarity, implying lines \(\displaystyle NF_C\), \(\displaystyle M_FA\) and \(\displaystyle XY\) are concurrent. However, we have just proved that two of these intersect each other in \(\displaystyle T_D\), and \(\displaystyle XY\) is the radical axis of circles \(\displaystyle \omega_A\) and \(\displaystyle \omega_C\), and this is what we wanted to prove.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section*{Month: 202311}
+\addcontentsline{toc}{section}{Month: 202311}
+
+\subsection*{Problem 1}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A863&l=en}\\[1em]
+
+A. 863.Let \(\displaystyle n\ge 2\) be a given integer. Find the greatest value of \(\displaystyle N\), for which the following is true: there are infinitely many ways to find \(\displaystyle N\) consecutive integers such that none of them has a divisor greater than 1 that is a perfect \(\displaystyle n^{\mathrm{th}}\) power.
+
+Proposed byPeter Pal Pach,Budapest
+
+(7 pont)
+
+Deadline expired on December 11, 2023.
+
+Answer: \(\displaystyle 2^n-1\). It is clear that among \(\displaystyle 2^n\) consecutive integers you can always find one, that is divisible by \(\displaystyle 2^n\), which is a perfect \(\displaystyle n^{th}\) power.
+
+It is well known, that for \(\displaystyle n\ge 2\)
+
+\(\displaystyle \sum_{k=M}^{\infty} \frac{1}{k^n}<\frac{1}{2^{n+2}}\)
+
+is finite.
+
+This implies that there exists \(\displaystyle M\) such that
+
+\(\displaystyle \sum_{k=M}^{\infty} \frac{1}{k^n}<\frac{1}{2^{n+2}}.\)
+
+Let \(\displaystyle T=\prod_{k=1}^{M-1} k^n\). We claim that there exists infinitely many values of positive integer \(\displaystyle m\) such that none of consecutive integers \(\displaystyle \{mT+1,mT+2,...,mT+2^n-1\}\) is divisible by a perfect \(\displaystyle n^{th}\) power.
+
+To prove this, let's choose a very large number \(\displaystyle K\). For any \(\displaystyle r\in \{1,2,...,2^n-1\}\) let \(\displaystyle X_r\) denote the number of those integers among \(\displaystyle \{T+r,2T+r,...,KT+r\}\) which is divisible by a perfect \(\displaystyle n^{th}\) power.
+
+Since \(\displaystyle T\) is divisible by the \(\displaystyle n^{th}\) power of all numbers that are smaller then \(\displaystyle M\), and \(\displaystyle r<2^n\), therefore \(\displaystyle sT+r\) can only be divisible by the \(\displaystyle n^{th}\) power of those numbers that are at least \(\displaystyle M\) and at most \(\displaystyle \sqrt[n]{KT}\). Moreover, for an arbitrary \(\displaystyle k\), among the \(\displaystyle K\) elements of \(\displaystyle \{T+r,2T+r,...,KT+r\}\) at most \(\displaystyle \lceil \frac{K}{k^n} \rceil\) can be divisible by \(\displaystyle k^n\), since we can assume that \(\displaystyle k\) is coprime to \(\displaystyle T\), otherwise non of the elements will be divisible by \(\displaystyle k^n\). Thus
+
+\(\displaystyle X_r\le \sum_{k=M}^{\sqrt[n]{KT}} \lceil \frac{K}{k^n} \rceil\le \sqrt[n]{KT}+\sum_{k=M}^{\infty} \frac{K}{k^n} \le \sqrt[n]{KT}+\frac{K}{2^{n+2}}.\)
+
+If we choose \(\displaystyle K\) to be large enough, such that \(\displaystyle \sqrt[n]{KT}<\frac{K}{2^{n+2}}\) is satisfied, we get \(\displaystyle X_r<\frac{K}{2^{n+1}}\).
+
+Since \(\displaystyle X_r\) is the number of those for which \(\displaystyle mT+r\) is divisible by a perfect \(\displaystyle n^{th}\) power for \(\displaystyle m\le K\), and \(\displaystyle X_1+X_2+...+X_{2^n-1}<K/2\), therefore at least for \(\displaystyle K/2\) values of \(\displaystyle m\le K\) consecutive integers \(\displaystyle \{mT+1,mT+2,...,mT+2^n-1\}\) cannot contain a perfect \(\displaystyle k^{th}\) power for large enough values of \(\displaystyle K\), and this proves that infinitely many such values of \(\displaystyle m\) exist.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 2}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A864&l=en}\\[1em]
+
+A. 864.Let \(\displaystyle ABC\) be a triangle and \(\displaystyle O\) be its circumcenter. Let \(\displaystyle D\), \(\displaystyle E\) and \(\displaystyle F\) be the respective tangent points of the incircle of \(\displaystyle \triangle ABC\), and sides \(\displaystyle BC\), \(\displaystyle CA\) and \(\displaystyle AB\). Let \(\displaystyle M\) and \(\displaystyle N\) be the respective midpoints of sides \(\displaystyle AB\) and \(\displaystyle AC\). Let \(\displaystyle M'\) and \(\displaystyle N'\) be the respective reflections of points \(\displaystyle M\) and \(\displaystyle N\) across lines \(\displaystyle DE\) and \(\displaystyle DF\). Let lines \(\displaystyle CM'\) and \(\displaystyle BN'\) intersect lines \(\displaystyle DE\) and \(\displaystyle DF\) at points \(\displaystyle H\) and \(\displaystyle J\), respectively.
+
+Prove that the points \(\displaystyle H\), \(\displaystyle J\) and \(\displaystyle O\) are collinear.
+
+Proposed byLuu Dong,Vietnam
+
+(7 pont)
+
+Deadline expired on December 11, 2023.
+
+Denote by \(\displaystyle I\) the center of the circle \(\displaystyle (DEF)\). Let \(\displaystyle X\) be the intersection of the lines \(\displaystyle MN\) and \(\displaystyle CH\). Let \(\displaystyle Y \) be the intersection of the lines \(\displaystyle BI \) and \(\displaystyle DE\); \(\displaystyle Z\) is the intersection of the lines \(\displaystyle CI\) and \(\displaystyle DF\). Denote by \(\displaystyle K\) the orthocenter of triangle \(\displaystyle DEF\). Finally, let \(\displaystyle G\) be the midpoint of \(\displaystyle DE\). We use the usual \(\displaystyle \alpha\), \(\displaystyle \beta\), \(\displaystyle \gamma\) notations for the angles of triangle \(\displaystyle ABC\).
+
+We start the proof with three well-known lemmas and sketches of their proof.
+
+Lemma 1:Point \(\displaystyle Z\) lies on \(\displaystyle MN\) and \(\displaystyle \angle AZC=90^\circ\).
+
+Proof sketch:By angle chasing \(\displaystyle \frac{\alpha}{2}=\angle FZI=\angle FAI\), hence \(\displaystyle A, Z, F, I\) lie on a circle. This implies that \(\displaystyle \angle AZC=\angle AFI=90^\circ\). Hence \(\displaystyle N\) is the midpoint of circle \(\displaystyle (AZC)\), so \(\displaystyle \angle CZN=\angle NCZ=\angle ZCB\), thus \(\displaystyle ZN \parallel BC\) meaning that \(\displaystyle M\) is on the line \(\displaystyle ZN\).
+
+Lemma 2:\(\displaystyle K\), \(\displaystyle I\) and \(\displaystyle O\) are collinear.
+
+Proof sketch:Let \(\displaystyle A'\), \(\displaystyle B'\), \(\displaystyle C'\) be the excenters of triangle \(\displaystyle ABC\). The sides of \(\displaystyle A'B'C'\) are parallel to the sides of \(\displaystyle DEF\), hence there exists a homothety that transforms \(\displaystyle A'B'C'\) to \(\displaystyle DEF\). This implies that the Euler-lines of the two triangle are parallel. Note that \(\displaystyle I\) is the circumcenter and \(\displaystyle K\) is the orthocenter of \(\displaystyle DEF\), hence \(\displaystyle IK\) is the Euler-line of \(\displaystyle DEF\). Furthermore, \(\displaystyle I\) is the orthocenter and \(\displaystyle O\) is the nine-point center of \(\displaystyle A'B'C'\), hence \(\displaystyle IO\) is the Euler-line of \(\displaystyle A'B'C'\). The conclusion follows.
+
+Lemma 3:\(\displaystyle 2 \cdot IG=FK\)
+
+Proof sketch:Remember that \(\displaystyle K\) is the orthocenter and \(\displaystyle I\) is the circumcenter of \(\displaystyle DEF\). By angle chasing, the reflection \(\displaystyle K'\) of \(\displaystyle K\) through \(\displaystyle G\) lies on the circle \(\displaystyle (DEF)\), furthermore this is the point opposite to \(\displaystyle F\) in this circle. Consequently, \(\displaystyle IG\) is the midline of triangle \(\displaystyle FKK'\), which proves the lemma.
+
+Notice that by symmetry, \(\displaystyle Y\) also belongs to line \(\displaystyle MN\) as \(\displaystyle Z\) (by Lemma 1). As \(\displaystyle CE=CD\), we have \(\displaystyle EN=YN\), hence
+
+\(\displaystyle \angle DYM'=\angle DYM=\angle NYE=\angle YEN.\)
+
+This means \(\displaystyle YM'\parallel EC\). Similarly, \(\displaystyle ZN'\parallel FB\). It is easy to see that \(\displaystyle MM'\parallel CZ\), hence
+
+\(\displaystyle \dfrac{YX}{YN} = \dfrac{M'X}{M'C} =\dfrac{MX}{MZ} .\)
+
+Notice that if \(\displaystyle X'\) is the intersection of \(\displaystyle N'B\) and \(\displaystyle MN\) then a similar calculation shows
+
+\(\displaystyle \dfrac{YX'}{YN}=\dfrac{MX'}{MZ}\)
+
+implying \(\displaystyle X=X'\), hence \(\displaystyle N'\), \(\displaystyle B\) and \(\displaystyle X\) are collinear. Applying Pappus's theorem to six points \(\displaystyle Z, X, Y, B, D\) and \(\displaystyle C\) we get that points \(\displaystyle BX\cap DZ = J, \ CX\cap DY = H, \ BY\cap CZ = I\) are collinear.
+
+By angle chasing, \(\displaystyle \angle AIZ=\angle FIB=90^\circ-\frac{\beta}{2}\). Combining this with Lemma 1, the triangles \(\displaystyle AZI\) and \(\displaystyle BFI\) are similar, hence \(\displaystyle ZI\cdot BF = AZ\cdot IF\). Using Lemma 1, \(\displaystyle AZ=AC\cdot \sin \dfrac{\gamma}{2}\). Clearly, \(\displaystyle \angle IDG=\frac{\gamma}{2}\).  Using Lemma 3 and Lemma 1 once more, we calculate
+
+\(\displaystyle AZ\cdot IF = AC\cdot \sin \dfrac{\gamma}{2} \cdot ID= 2ZN \cdot \sin (\angle{IDG}) \cdot ID= 2ZN'\cdot IG =ZN'\cdot FK.\)
+
+It follows that \(\displaystyle ZI\cdot BF = ZN'\cdot FK.\) We get
+
+\(\displaystyle \dfrac{FK}{ZI}=\dfrac{BF}{ZN'}=\dfrac{JF}{JZ}.\)
+
+This implies that the points \(\displaystyle J, K\) and \(\displaystyle I\) are collinear. We proved earlier that \(\displaystyle J, H\) and \(\displaystyle I\) are collinear and by Lemma 2, \(\displaystyle K, I\) and \(\displaystyle O\) are collinear.  Combining these, \(\displaystyle J, K, I, H, O\) are collinear, which finishes the proof.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 3}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A865&l=en}\\[1em]
+
+A. 865.A crossword is a grid of black and white cells such that every white cell belongs to some \(\displaystyle 2 \times 2\) square of white cells. A word in the crossword is a contiguous sequence of two or more white cells in the same row or column, delimited on each side by either a black cell or the boundary of the grid.
+
+Show that the total number of words in an \(\displaystyle n\times n\) crossword cannot exceed \(\displaystyle \frac{{(n+1)}^2}{2}\).
+
+Proposed byNikolai Beluhov,Bulgaria
+
+(7 pont)
+
+Deadline expired on December 11, 2023.
+
+We adjoin one additional row of black cells at the bottom and one additional column of black cells on the right. From now on, we will be working with the resulting grid of size \(\displaystyle (n + 1) \times (n + 1)\).
+
+Our strategy will be to assign two grid cells to each word in the crossword. However, this idea will not work in its simplest form, and there will be some complications that we will need to take care of.
+
+Introduce a coordinate system such that the lower left corner cell is at \(\displaystyle (0, 0)\) and the upper right corner cell is at \(\displaystyle (n, n)\). If \(\displaystyle c\) is the cell at \(\displaystyle (x, y)\), then we write \(\displaystyle c + (u, v)\) for the cell at \(\displaystyle (x + u, y + v)\).
+
+For every horizontal word in the crossword, draw an arrow pointing from its rightmost white cell to the black cell immediately on the right. Similarly, for every vertical word in the crossword, draw an arrow pointing from the black cell that marks the word's lower end to the white cell immediately on top. (These black cells are guaranteed to exist because of the row and column we adjoined in the beginning.)
+
+These arrows form several oriented paths, each one advancing up and to the right.
+
+We say that a path isspecialwhen it is of the form \(\displaystyle c_1c_2c_3\) with \(\displaystyle c_1\) white, \(\displaystyle c_2\) black, \(\displaystyle c_3\) white, and \(\displaystyle c_2 + (-1, 1)\) black. We will deal with all nonspecial paths first, and we will consider the special paths separately after that.
+
+Consider, then, an arbitrary nonspecial path \(\displaystyle P = c_1 c_2 \ldots c_{k + 1}\) with \(\displaystyle k\) arrows. We are going to assign \(\displaystyle 2k\) grid cells to \(\displaystyle P\), two for each word whose arrow belongs to \(\displaystyle P\). We do this as follows. All cells traversed by \(\displaystyle P\) are assigned to \(\displaystyle P\). Additionally, for all \(\displaystyle 2 \le i \le k\), cell \(\displaystyle a_i + (-1, 1)\) is assigned to \(\displaystyle P\). Since every white cell belongs to some \(\displaystyle 2 \times 2\) square of white cells, and since \(\displaystyle P\) is not special, these \(\displaystyle k - 1\) cells are guaranteed to exist, to be white, and to not be traversed by any of our paths. Thus, in particular, all cells assigned to \(\displaystyle P\) will be either white or traversed by \(\displaystyle P\).
+
+We proceed to take care of the special paths.
+
+First off, to each special path we assign the three cells that it traverses.
+
+By this point, a black cell \(\displaystyle c\) is assigned to a path if and only if at least one of \(\displaystyle c + (0, 1)\) and \(\displaystyle c + (-1, 0)\) is white. And a white cell \(\displaystyle c\) is assigned to a path if and only if one of the following has taken place: (i) At least one of \(\displaystyle c + (1, 0)\) and \(\displaystyle c + (0, -1)\) is black; (ii) Both of these cells are white whereas \(\displaystyle c + (1, -1)\) is black; or (iii) All three cells listed in (i) and (ii) are white whereas both of \(\displaystyle c + (2, -1)\) and \(\displaystyle c + (1, -2)\) are black.
+
+Next up, we define asurplus diagonalas follows. (In the figure,Wstands for a white cell,Bfor a black cell,-for a cell whose colour does not matter, and?for a cell whose colour we do not know precisely but is important to the definition.)
+
+\(\displaystyle \begin{matrix}
+     - & ? & - & - & - & - & - & -\\
+     ? & W & W & - & - & - & - & -\\
+     - & W & W & B & - &- &- &-\\
+     -& -& B& W& W& -& -& -\\
+     -& -& -& W& W& B& -& -\\
+     -& -& -& -& B& W& W& -\\
+     -& -& -& -& -& W& W& B\\
+     -& -& -& -& -& -& B& B\\
+\end{matrix}\)
+
+Every surplus diagonal eitherbegins on white, or itbegins on black. If cells \(\displaystyle d\), \(\displaystyle d + (0, -1)\), \(\displaystyle d + (1, 0)\), and \(\displaystyle d + (1, -1)\) form a white \(\displaystyle 2 \times 2\) square and at least one of cells \(\displaystyle d + (0, 1)\) and \(\displaystyle d + (-1, 0)\) is either white or nonexistent, then this is the first white \(\displaystyle 2 \times 2\) square in a surplus diagonal that begins on white. On the other hand, if cells \(\displaystyle d\), \(\displaystyle d + (0, -1)\), and \(\displaystyle d + (1, 0)\) are all black, then cells \(\displaystyle d + (0, -1)\) and \(\displaystyle d + (1, 0)\) form the first black pair in a surplus diagonal that begins on black. For example, the surplus diagonal in the figure begins on white, assuming that at least one of the two cells marked?is white.
+
+Once a surplus diagonal starts, it advances down and to the right by alternating white \(\displaystyle 2 \times 2\) squares and diagonally adjacent black pairs. Say that \(\displaystyle \{d, d + (0, -1), d + (1, 0), d + (1, -1)\}\) is a white \(\displaystyle 2 \times 2\) square in a surplus diagonal \(\displaystyle D\). Then the black pair that follows it in \(\displaystyle D\) is \(\displaystyle \{d + (2, -1), d + (1, -2)\}\). Conversely, say that \(\displaystyle \{d + (0, -1), d + (1, 0)\}\) is a black pair in a surplus diagonal \(\displaystyle D\). Then the white \(\displaystyle 2 \times 2\) square that follows it in \(\displaystyle D\) is \(\displaystyle \{d + (1, -1), d + (1, -2), d + (2, -1), d + (2, -2)\}\). (This is shown in the figure.)
+
+Eventually, every surplus diagonal eitherends on white, or itends on black. If \(\displaystyle \{d, d + (0, -1), d + (1, 0), d + (1, -1)\}\) is a white \(\displaystyle 2 \times 2\) square in a surplus diagonal \(\displaystyle D\) and at least one of cells \(\displaystyle d + (2, -1)\) and \(\displaystyle d + (1, -2)\) is white, then this is the last white \(\displaystyle 2 \times 2\) square in \(\displaystyle D\), and \(\displaystyle D\) ends on white. If \(\displaystyle \{d + (0, -1), d + (1, 0)\}\) is a black pair in a surplus diagonal \(\displaystyle D\) and cell \(\displaystyle d + (1, -1)\) is black, then this is the last black pair in \(\displaystyle D\), and \(\displaystyle D\) ends on black. For example, the surplus diagonal in the figure ends on black.
+
+Note that every white \(\displaystyle 2 \times 2\) square belongs to a unique surplus diagonal, and every black pair of the form \(\displaystyle \{d + (0, -1), d + (1, 0)\}\) belongs to a unique surplus diagonal as well. This follows because of the condition that every white cell belongs to at least one \(\displaystyle 2 \times 2\) square of white cells.
+
+Furthermore, note that if a surplus diagonal ends on white, then the top left white cell of its final white \(\displaystyle 2 \times 2\) square is unassigned, and if it ends on black, then the black cell sealing off its final black pair is unassigned. In this way, different surplus diagonals are associated with different unassigned cells.
+
+We are going to show that the number of special paths does not exceed the number of surplus diagonals. Once we have done that, we can simply take as many unassigned cells as we need from the surplus diagonals and assign them to the special paths, completing the proof.
+
+We proceed to assign to each special path some fractions of the beginnings and endings of certain surplus diagonals.
+
+(Here, we use ``beginning'' and ``ending'' as abstract concepts. They do not refer to any specific cells or sets of cells in the surplus diagonal. So even a surplus diagonal which consists of a single white \(\displaystyle 2 \times 2\) square or a single diagonally adjacent black pair will still have a separate beginning and ending.)
+
+Let \(\displaystyle P = c_1 c_2 c_3\) be a special path, with \(\displaystyle c_2 = (x, y)\). Then \(\displaystyle c_1 = (x - 1, y)\) is white, \(\displaystyle c_2\) is black, \(\displaystyle c_3 = (x, y + 1)\) is white, and \(\displaystyle d_2 = (x - 1, y + 1)\) is black.
+
+Since every white cell belongs to some \(\displaystyle 2 \times 2\) square of white cells, \(\displaystyle c_1\) is the upper right cell of a white \(\displaystyle 2 \times 2\) square \(\displaystyle S_1\) and \(\displaystyle c_3\) is the lower left cell of a white \(\displaystyle 2 \times 2\) square \(\displaystyle S_3\), as shown in the figure.
+
+\(\displaystyle \begin{matrix}
+     -& -& W& W\\
+     -& B& W& W\\
+     W& W& B& -\\
+     W& W& -& -\\
+\end{matrix}\)
+
+Consider cells \(\displaystyle d_1 = d_2 + (-1, 0) = (x - 2, y + 1)\) and \(\displaystyle d_3 = d_2 + (0, 1) = (x - 1, y + 2)\).
+
+Case 1. Both of those cells are black. Then some surplus diagonal ends at the black pair \(\displaystyle \{d_1, d_3\}\). Assign to \(\displaystyle P\) the ending of that surplus diagonal.
+
+Case 2. Cell \(\displaystyle d_1\) is white and cell \(\displaystyle d_3\) is black. Consider the white \(\displaystyle 2 \times 2\) square \(\displaystyle K_1\) that cell \(\displaystyle d_1\) belongs to. (If there are two such squares, choose one arbitrarily.) Then some surplus diagonal ends at \(\displaystyle K_1\). Assign half of the ending of that surplus diagonal to \(\displaystyle P\). Furthermore, some surplus diagonal begins at the white \(\displaystyle 2 \times 2\) square \(\displaystyle S_1\). Assign half of the beginning of that surplus diagonal to \(\displaystyle P\).
+
+Case 3. Cell \(\displaystyle d_1\) is black and cell \(\displaystyle d_3\) is white. This case is symmetric to Case 2.
+
+Case 4. Both cells \(\displaystyle d_1\) and \(\displaystyle d_3\) are white. Consider the white \(\displaystyle 2 \times 2\) square \(\displaystyle K_1\) that cell \(\displaystyle d_1\) belongs to. (If there are two such squares, choose one arbitrarily.) Then some surplus diagonal ends at \(\displaystyle K_1\). Assign half of the ending of that surplus diagonal to \(\displaystyle P\). Similarly, consider the white \(\displaystyle 2 \times 2\) square \(\displaystyle K_3\) that cell \(\displaystyle d_3\) belongs to. (If there are two such squares, choose one arbitrarily.) Then some surplus diagonal ends at \(\displaystyle K_3\). Assign half of the ending of that surplus diagonal to \(\displaystyle P\), too.
+
+Next up, consider cells \(\displaystyle e_1 = c_2 + (0, -1) = (x, y - 1)\) and \(\displaystyle e_3 = c_2 + (1, 0) = (x + 1, y)\).
+
+Case 1. Both of those cells are black. Then some surplus diagonal begins at the black pair \(\displaystyle \{e_1, e_3\}\). Assign to \(\displaystyle P\) the beginning of that surplus diagonal.
+
+Case 2. Cell \(\displaystyle e_1\) is white and cell \(\displaystyle e_3\) is black. Consider the white \(\displaystyle 2 \times 2\) square \(\displaystyle L_1\) that cell \(\displaystyle e_1\) belongs to. (If there are two such squares, choose one arbitrarily.) Then some surplus diagonal begins at \(\displaystyle L_1\). Assign half of the beginning of that surplus diagonal to \(\displaystyle P\). Furthermore, some surplus diagonal ends at the white \(\displaystyle 2 \times 2\) square \(\displaystyle S_1\). Assign half of the ending of that surplus diagonal to \(\displaystyle P\).
+
+Case 3. Cell \(\displaystyle e_1\) is black and cell \(\displaystyle e_3\) is white. This case is symmetric to Case 2.
+
+Case 4. Both cells \(\displaystyle e_1\) and \(\displaystyle e_3\) are white. Consider the white \(\displaystyle 2 \times 2\) square \(\displaystyle L_1\) that cell \(\displaystyle e_1\) belongs to. (If there are two such squares, choose one arbitrarily.) Then some surplus diagonal begins at \(\displaystyle L_1\). Assign half of the beginning of that surplus diagonal to \(\displaystyle P\). Similarly, consider the white \(\displaystyle 2 \times 2\) square \(\displaystyle L_3\) that cell \(\displaystyle e_3\) belongs to. (If there are two such squares, choose one arbitrarily.) Then some surplus diagonal begins at \(\displaystyle L_3\). Assign half of the beginning of that surplus diagonal to \(\displaystyle P\), too.
+
+Observe that:
+
+(a) To each special path, we have assigned some fractions of the beginnings and endings of certain surplus diagonals, with total weight two.
+
+(b) From each white beginning of a surplus diagonal we have assigned half to at most two special paths, and similarly for white endings.
+
+(This is not entirely obvious. Consider a surplus diagonal \(\displaystyle D\) which begins on the white \(\displaystyle 2 \times 2\) square \(\displaystyle \{d, d + (0, -1), d + (1, 0), d + (1, -1)\}\), and let \(\displaystyle M\) be the set of the middle cells of all special paths to which we have assigned half of the beginning of \(\displaystyle D\). Then our definitions ensure that at most one of the cells \(\displaystyle d + (0, 1)\), \(\displaystyle d + (1, 1)\), and \(\displaystyle d + (2, 0)\) is in \(\displaystyle M\); at most one of the cells \(\displaystyle d + (-1, 0)\), \(\displaystyle d + (-1, -1)\), and \(\displaystyle d + (0, -2)\) is in \(\displaystyle M\); and \(\displaystyle M\) does not contain any other cells. White endings behave similarly.)
+
+(c) Each black beginning of a surplus diagonal we have assigned to at most one special path, and similarly for black endings.
+
+(d) Each surplus diagonal possesses one beginning and one ending.
+
+From (a), (b), (c), and (d), we derive that the number of special paths does not exceed the number of surplus diagonals, as needed. The solution is complete.
+
+Remark. It is not too difficult to achieve \(\displaystyle n^2/2 - O(n)\) words, for instance by blackening all cells \(\displaystyle c = (x, y)\) such that \(\displaystyle c\) is sufficiently far away from the boundary of the grid and \(\displaystyle x + y\) is a multiple of four. Many other patterns of word density \(\displaystyle 1/2\) are possible as well.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section*{Month: 202312}
+\addcontentsline{toc}{section}{Month: 202312}
+
+\subsection*{Problem 1}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A866&l=en}\\[1em]
+
+A. 866.A graph is called 2-connected, if after deleting any point (and the edges adjacent to it) from the graph it remains still connected.
+
+Is it true that in any 2-connected graph with a countably infinite number of vertices it's always possible to find a trail that is infinite in one direction (i.e. a sequence of not necessarily distinct points \(\displaystyle v_1, v_2,\ldots\) such that \(\displaystyle v_i\) and \(\displaystyle v_{i+1}\) is always connected with an edge, and all edges \(\displaystyle (v_i,v_{i+1})\) are distinct from each other)?
+
+Submitted byBalazs BursicsandAnett Kocsis,Budapest
+
+(7 pont)
+
+Deadline expired on January 10, 2024.
+
+The statement is true. Let the original graph be \(\displaystyle G\), and let \(\displaystyle F\) be an arbitrary spanning tree in \(\displaystyle G\). If all vertices have a finite degree in \(\displaystyle F\), then we are can find an infinite path using Konig's lemma.
+
+So suppose that \(\displaystyle F\) has a vertex with an infinite degree, let \(\displaystyle v\) denote one such vertex. It is clear that it is enough to find infinitely many edge-disjoint cycles passing through \(\displaystyle v\). Furthermore, if path \(\displaystyle p=(v_1,v_2,...,v_k)\) is given, it is enough to find infinitely many cycles all containing \(\displaystyle p\), and sharing no edge apart from the edges of \(\displaystyle p\): indeed, this means that there are infinitely many edge-disjoint trails between \(\displaystyle v\) and \(\displaystyle v_k\), and these can be combined to an infinite trail.
+
+If we take out vertex \(\displaystyle v\) from tree \(\displaystyle F\), we will ge infinitely many components: let's call them \(\displaystyle v\)-components. We will call two \(\displaystyle v\)-components adjacent, if it is possible to find one vertex in each that is connected with an edge in \(\displaystyle G\). Notice that because of the condition of \(\displaystyle G\) being 2-connected, every \(\displaystyle v\)-component has something adjacent to it.
+
+First assume that every \(\displaystyle v\)-component has only finitely many \(\displaystyle v\)-components adjacent to it. In this case we can find infinitely many edge-disjoint cycles through \(\displaystyle v\) with the following algorithm: let's assume we have already found cycles \(\displaystyle C_1\), \(\displaystyle C_2\),..., \(\displaystyle C_k\). We will show another cycle that is edge-disjoint from these. Cycles \(\displaystyle C_1\), \(\displaystyle C_2\),..., \(\displaystyle C_k\) contain finitely many vertices, thus they intersect finitely many \(\displaystyle v\)-components, and by our assumption these have finitely many adjacent \(\displaystyle v\)-components. Thus we can find \(\displaystyle v\)-component \(\displaystyle A\) which is disjoint from the cycles and is not adjacent to a \(\displaystyle v\)-component intersecting a cycle. Let \(\displaystyle B\) be a \(\displaystyle v\)-component that is adjacent to \(\displaystyle A\). We can find vertices \(\displaystyle a\) in \(\displaystyle A\) and \(\displaystyle b\) in \(\displaystyle B\) such that \(\displaystyle a\) and \(\displaystyle b\) are connected with an edge in \(\displaystyle G\), and now we get a new edge-disjoint cycle by travelling from \(\displaystyle v\) to \(\displaystyle a\) in \(\displaystyle F\), then from \(\displaystyle a\) to \(\displaystyle b\) and finally back to \(\displaystyle v\) from \(\displaystyle b\). Thus we can find infinitely many edge-disjoint cycles thorugh \(\displaystyle v\).
+
+So now we can assume that there exists \(\displaystyle v\)-component \(\displaystyle A\) that has infinitely many adjacent \(\displaystyle v\)-components. Let \(\displaystyle v_1\) be the vertex in \(\displaystyle A\) that is adjacent to \(\displaystyle v\) in \(\displaystyle F\). If we take out vertex \(\displaystyle v_1\) from \(\displaystyle F\), we will get components. Let's those components \(\displaystyle v_1\)-component that do not contain \(\displaystyle v\). Let's call a \(\displaystyle v_1\)-component and a \(\displaystyle v\)-component different from \(\displaystyle A\) adjacent, if they are connected through an edge in \(\displaystyle G\).
+
+If we can find infinitely many \(\displaystyle v\)-components that are connected to \(\displaystyle v_1\) through an edge, we can find infinitely many cycles containing edge \(\displaystyle (v,v_1)\), that do not share an edge apart from this one, so we are done. If this is not the case, \(\displaystyle v_1\)-components have finitely many \(\displaystyle v\)-components in total that are adjacent to them.
+
+If every \(\displaystyle v_1\) component has finitely many \(\displaystyle v\)-components adjacent to them, then there are infinitely many \(\displaystyle v_1\) components. In this case we can find infinitely many cycles containing \(\displaystyle (v,v_1)\) arnd sharing no other edges, similarly to what we have done earlier. The only difference is that it is not guaranteed that every \(\displaystyle v_1\)-component is adjacent to \(\displaystyle v\)-component, however, this is not a problem, since it is enough that they have infinitely many components adjacent to them. If we have already found cycles \(\displaystyle C_1\), \(\displaystyle C_2\),..., \(\displaystyle C_k\), then there are finitely many \(\displaystyle v_1\)-components intersecting cycle \(\displaystyle C_i\), and they have finitely many \(\displaystyle v\)-components adjacent to them, thus there exists \(\displaystyle v_1\)-component which has a \(\displaystyle v\)-component adjacent to it such that no cycle intersects any of them, and using these we can find cycle \(\displaystyle C_{k+1}\). Thus we are also done in this case.
+
+If there exists \(\displaystyle v_1\) component that is adjacent to infinitely many \(\displaystyle v\)-components, then let \(\displaystyle A_2\) be such a component, and let \(\displaystyle v_2\) be the vertex in \(\displaystyle A_2\) that is adjacent to \(\displaystyle v_1\) in \(\displaystyle F\).
+
+We can continue this process inductively. If we have already defined vertices \(\displaystyle v\), \(\displaystyle v_1\),..., \(\displaystyle v_k\), where \(\displaystyle v_k\) is a vertex adjacent to \(\displaystyle v_{k-1}\) in a \(\displaystyle v_{k-1}\)-component that is adjacent to infinitely many \(\displaystyle v\)-components, then we can define \(\displaystyle v_k\)-components as those components we get from \(\displaystyle F\) by taking out vertex \(\displaystyle v_k\) not containing \(\displaystyle v_{k-1}\). WE can define adjacency between a \(\displaystyle v_k\)-component and a \(\displaystyle v\)-component different from \(\displaystyle A_1\). Let \(\displaystyle p\) denote path \(\displaystyle (v_1,v_2,...,v_k)\). If \(\displaystyle v_k\) is connected to infinitely many \(\displaystyle v\)-components through an edge, then we can find infinitely many cycles containing \(\displaystyle p\) and sharing edges only from \(\displaystyle p\). Otherwise, \(\displaystyle v_k\)-components have infinitely many adjacent components in total. If every \(\displaystyle v_k\)-component has finitely many adjacent \(\displaystyle v\)-components, then we can find infinitely many cycles containing \(\displaystyle p\) and sharing edges only from \(\displaystyle p\). And if there is \(\displaystyle v_k\)-component \(\displaystyle A_{k+1}\) that has infinitely many adjacent \(\displaystyle v\)-components, we can define \(\displaystyle v_{k+1}\) and carry on with the inductive process.
+
+If we never get stuck, we have found infinite path \(\displaystyle v\), \(\displaystyle v_1\), \(\displaystyle v_2\), ... in \(\displaystyle F\). Otherwise, we will find the infinite trail in the step where we got stuck using the cycle-method.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 2}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A867&l=en}\\[1em]
+
+A. 867.Let \(\displaystyle p(x)\) be a monic integer polynomial (polynomial with integer coefficients and leading coefficient 1) of degree \(\displaystyle n\) that has \(\displaystyle n\) real roots, \(\displaystyle \alpha_1, \alpha_2,\ldots, \alpha_n\). Let \(\displaystyle q(x)\) be an arbitrary integer polynomial that is relatively prime to polynomial \(\displaystyle p(x)\) (i.e. it's not possible to find an integer polynomial different from constant 1 and \(\displaystyle -1\) that divides both \(\displaystyle p(x)\) and \(\displaystyle q(x)\)). Prove that \(\displaystyle \sum\limits_{i=1}^{n} \big|q(\alpha_i)\big|\ge n\).
+
+Submitted byDavid Matolcsi,Berkeley
+
+(7 pont)
+
+Deadline expired on January 10, 2024.
+
+Notice that product
+
+\(\displaystyle \prod_{i=1}^{n} q(x_i)\)
+
+is a symmetric polynomial of variables \(\displaystyle x_i\) with integer coefficients, since swapping any two of its variables will result in the same polynomial. By the fundamental theorem of symmetric polynomials it can be expressed as a polynomial of the elementary symmetric polynomials of variables \(\displaystyle x_i\) with integer coefficients.
+
+The leading coefficient of \(\displaystyle p(x)\) is \(\displaystyle 1\), thus by the Vieta's formulas the the values of the elementary symmetric polynomials of values \(\displaystyle \alpha_i\) will be the coefficients of \(\displaystyle p\) with the appropriate signs. The coefficients of \(\displaystyle p\) are all integers, therefore the values of the elementary symmetric polynomials of \(\displaystyle \alpha_1, \alpha_2, \ldots , \alpha_n\) will take integer values. Thus, combining these two observations the value \(\displaystyle \prod_{i=1}^{n} q(\alpha_i)\) is also integer.
+
+It's well know that minimal polynomial of an algebraic number divides all the rational polynomials where the given algebraic number is a root. Therefore, if \(\displaystyle p\) and \(\displaystyle q\) would have a common root, the minimal polynomial of it would divide both \(\displaystyle p\) and \(\displaystyle q\) in the ring of rational polynomials, and thus by Gauss's lemma they would also have a non-trivial common divisor among the integer polynomials. Therefore, \(\displaystyle p\) and \(\displaystyle q\) cannot have a common a root, consequently \(\displaystyle \prod_{i=1}^{n} q(\alpha_i)\) is not \(\displaystyle 0\), however, it's an integer, so its absolute value is at least \(\displaystyle 1\).
+
+Applying the AM-GM inequality we get that
+
+\(\displaystyle 1\le \sqrt[n]{\prod_{i=1}^{n} |q(\alpha_i)|}\le \frac{1}{n}\sum_{i=1}^{n} |q(\alpha_i)|,\)
+
+consequently
+
+\(\displaystyle \sum_{i=1}^{n} |q(\alpha_i)|\ge n.\)
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 3}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A868&l=en}\\[1em]
+
+A. 868.A set of points in the plane is called disharmonic, if the ratio of any two distances between the points is between \(\displaystyle 100/101\) and \(\displaystyle 101/100\), or at least 100 or at most \(\displaystyle 1/100\).
+
+Is it true that for any distinct points \(\displaystyle A_1, A_2,\ldots, A_n\) in the plane it is always possible to find distinct points \(\displaystyle A'_1, A'_2,\ldots,A'_n\) that form a disharmonic set of points, and moreover \(\displaystyle A_i\), \(\displaystyle A_j\) and \(\displaystyle A_k\) are collinear in this order if and only if \(\displaystyle A'_i\), \(\displaystyle A'_j\) and \(\displaystyle A'_k\) are collinear in this order (for all distinct \(\displaystyle 1\le i,j,k\le n\))?
+
+Submitted byDomotor PalvolgyiandBalazs Keszegh,Budapest
+
+(7 pont)
+
+Deadline expired on January 10, 2024.
+
+The statement is not true.
+
+The main idea is that we consider a set of points with so many incidences that all transformations preserving incidence will also be projective, thus preserving cross-ratios. We will show that disharmonic set of points cannot contain harmonic quadraples, while the original set of points can.
+
+Lemma:if \(\displaystyle D\), \(\displaystyle A\), \(\displaystyle C\) and \(\displaystyle B\) are four distinct collinear points of a disharmonic set of points in this order, then \(\displaystyle (A;B;C;D)\) cannot be -1, therefore it cannot be harmonic.
+
+Proof:Suppose for the sake of contradiction that this is not true. Let \(\displaystyle DA=a\), \(\displaystyle AC=b\), \(\displaystyle CB=c\) (with \(\displaystyle a,b,c>0\)). The condition for being harmonic is \(\displaystyle AC/CB=DA/DB\), i.e. \(\displaystyle ac=a(a+b+c)\). This implies \(\displaystyle b\le a\) and \(\displaystyle b\le c\), and the role of \(\displaystyle a\) and \(\displaystyle c\) is symmetric, therefore we can assume \(\displaystyle b\le a\le c\). If \(\displaystyle a\le 1.01 b\), then \(\displaystyle 2\le (a+b)/b\le 2.01\), which is not allowed in a disharmonic set of points. Thus \(\displaystyle 100b\le a\le c\). Let \(\displaystyle a=xb\) and \(\displaystyle c=yb\) where \(\displaystyle 100\le x\le y\). Substituting this into the equality and dividing by \(\displaystyle b^2\) we get \(\displaystyle xy=x+y+1\). But this is clearly impossible, since \(\displaystyle x+y+1<100y\le xy\). This is a contradiction, so the statement of the lemma is true.
+
+Consider the following figure: we start with convex quadrilateral \(\displaystyle ABCD\). \(\displaystyle E\) is the intersection point of lines \(\displaystyle AB\) and \(\displaystyle CD\), \(\displaystyle F\) is the intersection point of lines \(\displaystyle AD\) and \(\displaystyle BC\), \(\displaystyle G\) is the intersection of diagonals \(\displaystyle AC\) and \(\displaystyle BD\). Finally, let \(\displaystyle H\), \(\displaystyle I\), \(\displaystyle J\) and \(\displaystyle K\) be the intersection points of lines \(\displaystyle EG\) and \(\displaystyle AD\), \(\displaystyle FG\) and \(\displaystyle AB\), \(\displaystyle EG\) and \(\displaystyle BC\) and \(\displaystyle FG\) and \(\displaystyle CD\), respectively.
+
+We claim that for these 11 points we cannot find a disharmonic set of points.
+
+Let's assume for the sake of contradiction that there exists a disharmonic set of points for this configuration, and let point \(\displaystyle X\) be mapped to point \(\displaystyle X'\). According to the conditions, \(\displaystyle A'B'C'D'\) is also a quadrilateral, and the remaining points can be obtained using the above method, for example \(\displaystyle E'\) has to be the intersection of lines \(\displaystyle A'B'\) and \(\displaystyle C'D'\), \(\displaystyle F'\) has to be the intersection of lines \(\displaystyle A'D'\) and \(\displaystyle B'C'\), and so on.
+
+It is well known that points \(\displaystyle A\), \(\displaystyle B\), \(\displaystyle C\) and \(\displaystyle D\) can be mapped to \(\displaystyle A'\), \(\displaystyle B'\), \(\displaystyle C'\) and \(\displaystyle D'\) using a projective transformation. The projective transformations preserve incidence, and thus the rest of points has to mapped to the corresponding point in the disharmonic configuration (thus \(\displaystyle E\) to \(\displaystyle E'\), \(\displaystyle F\) to \(\displaystyle F'\), and so on). It is well known that \(\displaystyle (E';G';H';J')\) is a harmonic quadraple (an easy way to show this is two project \(\displaystyle A'B'C'D'\) into a parallelogram), but this contradicts our lemma.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section*{Month: 202401}
+\addcontentsline{toc}{section}{Month: 202401}
+
+\subsection*{Problem 1}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A869&l=en}\\[1em]
+
+A. 869.Let \(\displaystyle A\) and \(\displaystyle B\) be given real numbers. Let the sum of real numbers \(\displaystyle 0\le x_1\le x_2\le\dots\le x_n\) be \(\displaystyle A\), and let the sum of real numbers \(\displaystyle 0\le y_1\le y_2\le\dots\le y_n\) be \(\displaystyle B\). Find the largest possible value of \(\displaystyle {\sum_{i=1}^n (x_i-y_i)^2}\).
+
+Proposed byPeter Csikvari, Budapest
+
+(7 pont)
+
+Deadline expired on February 12, 2024.
+
+If \(\displaystyle A\) or \(\displaystyle B\) is negative, the problem is undefined, so let's suppose \(\displaystyle A,B\ge 0\).
+
+We will prove that the answer is \(\displaystyle (\max(A,B))^2-\frac{2AB}{n}+\frac{(\min(A,B))^2}{n}\), which can be reached with \(\displaystyle x_1=\dots=x_{n-1}=0\), \(\displaystyle x_n=A\) and \(\displaystyle y_1=\dots=y_n=\frac{B}{n}\) for \(\displaystyle A\ge B\), or with \(\displaystyle x_1=\dots=x_n=\frac{A}{n}\) and \(\displaystyle y_1=\dots=y_{n-1}=0\), \(\displaystyle y_n=B\) for \(\displaystyle A<B\).
+
+The main idea is this: points \(\displaystyle (x_1,...,x_n)\) satisfying the conditions will form a solid with \(\displaystyle n\) vertices in an \(\displaystyle n-1\) dimensional subspace of the \(\displaystyle n\)-dimensional space. For example, if \(\displaystyle n=3\) and \(\displaystyle A=2\), we will get a triangle with vertices \(\displaystyle (2/3,2/3,2/3)\), \(\displaystyle (0,1,1)\) and \(\displaystyle (0,0,2)\) is the three dimensional space. The problem asks to find the two points of the two solids that are the furthes away from each other.
+
+To formalize this idea, we note that every \(\displaystyle (x_1,...,x_n)\) satisfying the conditions can be expressed in the form \(\displaystyle \alpha_1(\frac{A}{n}, \ldots, \frac{A}{n})+\alpha_2(0,\frac{A}{n-1},\ldots,\frac{A}{n-1})+...+\alpha_{n-1}(0, \ldots, 0, \frac{A}{2},\frac{A}{2})+\alpha_n(0,\ldots, 0, A)\), where \(\displaystyle A\alpha_1=nx_1\) and \(\displaystyle A\alpha_i=(n+1-i)(x_i-x_{i-1})\) for \(\displaystyle 2\le i \le n\). Observe that \(\displaystyle A(\alpha_1+\alpha_2+\dots+\alpha_n)=x_1+x_2+\dots+x_n=A\), i.e. \(\displaystyle \alpha_1+\alpha_2+\dots+\alpha_n=1\), and every \(\displaystyle \alpha_j\) is a non-negative real number (\(\displaystyle 1\leq{j}\leq{n}\)).
+
+Let \(\displaystyle v_k=(0, 0, \ldots 0, \frac{A}{k}, \frac{A}{k}, \ldots, \frac{A}{k})\) and let \(\displaystyle v_{k,j}\) denote its \(\displaystyle j^{th}\) coordinate. Using these notations, every vector satisfying the conditions can be expressed as \(\displaystyle \sum_{k=1}^n \alpha_k v_k\) such that \(\displaystyle \alpha_k\ge 0\), and \(\displaystyle \sum_{k=1}^n \alpha_k=1\). This is the linear algebra equivalent of saying that the points in the problem form the convex hull of the \(\displaystyle n\) points \(\displaystyle (0,...,0,A)\), \(\displaystyle (0,...,0,\frac{A}{2},\frac{A}{2})\),..., \(\displaystyle (\frac{A}{n},...,\frac{A}{n})\). Now we will phrase and prove formally the intuitive claim that the two points that are the furthest away from each other are vertices of the solids.
+
+Lemma:There exists \(\displaystyle 1\le k \le n\) satisfying \(\displaystyle \sum_{j=1}^n (x_j-y_j)^2\le \sum_{j=1}^n (v_{k,j}-y_j)^2\).
+
+Using the inequality between the weighted arithmetic and quadratic means we get
+
+\(\displaystyle \sum_{k=1}^n \alpha_k (v_{k,j}-y_j)^2\ge \sum_{k=1}^n \big(\alpha_k(v_{k,j}-y_j)\big)^2=(x_j-y_j)^2.\)
+
+for every \(\displaystyle 1\le j \le n\).
+
+Summing these for every \(\displaystyle j\) we get
+
+\(\displaystyle \sum_{k=1}^n \alpha_k \sum_{j=1}^n (v_{k,j}-y_j)^2=\sum_{j=1}^{n} \sum_{k=1}^n \alpha_k (v_{k,j}-y_j)^2\ge \sum_{j=1}^{n} (x_j-y_j)^2.\)
+
+Since weights \(\displaystyle \alpha_k\) are non-negative and their sum is 1, we get that
+
+\(\displaystyle \max_{k} \sum_{j=1}^n (v_{k,j}-y_j)^2\ge \sum_{j=1}^{n} (x_j-y_j)^2,\)
+
+therefore there exists \(\displaystyle k\) for which replacing \(\displaystyle (x_1,...,x_n)\) with \(\displaystyle v_k\) squared distance \(\displaystyle \sum_{j=1}^{n} (x_j-y_j)^2\) won't decrease.
+
+Repeating the same argument we can also replace \(\displaystyle (y_1,...,y_n)\) with vector \(\displaystyle v'_r\) such that  \(\displaystyle \sum_{j=1}^{n} (x_j-y_j)^2\) won't decrease. Thus there exists \(\displaystyle e\) and \(\displaystyle f\) for which \(\displaystyle \sum_{j=1}^n (x_j-y_j)^2\le \sum_{j=1}^n (v_{e,j}-v'_{f,j})^2\).
+
+Supposing \(\displaystyle e>f\) we get
+
+\(\displaystyle \sum_{j=1}^n (v_{e,j}-v_{f,j})^2=f(\frac{A}{e}-\frac{B}{f})^2+(e-f)(\frac{A}{e}-0)^2+(n-e)0^2=\frac{A^2}{e}-\frac{2AB}{e}+\frac{B^2}{f}.\)
+
+Therefore in general
+
+\(\displaystyle \sum_{j=1}^n (v_{e,j}-v_{f,j})^2=\frac{A^2}{e}+\frac{B^2}{f}-\frac{2AB}{max(e,f)}.\)
+
+We can assume \(\displaystyle A\ge B\) and apply the rearrangement inequality:
+
+\(\displaystyle \frac{A^2}{e}+\frac{B^2}{f}-\frac{2AB}{\max(e,f)}\le \frac{A^2}{\min(e,f)}+\frac{B^2}{\max(e,f)}-\frac{2AB}{\max(e,f)}.\)
+
+Obviously
+
+\(\displaystyle \frac{A^2}{\min(e,f)}+\frac{B^2}{\max(e,f)}-\frac{2AB}{\max(e,f)}\le \frac{A^2}{1}+\frac{B^2}{\max(e,f)}-\frac{2AB}{\max(e,f)},\)
+
+and \(\displaystyle 0\le B\le A\), therefore \(\displaystyle (B-2A)B\le 0\), and then
+
+\(\displaystyle \frac{A^2}{1}+\frac{B^2}{\max(e,f)}-\frac{2AB}{\max(e,f)}\le A^2+\frac{B^2}{n}-\frac{2AB}{n},\)
+
+so the general answer is
+
+\(\displaystyle \sum_{j=1}^n (x_j-y_j)^2\le (\max(A,B))^2-\frac{2AB}{n}+\frac{(\min(A,B))^2}{n},\)
+
+and equality holds for the choice shown at the beginning of this solution.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 2}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A870&l=en}\\[1em]
+
+A. 870.We label every edge of a simple graph with the difference of the degrees of its endpoints. If the number of vertices is \(\displaystyle N\), what can be the largest value of the sum of the labels on the edges?
+
+Proposed byDaniel LengerandGabor Szucs, Budapest
+
+(7 pont)
+
+Deadline expired on February 12, 2024.
+
+Let \(\displaystyle v_1\) denote the number of edges connecting vertex \(\displaystyle v\) to a vertex with a smaller degree, and \(\displaystyle v'_1\) denote the number of edges connecting vertex \(\displaystyle v\) to a vertex with smaller or equal degree. \(\displaystyle v_2\) and \(\displaystyle v_2'\) are defined similarly. The degree of \(\displaystyle v\), \(\displaystyle d(v)\) can be written as \(\displaystyle v_1+v'_2\) and \(\displaystyle v'_1+v_2\).
+
+Let's assume that graph \(\displaystyle G\) is extremal. We will prove several observations about \(\displaystyle G\).
+
+Adding an edge.Suppose that \(\displaystyle k\) and \(\displaystyle n\) are two unconnected vertices of the graph with \(\displaystyle d(k)\le d(n)\). What happens to the weights on the edges if we add edge \(\displaystyle kn\) to \(\displaystyle G\)? The weights will increase by one on those edges that connect the vertices to a vertex with a degree that's not larger, and it will decrease by 1 on those edges that connect the vertices to a vertex with a larger degree. This gives a total of \(\displaystyle n'_1+k'_1-n_2-k_2\). Additionally, edge \(\displaystyle kn\) will have a weight of \(\displaystyle d(n)-d(k)\). Therefore the total change is
+
+\(\displaystyle d(n)-d(k) + n_1'+ k_1' - n_2 - k_2 = n_1' + n_2 - k_1' - k_2 + n_1'+ k_1' - n_2 - k_2 = 2(n_1' - k_2).\)
+
+Since \(\displaystyle G\) was extremal, \(\displaystyle 2(n'_1-k_2)\le 0\), and thus \(\displaystyle n'_1\le k_2\).
+
+Deleting an edge.Let \(\displaystyle k\) and \(\displaystyle n\) be two connected vertices with \(\displaystyle d(k)\le d(n)\). What happens when we delete edge \(\displaystyle kn\)? Weights on edges connecting the vertices to a vertex with a degree that is not larger will increase by 1, and on edges connecting the vertices to a vertex with a smaller degree will decrease by 1. The weight of the deleted edge was \(\displaystyle d(n)-d(k)\). The total change is
+
+\(\displaystyle d(k) - d(n) + n_2' + k_2' - n_1 - k_1 = k_1 + k_2' - n_1 - n_2' + n_2'+ k_2' - n_1 - k_1 = 2(k_2' - n_1).\)
+
+This implies \(\displaystyle k'_2\le n_1\), since \(\displaystyle G\) is extremal.
+
+Cherry.Let three vertices of the graph be \(\displaystyle u\), \(\displaystyle t\) and \(\displaystyle a\), where \(\displaystyle ua\) is not an edge, \(\displaystyle ta\) is an edge, and \(\displaystyle d(u),d(t)\le d(a)\). Adding edge \(\displaystyle ua\) yields \(\displaystyle a'_1\le u_2\), and deleting edge \(\displaystyle ta\) yields \(\displaystyle t'_2\le a_1\). Putting these together we get \(\displaystyle t_2'\le a_1\le a'_1\le u_2\), i.e. \(\displaystyle t_2'\le u_2\).
+
+Reverse cherry.Let \(\displaystyle m\), \(\displaystyle u\) and \(\displaystyle t\) be three vertices with \(\displaystyle mu\) not being an edge, \(\displaystyle mt\) being an edge and \(\displaystyle d(m)\le d(u),d(t)\). Adding edge \(\displaystyle mu\) yields \(\displaystyle u'_1\le m_2\), deleting edge \(\displaystyle mt\) yields \(\displaystyle m'_2 \le t_1\). Combining these proves \(\displaystyle u'_1\le t_1\).
+
+Partitioning from the minimal degree.Let \(\displaystyle m\) be a vertex with a minimal degree. We can assume that \(\displaystyle d(m)>0\): adding an edge from an isolated point will not decrease the total weight. Let \(\displaystyle A\) denote the set of vertices not connected to \(\displaystyle m\), while \(\displaystyle B\) denote the set of vertices connected to \(\displaystyle m\). Applying the reverse cherry argument yields \(\displaystyle a'_1\le b_1\) for any \(\displaystyle a\in A\) and \(\displaystyle b\in B\).
+
+Let's assume there exists \(\displaystyle n\in A\) and \(\displaystyle k\in B\) satisfying \(\displaystyle d(n)>d(k)\), implying the existence of vertex \(\displaystyle x\) that is connected to \(\displaystyle n\) and not connected to \(\displaystyle k\). We also know that \(\displaystyle n'_1\le k_1\). Let's consider cases based on the value of \(\displaystyle d(x)\):
+
+From now on, we assume \(\displaystyle d(a)\le d(b)\) for all \(\displaystyle a\in A\), \(\displaystyle b\in B\).
+
+Let's check whether it's possible to have an edge in \(\displaystyle A\). Suppose that \(\displaystyle p,q\in A\) and \(\displaystyle pq\) is an edge, moreover \(\displaystyle d(p)\le d(q)\). Using the reverse cherry argument \(\displaystyle p\) is also connected to all the vertices in \(\displaystyle B\), since \(\displaystyle q_1\le b_1\). On the other hand, applying the cherry argument for triple \(\displaystyle m\), \(\displaystyle p\) and \(\displaystyle q\) implies \(\displaystyle |B|+1\le p'_2\le m_2=|B|\). This is a contradiction, thus there are no edges inside \(\displaystyle A\).
+
+Since \(\displaystyle m\) is minimal, every vertex in \(\displaystyle A\) has to be connected to every vertex in \(\displaystyle B\).
+
+Now let's check whether is possible that two vertices are not connected inside \(\displaystyle B\). Let's assume that \(\displaystyle r,s\in B\), \(\displaystyle rs\) is not an edge, \(\displaystyle d(r)\le d(s)\). Applying the reverse cherry argument for \(\displaystyle m\), \(\displaystyle r\) and \(\displaystyle s\) implies \(\displaystyle |B|=m'_2\le r_2\le |B|-1\), contradiction.
+
+Ultimately we've showed there is an extremal graph with the following structure: the vertices of a complete graph are connected to the vertices of an empty graph. If the number of vertices in the complete graph is \(\displaystyle X\) and \(\displaystyle Y\) is the empty graph, then the total weight of the graph is
+
+\(\displaystyle X(X-1)/2 \cdot 0 + XY \cdot (Y-1) = XY(Y-1).\)
+
+Let's check two consecutive values, \(\displaystyle XY(Y-1)\) and \(\displaystyle (X-1)(Y+1)Y\): their difference is \(\displaystyle (2X-Y-1)Y\), therefore increasing \(\displaystyle Y\) will increase the weight until \(\displaystyle Y+1<2X\), thus \(\displaystyle N+1<3X\) and \(\displaystyle 3Y<2N-1\). This means that the extremal value will be reached when \(\displaystyle X=\lfloor \frac{N+1}{3} \rfloor\), \(\displaystyle Y=\lceil \frac{2N-1}{3} \rceil\) (if \(\displaystyle N\) is 2 mod 3, there will be two choices for \(\displaystyle X\) and \(\displaystyle Y\)).
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 3}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A871&l=en}\\[1em]
+
+A. 871.Let \(\displaystyle ABC\) be an obtuse triangle, and let \(\displaystyle H\) denote its orthocenter. Let \(\displaystyle \omega_A\) denote the circle with center \(\displaystyle A\) and radius \(\displaystyle AH\). Let \(\displaystyle \omega_B\) and \(\displaystyle \omega_C\) be defined in a similar way. For all points \(\displaystyle X\) in the plane of triangle \(\displaystyle ABC\) let circle \(\displaystyle \Omega(X)\) be defined in the following way (if possible): take the polars of point \(\displaystyle X\) with respect to circles \(\displaystyle \omega_A\), \(\displaystyle \omega_B\) and \(\displaystyle \omega_C\), and let \(\displaystyle \Omega(X)\) be the circumcircle of the triangle defined by these three lines.With a possible exception of finitely many points find the locus of points \(\displaystyle X\) for which point \(\displaystyle X\) lies on circle \(\displaystyle \Omega(X)\).
+
+Proposed byVilmos Molnar-Szabo, Budapest
+
+(7 pont)
+
+Deadline expired on February 12, 2024.
+
+Let \(\displaystyle X_A\), \(\displaystyle X_B\) and \(\displaystyle X_C\) denote the inverse image of \(\displaystyle X\) with respect to circles \(\displaystyle \omega_A\), \(\displaystyle omega_B\) and \(\displaystyle omega_C\). Let \(\displaystyle A'\), \(\displaystyle B'\) and \(\displaystyle C'\)be the reflection of orthocenter \(\displaystyle H\) across sides \(\displaystyle BC\), \(\displaystyle AC\) and \(\displaystyle AB\) (it's well known, that these are on the circumcircle of \(\displaystyle ABC\)). Observe that \(\displaystyle A'\) is on \(\displaystyle \omega_B\) and \(\displaystyle \omega_C\), since \(\displaystyle H\) is one of their intersections, and the line connecting their centers is \(\displaystyle BC\). Our first claim is that the circumcircle of triange \(\displaystyle XX_AX_B\) is the Apollonius circle of line segment \(\displaystyle HC'\).
+
+We will use the well known statement that the fixed circle of an inversion is the Apollonius circle of a point and its inverse image. This implies that \(\displaystyle \omega_A\) and \(\displaystyle \omega_B\) are the Apollonius circles line segments \(\displaystyle XX_A\) and \(\displaystyle XX_B\), respectively. The intersections of these circles are \(\displaystyle H\) and \(\displaystyle C'\), therefore \(\displaystyle HX/HX_A=C'X/C'X_A\) and \(\displaystyle HX/HX_B=C'X/C'X_B\). Rearranging these leads to \(\displaystyle HX/C'X=HX_A/C'X_A=HX_B/C'X_B\), therefore \(\displaystyle X\), \(\displaystyle X_A\) and \(\displaystyle X_B\) are on the Apollonius circle of \(\displaystyle HC'\), as we claimed. Let \(\displaystyle O_A\) denote the center of this circle, and let \(\displaystyle O_B\) and \(\displaystyle O_C\) be defined similarly.
+
+Now let's consider an inversion with center \(\displaystyle H\) which maps \(\displaystyle A\) to \(\displaystyle A'\), \(\displaystyle B\) to \(\displaystyle B'\) and \(\displaystyle C\) to \(\displaystyle C'\). Such an inversion always exists if we allow circles with imaginary radius, however, an actual circle exists exactly if \(\displaystyle H\) lies outside of the circumcircle of \(\displaystyle ABC\), i.e. if \(\displaystyle ABC\) is obtuse. In this case, let \(\displaystyle k\) denote the fixed circle of the inversion, and let \(\displaystyle X'\) denote the inverse image of \(\displaystyle X\) with respect to \(\displaystyle k\).
+
+It's well known that the polar of \(\displaystyle X\) with respect to \(\displaystyle \omega_A\) is the perpendicular to \(\displaystyle XH\) at point \(\displaystyle X_A\). A similar claim is true for \(\displaystyle \omega_B\), therefore the intersection of the two polars is the point that is opposite from \(\displaystyle X\) on circle \(\displaystyle XX_AX_B\). If we apply a homothety from point \(\displaystyle X\) with ratio \(\displaystyle 1/2\), the image of this intersection becomes \(\displaystyle O_C\), and thus the condition of the problem transforms to \(\displaystyle X\), \(\displaystyle O_A\), \(\displaystyle O_B\) and \(\displaystyle O_C\) being concyclic. Using directed angles mod \(\displaystyle 180^{\circ}\), the condition becomes equivalent to \(\displaystyle \angle O_CXO_B=\angle O_CO_AO_B\). Let's take a closer look at these angles.
+
+Note that \(\displaystyle O_AO_C\) is perpendicular to \(\displaystyle XB\): circles \(\displaystyle XX_BX_C\) and \(\displaystyle XX_AX_B\) intersect at at points \(\displaystyle X\) and \(\displaystyle X_B\), therefore \(\displaystyle XX_B\) in perpendicular to line \(\displaystyle O_AO_C\) connecting the centers of these circles, and \(\displaystyle X\), \(\displaystyle X_B\) and \(\displaystyle B\) are collinear, since \(\displaystyle X_B\) is the inverse image \(\displaystyle X\) with respect to \(\displaystyle \omega_B\), the center of which is \(\displaystyle B\). Similarly, \(\displaystyle O_AO_B\) and \(\displaystyle XC\) are also perpendicular, therefore \(\displaystyle \angle O_CO_AO_B = \angle BXC\) (we will keep using directed angles mod \(\displaystyle 180^{\circ}\)).
+
+Now let's focus on angle \(\displaystyle \angle O_CXO_B\): let's rewrite it as the difference \(\displaystyle \angle O_CXO_B = \angle HXO_B - \angle HXO_C\). Determining angle \(\displaystyle \angle HXO_B\) is based on our previous claim: circle \(\displaystyle XX_AX_C\) is the Apollonius circle of \(\displaystyle HB'\), the center of which is \(\displaystyle O_B\), and then \(\displaystyle \angle HXO_B = \angle O_BB'X = \angle HB'X\) (see the figure below).
+
+Finally, considering the inversion with respect to circle \(\displaystyle k\) we get that \(\displaystyle \angle HB'X = \angle HX'B\), since \(\displaystyle B\) and \(\displaystyle B'\) are also the inverse image of each other with respect to \(\displaystyle k\). So finally we get that \(\displaystyle \angle O_CXO_B = \angle HXO_B - \angle HXO_C = \angle HB'X - \angle HC'X = - \angle HX'B + \angle HX'C = \angle BX'C\).
+
+Therefore, the condition in the problem is equivalent to \(\displaystyle \angle BXC = \angle BX'C\), and this is equivalent to \(\displaystyle B\), \(\displaystyle C\), \(\displaystyle X\) and \(\displaystyle X'\) being concyclic. This happens when \(\displaystyle X = X'\), i.e. if \(\displaystyle X\) is on \(\displaystyle k\). Supposing \(\displaystyle X \neq X'\) implies that this circle is the circle passing through \(\displaystyle B\) and \(\displaystyle C\) and perpendicular to \(\displaystyle k\), which is the circumcircle of triangle \(\displaystyle ABC\).
+
+We have answered the question in the problem: the locus of the points \(\displaystyle X\) satisfying the conditions of the problem are \(\displaystyle k\) and the circumcircle of triangle \(\displaystyle ABC\). Note that the argument works for acute triangles, too, however, in this case \(\displaystyle k\) does not exist (the imaginary inversion has no fixes points), therefore the answer in this case restricts to just the circumcircle.
+
+Remark:If we invert with respect to \(\displaystyle k\), the image of circle \(\displaystyle \omega_A\) becomes line \(\displaystyle BC\), and thus the inversion across \(\displaystyle omega_A\) becomes reflection across \(\displaystyle BC\). By Simson's theorem the condition of the problem is equivalent to \(\displaystyle X_A\), \(\displaystyle X_B\) and \(\displaystyle X_C\) being collinear, and after the inversion with respect to \(\displaystyle k\) this condition becomes that the reflections of \(\displaystyle X'\) across the sides of triangle \(\displaystyle ABC\) and \(\displaystyle H\) is concyclic or collinear. Then we qucikly get the the circumcircle of \(\displaystyle ABC\) will work, since reflecting its points across the sides will result in a line passing through \(\displaystyle H\). Therefore \(\displaystyle X'\) being on the circumcircle works, but since the circumcircle is invariant at the inversion with respect to \(\displaystyle k\), this is equivalent to \(\displaystyle X\) being on the circumcircle, too.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section*{Month: 202402}
+\addcontentsline{toc}{section}{Month: 202402}
+
+\subsection*{Problem 1}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A872&l=en}\\[1em]
+
+A. 872.For every positive integer \(\displaystyle k\) let \(\displaystyle a_{k,1},a_{k,2},\ldots\) be a sequence of positive integers. For every positive integer \(\displaystyle k\) let sequence \(\displaystyle \{a_{k+1, i}\}\) be the difference sequence of \(\displaystyle \{a_{k, i}\}\), i.e. for all positive integers \(\displaystyle k\) and \(\displaystyle i\) the following holds: \(\displaystyle a_{k, i+1}-a_{k, i}=a_{k+1, i}\). Is it possible that every positive integer appears exactly once among numbers \(\displaystyle a_{k,i}\)?
+
+Proposed byDavid Matolcsi, Berkeley
+
+(7 pont)
+
+Deadline expired on March 11, 2024.
+
+It is possible.
+
+We construct the sequence by proceeding diagonally, meaning that in the \(\displaystyle n\)th step, we specify all values of \(\displaystyle a_{k,l}\) for which \(\displaystyle k+l=n+1\). In the first step, we specify the value of \(\displaystyle a_{1,1}\). Then, once we have completed the first \(\displaystyle (n-1)\) steps, i.e., we have determined all \(\displaystyle a_{k,l}\) for which \(\displaystyle k+l \leq n\), in the \(\displaystyle n\)th step, it suffices to specify the value of \(\displaystyle a_{n,1}\), which uniquely determines the diagonal: \(\displaystyle a_{n-1, 2}=a_{n,1}+a_{n-1,1}\), then \(\displaystyle a_{n-2,3}=a_{n-1,2}+a_{n-2,2}=a_{n,1}+a_{n-1,1}+a_{n-2,2}\), and so on, until we reach the end of the diagonal, which is \(\displaystyle a_{1,n}=a_{n,1}+a_{n-1,1}+a_{n-2,2}+\ldots +a_{1,n-1}\). So, summarizing, if we choose the \(\displaystyle a_{n,1}\) numbers, they uniquely determine all the numbers of the sequences, and it is clear that by defining the numbers this way, we will indeed obtain sequences such that the sequence \(\displaystyle \{a_{k+1,i}\}\) is the difference sequence of \(\displaystyle \{a_{k,i}\}\).
+
+The idea is to simultaneously ensure that each cell contains a different positive integer and that every number appears somewhere in the sequence. Thus, we aim to insert the smallest positive integer into each cell such that it hasn't been used before, while ensuring that no repeated numbers occur. If we can achieve this, we obtain a suitable construction.
+
+Let \(\displaystyle a_{1,1}=1\). Then, we alternately construct two auxiliary diagonals and one main diagonal. The purpose of the auxiliary diagonals is to fill them with large numbers, much larger than the sum of all previously determined numbers. After this, we state that by inserting the smallest previously not used integer \(\displaystyle x\) into the first element of the main diagonal, we obtain a diagonal that does not create repetitions.
+
+When an auxiliary diagonal is constructed, we choose a number \(\displaystyle C\) for \(\displaystyle a_{n,1}\), which is more than \(\displaystyle 10\) times larger than the sum of all previously inserted numbers. Then the numbers in the auxiliary diagonal, \(\displaystyle C, C+a_{n-1,1}, C+a_{n-1,1}+a_{n-2,2}, \ldots , C+a_{n-1,1}+a_{n-2,2}+\ldots +a_{1,n-1}\) are all larger than any previously inserted number and obviously distinct from each other.
+
+When a main diagonal follows, we have previously built two auxiliary diagonals. We denote the first element of the former as \(\displaystyle C\) and the first element of the latter as \(\displaystyle D\). Then, as we have written before, we insert \(\displaystyle x\) into the first cell of the main diagonal, which is the smallest positive integer not previously inserted into any diagonal. Now we just need to show that this determines the corresponding diagonal in such a way that no repeated numbers are included.
+
+It is clear that \(\displaystyle C>10(x-1)\ge 5x\). The elements of the main diagonal increase monotonically due to the construction rule, so they are all distinct. The first element, \(\displaystyle x\), is distinct from all previous numbers by definition. The second element is \(\displaystyle D+x\). Since this is greater than \(\displaystyle D\), it cannot be equal to any previous element not in the latest diagonal, in which \(\displaystyle D\) and \(\displaystyle D+C\) are the first two numbers, and \(\displaystyle D<D+x<D+C\). The next element of the main diagonal is \(\displaystyle 2D+C+x\), and all other elements in this diagonal is bigger than this. We claim that even \(\displaystyle 2D+C+x\) is greater than any previously inserted number. This is because the largest previously inserted number is the last number of the preceding diagonal, obtained by adding the sum of all elements of the diagonal before it to \(\displaystyle D\). However, \(\displaystyle D\) is defined to be more than \(\displaystyle 10\) times larger than the sum of all previously inserted numbers, so the last element of the diagonal starting with \(\displaystyle D\) is less than \(\displaystyle 2D\), and thus less than \(\displaystyle 2D+C+x\).
+
+With this, we have constructed suitable sequences, so we are done.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 2}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A873&l=en}\\[1em]
+
+A. 873.Let \(\displaystyle ABCD\) be a convex cyclic quadrilateral satisfying \(\displaystyle AB\cdot CD=AD\cdot BC\). Let the inscribed circle \(\displaystyle \omega\) of triangle \(\displaystyle ABC\) be tangent to sides \(\displaystyle BC\), \(\displaystyle CA\) and \(\displaystyle AB\) at points \(\displaystyle A'\), \(\displaystyle B'\) and \(\displaystyle C'\), respectively. Let point \(\displaystyle K\) be the intersection of line \(\displaystyle ID\) and the nine-point-circle of triangle \(\displaystyle A'B'C'\) that is inside line segment \(\displaystyle ID\). Let \(\displaystyle S\) denote the centroid of triangle \(\displaystyle A'B'C'\). Prove that lines \(\displaystyle SK\) and \(\displaystyle BB'\) intersect each other on circle \(\displaystyle \omega\).
+
+Proposed byAron Ban-Szabo, Budapest
+
+(7 pont)
+
+Deadline expired on March 11, 2024.
+
+Those \(\displaystyle ABCD\) cyclic quadrilaterals, in which \(\displaystyle AB\cdot CD = BC \cdot DA\) are called harmonic. The most important geometric property of a harmonic quadrilateral is the following: a cyclic quadrilateral is harmonic if and only if the tangents at two opposite vertices of the quadrilateral meet on the the other diagonal, or both tangents and the other diagonal are parallel.
+
+This well known claim can be proved using the tangent-chord theorem: if the tangents at \(\displaystyle A\) and \(\displaystyle C\) meet at \(\displaystyle T\) on diagonal \(\displaystyle BD\), then triangles \(\displaystyle DAT\) and \(\displaystyle ABT\) are similar, therefore \(\displaystyle DA/AB=AT/BT\), and similarly we get \(\displaystyle CD/BC=CT/BT\). Since \(\displaystyle CT=AT\) due to the tangent segment theorem, we get \(\displaystyle DA/AB=CD/BC\) and this rearranges to the condition in the beginning. To prove the reverse direction, we apply the earlier case to \(\displaystyle ABCD'\), where \(\displaystyle D'\) is the point where the circle and line \(\displaystyle BT\) meet.
+
+(If \(\displaystyle BD\) and the two tangents are parallel, \(\displaystyle ABCD\) is a kite, which satisfies the harmonic condition.)
+
+We will also use the fact that the inverse image of a harmonic quadrilateral is also harmonic. Since inversion preserves the cross ratio, and similar to the line, the cross ratio \(\displaystyle (A,C,B,D)\) on a circle is also defined with the formula \(\displaystyle AB/BC\cdot DB/AD\) (with the appropriate sign: it is negative if and only if chords \(\displaystyle AC\) and \(\displaystyle BD\) intersect each other), the statement is clearly true. This fact about the cross ration can actually be proved easily: if the image of \(\displaystyle A\), \(\displaystyle B\), \(\displaystyle C\) and \(\displaystyle D\) is \(\displaystyle A'\), \(\displaystyle B'\), \(\displaystyle C'\) and \(\displaystyle D'\), and the center of the inversion is \(\displaystyle O\), then it is well known that \(\displaystyle AB/A'B'=OA/OB'\), and thus \(\displaystyle A'B'/B'C'=AB/BC\cdot OB'/OA\cdot OC/OB'=AB/BC\cdot OC/CA\), and the same holds for replacing \(\displaystyle B\) with \(\displaystyle D\), which implies the statement.
+
+Now we solve the problem.
+
+Let's invert with respect to the inscribed circle. The image of \(\displaystyle A\) is the midpoint of \(\displaystyle B'C'\), denoted by \(\displaystyle A^*\) (this is an easy to check basic property of inversion), and similar is true for \(\displaystyle B\) and \(\displaystyle C\). Therefore the image of circle \(\displaystyle (ABC)\) is the nine-point circle of \(\displaystyle A'B'C'\). The inverse image if \(\displaystyle D\) must be on ray \(\displaystyle ID\), and also on this nine-point circle, therefore it must be point \(\displaystyle K\) from the problem.
+
+Now let's apply a homothety from centroid \(\displaystyle S\) of \(\displaystyle A'B'C'\) with a ratio of \(\displaystyle -2\): it maps \(\displaystyle A^*\) to \(\displaystyle A'\), and similar is true for \(\displaystyle B\) and \(\displaystyle C\). Let \(\displaystyle M\) denote the imgae of \(\displaystyle K\). Then \(\displaystyle M\) must be on the incribed circle, \(\displaystyle \omega\), and we have seen that \(\displaystyle A'B'C'M\) must be harmonic (since \(\displaystyle ABCD\) was harmonic, and both the inversion and the homothety preserve harmonic quadrilaterals). Therefore, diagonal \(\displaystyle B'M\) must go through the tangents of \(\displaystyle \omega\) at \(\displaystyle A'\) and \(\displaystyle C'\) (i.e. \(\displaystyle BC\) and \(\displaystyle BA\)), which is exactly point \(\displaystyle B\), and this was to be proved.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 3}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A874&l=en}\\[1em]
+
+A. 874.NyihahaandBruhahaare two neighbouring islands, both having \(\displaystyle n\) inhabitants. On islandNyihahaevery inhabitant is either a Knight or a Knave. Knights always tell the truth and Knaves always lie. The inhabitants of islandBruhahaare normal people, who can choose to say whatever they want. When a visitor arrives on any of the two islands, the following ritual is performed: every inhabitant points randomly to another inhabitant (independently from each other with uniform distribution), and says ``He is a Knight'' or ``He is a Knave''. On islandNyihaha, Knights have to tell the truth and Knaves have to lie. On islandBruhahaevery inhabitant says either ``He is a Knight'' or ``He is a Knave'' with probability \(\displaystyle 1/2\) independently from each other. Sinbad arrives on islandBruhaha, but he does not know whether he is on islandNyihahaor islandBruhaha. Let \(\displaystyle p_n\) denote the probability that after observing the ritual he can rule out being on islandNyihaha. Is it true that \(\displaystyle p_n \to 1\) if \(\displaystyle n \to \infty\)?
+
+Proposed byDavid Matolcsi, Berkeley
+
+(7 pont)
+
+Deadline expired on March 11, 2024.
+
+Let's form a directed graph from the inhabitants of the island that indicates who points to whom. The out-degree of all the vertices is 1. Let's put 0's on the edges that correspond to someone saying 'Knight', and let's put 1's on the edges corresponding to someone saying 'Knave'. If it's possible to assign 0's and 1's on the vertices such that \(\displaystyle a+x=b\) mod 2 is true for all directed edges (\(\displaystyle a\) and \(\displaystyle b\) are the values assigned to the vertices, and \(\displaystyle x\) is the value assigned to the edge), then Sinbad cannot be sure that he is not on island Nyihaha. Indeed, if \(\displaystyle A\) is calling \(\displaystyle B\) a Knight, than they have to be of the same type, while if he is calling \(\displaystyle B\) a Knave, then they have to be of different type.
+
+Such an assignment exists if and only if every directed cycle in the graph includes an even number of 1's. On the one hand, an odd number of 1's in a cycle means this cycle cannot be labeled correctly with 0's and 1's. On the other hand, if no such cycle exists, then we can pick an arbitrary vertex in each connected component, assign an arbitrary value, and then assign every other value according to the values written on the edges.
+
+All the directed cycles in the graph must be disjoint from each other, since all the out-degrees are 1. On the other hand, in a single cycle the number of 1's has a \(\displaystyle 1/2\) chance of being even: let's assign values randomly to the edges in the cycle, and the last one will decide the parity of the 1's. These imply that if the number of cycles is \(\displaystyle t\), then there is a \(\displaystyle 1/2^t\) chance that all the cycles contain an even number of 1's.
+
+Therefore, if the graph created from the answers of inhabitants of Bruhaha contains \(\displaystyle t\) cycles, then there is a \(\displaystyle 1/2^t\) chance that the answers could also be the answers of the inhabitants of Nyihaha.
+
+We will prove that for every \(\displaystyle t\) the chance that there are at least \(\displaystyle N\) cycles in the graph of \(\displaystyle n\) points goes to 1 as \(\displaystyle n\) goes to infinity.
+
+This will prove that the answer to the question in the problem is affirmative. For a given \(\displaystyle \varepsilon>0\) we can find \(\displaystyle N\) such that \(\displaystyle 1/2^t<\varepsilon/2\), and also a \(\displaystyle N\) such that for \(\displaystyle n>N\) the chance that there at least \(\displaystyle T\) cycles in the graph is less, than \(\displaystyle \varepsilon/2\). Therefore, the probability that Sinbad cannot rule out that the answers are from Nyihaha is less then \(\displaystyle \varepsilon/2+1\cdot\frac{1}{2^t}<\varepsilon\). This proves that \(\displaystyle p\) goes to 1 as \(\displaystyle n\) goes to infinity (by the definition of convergence).
+
+Now we will prove that the probability of having at least \(\displaystyle t\) cycles indeed goes to infinity as \(\displaystyle n\) goes to infinity (for every fixed \(\displaystyle t\)).
+
+Since the inhabitants of Bruhaha point independently from each other, the order of their answers is irrelevant. Let's consider the following order: we start from an arbitrary inhabitant, and then follow with the person he is pointing to. We keep on doing this until we get to somebody who has already answered. Then we continue with another inhabitant chosen randomly, and follow the chain of their answers. We repeat this process until everybody has answered.
+
+We will divide the whole process into sections. We say that an Event happens in a section of length \(\displaystyle k\), if nobody of these \(\displaystyle k\) inhabitants points at somebody who has already answered before the section, but somebody from the second \(\displaystyle k/2\) points at somebody from the first \(\displaystyle k/2\) of the section.
+
+Whenever an Event happens in a section, there exists inhabitant \(\displaystyle A\) in the second half of the section who points at inhabitant \(\displaystyle B\) from the first half of the section. If a chain goes from \(\displaystyle B\) to \(\displaystyle A\), we have found a cycle from the inhabitants the section. Otherwise a new chain had to be started in the section, which means that somebody from the section pointed at somebody who has already answered, however, that person also must be in the section by the definition of the Event, therefore we get a cycle again. Thus, an Event guarantees a cycle in the section.
+
+Suppose that \(\displaystyle r\) people have already pointed before a section of \(\displaystyle k\) people. The probability of nobody pointing to an earlier inhabitant is \(\displaystyle (1-\frac{r}{n})^k\). The conditional probability of nobody pointing to the first section is \(\displaystyle (1-\frac{k/2}{n-r})^{\frac{k}{2}}\). Therefore, the probability of the Event in this section is
+
+\(\displaystyle \left(1-\frac{r}{n}\right)^k\left(1-\left(1-\frac{\frac{k}{2}}{n-r}\right)^{\frac{k}{2}}\right)\ge \left(1-\frac{r}{n}\right)^k\left(1-\left(1-\frac{\frac{k}{2}}{n}\right)^{\frac{k}{2}}\right).\)
+
+Let's choose the length of the sections to be \(\displaystyle \sqrt{n}, \frac{\sqrt{n}}{\sqrt{2}}, \frac{\sqrt{n}}{\sqrt{3}} \ldots\), until we reach \(\displaystyle n\). The number of inhabitants before the \(\displaystyle m^{\text{th}}\) section is
+
+\(\displaystyle r=\sqrt{n} \sum_{k=1}^{m-1} \frac{1}{\sqrt{k}}\le \sqrt{n} \left(1+\sum_{k=2}^{m-1} \frac{2}{\sqrt{k-1}+\sqrt{k}}\right)=\sqrt{n}\left(1+2\sum_{k=2}^{m-1} (\sqrt{k}-\sqrt{k-1})\right) < 2\sqrt{n}\sqrt{m}.\)
+
+Therefore \(\displaystyle \frac{r}{n} < \frac{2\sqrt{m}}{\sqrt{n}}\).
+
+This means that the probability of an Event in the \(\displaystyle m^{\text{th}}\) section is at least
+
+\(\displaystyle \left(1-\frac{2\sqrt{m}}{\sqrt{n}}\right)^{\frac{\sqrt{n}}{\sqrt{m}}}\left(1-\left(1-\frac{1}{2\sqrt{n}\sqrt{m}}\right)^{\frac{\sqrt{n}}{2\sqrt{m}}}\right).\)
+
+We will only work with sections for which \(\displaystyle m\le \sqrt{n}\). It is well known that \(\displaystyle (1-x)^{\frac{1}{x}}\to e^{-1}\) as \(\displaystyle x\to 0\). If \(\displaystyle n\) is large enough, then \(\displaystyle \frac{2\sqrt{m}}{\sqrt{n}}\) will be arbitrarily small, thus \(\displaystyle (1-\frac{2\sqrt{m}}{\sqrt{n}})^{\frac{\sqrt{n}}{\sqrt{m}}}\) can be arbitrarily close to \(\displaystyle e^{-\frac{1}{2}}\). We will only use the fact that this is larger than \(\displaystyle 1/2\) (since \(\displaystyle e<4\)).
+
+Therefore the probability of an event is at least
+
+\(\displaystyle \frac{1}{2} \left(1-\left(1-\frac{1}{2\sqrt{n}\sqrt{m}}\right)^{\frac{\sqrt{n}}{2\sqrt{m}}}\right).\)
+
+Let's estimate the subtrahend inside the brackets from above:
+
+\(\displaystyle \left(1-\frac{1}{2\sqrt{n}\sqrt{m}}\right)^{\frac{\sqrt{n}}{2\sqrt{m}}}\le \frac{1}{\left(1+\frac{1}{2\sqrt{n}\sqrt{m}}\right)^{\frac{\sqrt{n}}{2\sqrt{m}}}}\le\frac{1}{1+\frac{1}{4m}},\)
+
+where the second estimation is the consequence of Bernoulli's inequality (i.e. \(\displaystyle (1+x)^n\ge 1+xn\) if \(\displaystyle n\) is natural and \(\displaystyle x\ge -1\) real):
+
+\(\displaystyle \left(1+\frac{1}{2\sqrt{n}\sqrt{m}}\right)^{\frac{\sqrt{n}}{2\sqrt{m}}}\ge 1+\frac{1}{4m}.\)
+
+Finally,
+
+\(\displaystyle \frac{1}{1+\frac{1}{4m}}\le 1-\frac{1}{5m},\)
+
+therefore, the probability of an Event is at least
+
+\(\displaystyle \frac{1}{2}\left(1-\left(1-\frac{1}{5m}\right)\right)=\frac{1}{10m}.\)
+
+Having Events in the sections are independent from each other. Therefore if we take residue \(\displaystyle d\) mod \(\displaystyle t\), the probability that no Event will occur in a section with a number that is \(\displaystyle d\) mod \(\displaystyle t\) up to \(\displaystyle m=\sqrt{n}\) can be estimated as
+
+\(\displaystyle \prod_{j=0}^{\frac{\sqrt{n}}{t}} \left(1-\frac{1}{10(jt+d)}\right)\le \sqrt[10t]{{\prod_{i=10t+1}^{10\sqrt{n}}} \left(1-\frac{1}{i}\right)}=\sqrt[10t]{\frac{10t}{10\sqrt{n}}}=\frac{\sqrt[10t]{t}}{\sqrt[20t]{n}}.\)
+
+Therefore the probability that an Event will occur for every residue class is at least
+
+\(\displaystyle \left(1-\frac{\sqrt[10t]{t}}{\sqrt[20t]{n}}\right)^t\ge 1-\frac{t\sqrt[10t]{t}}{\sqrt[20t]{n}}\)
+
+(we have applied Bernoulli's once more).
+
+Since \(\displaystyle t\) is fixed, then
+
+\(\displaystyle 1-\frac{t\sqrt[10t]{t}}{\sqrt[20t]{n}}\to 1\)
+
+as \(\displaystyle n\to \infty\)  Thus we have proved that as \(\displaystyle n\to \infty\), the probability of at least \(\displaystyle t\) Event occuring, i.e. having at least \(\displaystyle t\) cycles in the graph goes to 1, which was our aim.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section*{Month: 202403}
+\addcontentsline{toc}{section}{Month: 202403}
+
+\subsection*{Problem 1}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A875&l=en}\\[1em]
+
+A. 875.\(\displaystyle a)\) Two players play a cooperative game. They can discuss a strategy prior to the game, however, they cannot communicate and have no information about the other player during the game. The game master chooses one of the players in each round. The player on turn has to guess the number of the current round. Players keep note of the number of rounds they were chosen, however, they have no information about the other player's rounds. If the player's guess is correct, the players are awarded a point. Player's are not notified whether they've scored or not. The players win the game upon collecting 100 points. Does there exist a strategy with which they can surely win the game in a finite number of rounds?
+
+\(\displaystyle b)\) How does this game change, if in each round the player on turn has two guesses instead of one, and they are awarded a point if one of the guesses is correct (while keeping all the other rules of the game the same)?
+
+Proposed byGabor Szucs, Budapest
+
+(7 pont)
+
+Deadline expired on April 10, 2024.
+
+a)Let the two players be \(\displaystyle A\) and \(\displaystyle B\). One point can always be achieved, for instance, if both players guess \(\displaystyle 1\) every round. However, more than that is not guaranteed: Let \(\displaystyle a_k\) denote Player \(\displaystyle A\)'s guess in the \(\displaystyle k\)-th round, and similarly define the sequence \(\displaystyle b_k\) for Player \(\displaystyle B\)'s guesses.
+
+We will illustrate the progress of the game in a table consisting of unit squares in the fourth quadrant as follows: We start from the top-left corner (indexed as \(\displaystyle (0,0)\)) and move rightward if Player \(\displaystyle A\) is called in that round, otherwise downward. Additionally, let's place vertical and horizontal walls in the table, the former on the right side of squares with coordinates \(\displaystyle (k-1,-(a_k-k))\), and the latter at the bottom of squares with coordinates \(\displaystyle (-(b_k-k),k-1)\).
+
+Consider the game in this representation: initially, the players can place at most one wall on the right edge of every vertical column and on the bottom edge of every horizontal row. Then, in each step, we move one unit to the right or downward (determined by the game master), and if we cross a vertical or horizontal wall, the players earn a point. When the game master has called \(\displaystyle A\) for \(\displaystyle n\) times and \(\displaystyle B\) for \(\displaystyle m\) times, and now calls \(\displaystyle A\) again, the players earn a point if \(\displaystyle a_{n+1}=n+m+1\). This corresponds to moving from square \(\displaystyle (n,-m)\) to square \(\displaystyle (n+1,-m)\), hence crossing a wall, if and only if \(\displaystyle -(a_{n+1}-(n+1))=-m\), which is equivalent to  \(\displaystyle a_{n+1}=n+m+1\).
+
+The players aim to place walls such that regardless of the movement chosen by the game master, they will hit at least \(\displaystyle 100\) walls within a finite number of steps.
+
+Suppose that the players have somehow placed walls according to the rules. Now, let the game master play as follows: until the players score a point, always move arbitrarily such that if possible, no point is scored for the players. The players can only earn their first point if they reach a square with walls on its bottom and right sides. Move rightward in this case. Afterward, keep moving right until reaching a wall. If this never happens, it's clear the players won't score more points. Once reaching a wall, since there was already a wall at the bottom of this row during a previous round (when the players scored), they won't score a point by moving downward. Then, move downward until reaching another wall. Again, it will be true that there was a wall at the right edge of the column, allowing us to move rightward. Repeat this process, alternately moving rightward or downward until encountering a wall, thus ensuring the players can never score more than one point.
+
+b)Prepare a table similar to the one described above. The only difference from parta)is that now, each row's bottom edge and each column's right edge can accommodate two walls. In this case, the players can win using the following construction (which can be continued indefinitely according to this pattern). The game master is forced to intersect a wall in every layer, ensuring the players score \(\displaystyle 100\) points within a finite number of steps.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 2}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A876&l=en}\\[1em]
+
+A. 876.Find all non-negative integers \(\displaystyle a\) and \(\displaystyle b\) satisfying \(\displaystyle 5^a+6=31^b\).
+
+Proposed byErik Furedi, Budapest
+
+(7 pont)
+
+Deadline expired on April 10, 2024.
+
+With \(\displaystyle a=2, b=1\) we obtain a solution, we will prove that this is the only solution. First, we observe that \(\displaystyle a\) is even and \(\displaystyle b\equiv1\) (mod \(\displaystyle 5\)). Examining the equation modulo \(\displaystyle 3\), we have \(\displaystyle 5^a\equiv1\) (mod \(\displaystyle 3\)). The powers of \(\displaystyle 5\) alternate between leaving remainders \(\displaystyle 2\) and \(\displaystyle 1\) modulo \(\displaystyle 3\), which implies \(\displaystyle a\) is even.
+
+There are no solutions for \(\displaystyle a<2\), so examining the equation modulo \(\displaystyle 25\), we get \(\displaystyle 31^b\equiv6\) (mod \(\displaystyle 25\)). The powers of \(\displaystyle 6\) alternate between \(\displaystyle 1\), \(\displaystyle 6\), \(\displaystyle 11\), \(\displaystyle 16\), \(\displaystyle 21\), and then \(\displaystyle 1\), ... modulo \(\displaystyle 25\). Therefore, \(\displaystyle b\equiv1\) (mod \(\displaystyle 5\)).
+
+Examining the equation modulo \(\displaystyle 8\), as \(\displaystyle a\) is even, \(\displaystyle 5^a\) yields remainder \(\displaystyle 1\) when divided by \(\displaystyle 8\), since it is a power of \(\displaystyle 25\). Hence, \(\displaystyle 31^b\equiv6+5^a\equiv7\) (mod \(\displaystyle 8\)). Since \(\displaystyle 31^1\equiv7\) (mod \(\displaystyle 8\)) and \(\displaystyle 31^{2}\equiv1\) (mod \(\displaystyle 8\)), the odd powers of \(\displaystyle 31\) yield remainder \(\displaystyle 7\) when divided by \(\displaystyle 8\), implying \(\displaystyle b\) is odd.
+
+For the case \(\displaystyle 2\geq{a}\), there is only the described solution to the equation \(\displaystyle 6+5^a=31^b\), hence we can assume \(\displaystyle a>2\). In this case, \(\displaystyle 5^a\) is divisible by \(\displaystyle 125\), so \(\displaystyle 31^b\equiv6\) (mod \(\displaystyle 125\)). The order of \(\displaystyle 31\) modulo \(\displaystyle 125\) is \(\displaystyle 25\) since \(\displaystyle 31^5\equiv26\) (mod \(\displaystyle 125\)) is not congruent to \(\displaystyle 1\), but \(\displaystyle 31^{25}\equiv26^5\equiv 1\) (mod \(\displaystyle 125\)). The powers of \(\displaystyle 31\) from \(\displaystyle 1\) to \(\displaystyle 25\) modulo \(\displaystyle 125\) are pairwise incongruent, and \(\displaystyle 31^{21}\equiv(31^5)^4\cdot31\equiv26^4\cdot31\equiv 6\). Therefore, the powers of \(\displaystyle 31\) giving \(\displaystyle 6\) modulo \(\displaystyle 125\) are exactly those which have exponent congruent to \(\displaystyle 21\) modulo 25.
+
+Examining the equation modulo \(\displaystyle 101\), we know that \(\displaystyle b\equiv21\) (mod \(\displaystyle 25\)) and \(\displaystyle b\equiv1\) (mod \(\displaystyle 2\)), so \(\displaystyle b\equiv21\) (mod \(\displaystyle 50\)). Notice that \(\displaystyle 31^{50}\equiv1\) (mod \(\displaystyle 101\)), since \(\displaystyle 31\equiv1849\equiv43^2\) (mod \(\displaystyle 101\)), raising to the \(\displaystyle 50\)th power gives \(\displaystyle 31^{50}\equiv43^{100}\) (mod \(\displaystyle 101\)), hence, by Fermat's Little Theorem, it is congruent to \(\displaystyle 1\) modulo \(\displaystyle 101\). Thus, \(\displaystyle 31^b\equiv31^{21}\) (mod \(\displaystyle 101\)). The values of \(\displaystyle 31^2, 31^4, 31^8,\) and \(\displaystyle 31^{16}\) modulo \(\displaystyle 101\) can be calculated successively by squaring, and thus, we find \(\displaystyle 31^{21}\equiv 31^{16}\cdot 31^4\cdot31\equiv 79\). Therefore, \(\displaystyle 31^b\equiv79\) (mod \(\displaystyle 101\)).
+
+From this, \(\displaystyle 5^a\equiv31^b-6\equiv73\) (mod \(\displaystyle 101\)). However, this is impossible, since none of the powers of \(\displaystyle 5\) are congruent to \(\displaystyle 73\) modulo \(\displaystyle 101\) as the powers of \(\displaystyle 5\) modulo \(\displaystyle 101\) are periodic, and a period is
+
+\(\displaystyle 5,25,24,19,95,71,52,58,88,36,79,92,56,78,87,31,54,68,37,84,16,80,97,81,1.\)
+
+This leads to a contradiction, concluding that the equation \(\displaystyle 6+5^a=31^b\) has only the solution \(\displaystyle a=2, b=1\) among non-negative integers.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 3}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A877&l=en}\\[1em]
+
+A. 877.Convex quadrilateral \(\displaystyle ABCD\) is circumscribed about circle \(\displaystyle \omega\). A tangent to \(\displaystyle \omega\) parallel to diagonal \(\displaystyle AC\) meets diagonal \(\displaystyle BD\) at point \(\displaystyle P\) outside of \(\displaystyle \omega\). The second tangent from \(\displaystyle P\) to \(\displaystyle \omega\) touches \(\displaystyle \omega\) at point \(\displaystyle T\). Prove that \(\displaystyle \omega\) and the circumcircle of triangle \(\displaystyle ATC\) are tangent.
+
+Proposed byNikolai Beluhov, Bulgaria
+
+(7 pont)
+
+Deadline expired on April 10, 2024.
+
+Lemma 1. Let \(\displaystyle A'\) be a point on line \(\displaystyle AC\) outside of \(\displaystyle \omega\), let the two tangents from \(\displaystyle A'\) to \(\displaystyle \omega\) meet line \(\displaystyle BD\) at points \(\displaystyle B'\) and \(\displaystyle D'\), and let the second tangents from \(\displaystyle B'\) and \(\displaystyle D'\) to \(\displaystyle \omega\) meet at point \(\displaystyle C'\). Then \(\displaystyle C'\) lies on line \(\displaystyle AC\).
+
+(Note that we allow each one of \(\displaystyle A'\), \(\displaystyle B'\), \(\displaystyle C'\), and \(\displaystyle D'\) to be a point at infinity. Furthermore, when either one of points \(\displaystyle B'\) and \(\displaystyle D'\) lies on \(\displaystyle \omega\), the ``second'' tangent from it to \(\displaystyle \omega\) is the unique tangent at it to \(\displaystyle \omega\).)
+
+Proof. In a circumscribed quadrilateral, the pole of each diagonal with respect to the incircle lies on the other diagonal.
+
+We apply this to quadrilaterals \(\displaystyle ABCD\) and \(\displaystyle A'B'C'D'\). Since lines \(\displaystyle BD\) and \(\displaystyle B'D'\) coincide, it follows that lines \(\displaystyle A'C'\) and \(\displaystyle AC\) meet both at \(\displaystyle A'\) and at the pole \(\displaystyle V\) of line \(\displaystyle BD \equiv B'D'\) with respect to \(\displaystyle \omega\). Thus lines \(\displaystyle AC\) and \(\displaystyle A'C'\) coincide unless \(\displaystyle A' \equiv V\). In the latter case, we let \(\displaystyle A'\) approach \(\displaystyle V\) and we take the limit. \(\displaystyle \square\)
+
+Lemma 2. The correspondence \(\displaystyle A' \leftrightarrow C'\) is projective.
+
+Proof. Let lines \(\displaystyle A'B'\), \(\displaystyle B'C'\), \(\displaystyle C'D'\), and \(\displaystyle D'A'\) touch \(\displaystyle \omega\) at points \(\displaystyle K\), \(\displaystyle L\), \(\displaystyle M\), and \(\displaystyle N\), respectively.
+
+Let lines \(\displaystyle AC\) and \(\displaystyle BD\) meet at \(\displaystyle E\). Then also \(\displaystyle E = KM \cap LN\) since quadrilateral \(\displaystyle A'B'C'D'\) is circumscribed about \(\displaystyle \omega\).
+
+Let line \(\displaystyle AC\) meet \(\displaystyle \omega\) at points \(\displaystyle X\) and \(\displaystyle Y\). Then
+
+\(\displaystyle (A'XEY) \stackrel{K}{=} (KXMY) \stackrel{E}{=} (MYKX) \stackrel{M}{=} (C'YEX).\)
+
+(Note that the middle transformation is not projection through \(\displaystyle E\) but inversion of center \(\displaystyle E\).) \(\displaystyle \square\)
+
+To complete the solution, let line \(\displaystyle PT\) meet line \(\displaystyle AC\) at point \(\displaystyle Z\) and let \(\displaystyle f\) be the correspondence of Lemma 2. Then \(\displaystyle f\) swaps the pairs \(\displaystyle A \leftrightarrow C\) and \(\displaystyle Z \leftrightarrow \infty\). So does inversion of center \(\displaystyle Z\) and a suitable radius. Thus \(\displaystyle f\) coincides with that inversion.
+
+Since the pole of line \(\displaystyle AC\) with respect to \(\displaystyle \omega\) lies on line \(\displaystyle BD\), by a limiting argument we see that \(\displaystyle f\) swaps also the pair \(\displaystyle X \leftrightarrow Y\). (Where \(\displaystyle X\) and \(\displaystyle Y\) are defined as in the proof of Lemma 2.) Therefore, \(\displaystyle ZT^2 = ZX \cdot ZY = ZA \cdot ZC\), and so the circumcircle of triangle \(\displaystyle ATC\) is tangent to line \(\displaystyle ZT\) at \(\displaystyle T\), as needed.
+
+Remark 1. Lemma 1 shows that a circumscribed quadrilateral can ``flex'' so that its incircle and the lines of its diagonals remain fixed.
+
+We can also phrase this as a closure theorem. Consider a circle \(\displaystyle \omega\) and two lines \(\displaystyle \ell\) and \(\displaystyle m\). Take a point \(\displaystyle P_1\) on \(\displaystyle \ell\) outside of \(\displaystyle \omega\) and let one of the two tangents from \(\displaystyle P_1\) to \(\displaystyle \omega\) meet \(\displaystyle m\) at point \(\displaystyle P_2\). Next let the second tangent from \(\displaystyle P_2\) to \(\displaystyle \omega\) meet \(\displaystyle \ell\) at point \(\displaystyle P_3\), and so on and so forth. If \(\displaystyle P_5 \equiv P_1\) for some choice of \(\displaystyle P_1\), then \(\displaystyle P_5 \equiv P_1\) for all choices of \(\displaystyle P_1\). Furthermore, the chain closes in this way if and only if the pole of each one of lines \(\displaystyle \ell\) and \(\displaystyle m\) with respect to \(\displaystyle \omega\) lies on the other one.
+
+Remark 2. One special case interesting in its own right is when \(\displaystyle \angle ADC\) is straight. With the points renamed to fit this setting somewhat better, we obtain the following result.
+
+Corollary. Let the incircle \(\displaystyle \omega\) of triangle \(\displaystyle ABC\) touch side \(\displaystyle BC\) at point \(\displaystyle D\). Let the second tangent to \(\displaystyle \omega\) parallel to line \(\displaystyle BC\) meet segment \(\displaystyle AD\) at point \(\displaystyle P\) and let the second tangent from \(\displaystyle P\) to \(\displaystyle \omega\) touch \(\displaystyle \omega\) at point \(\displaystyle T\). Then \(\displaystyle \omega\) and the circumcircle of triangle \(\displaystyle BTC\) are tangent.
+
+This admits an elementary proof independent from our solution to the problem. Here is a quick sketch: Let \(\displaystyle r\) be the radius of \(\displaystyle \omega\), let the second tangent to \(\displaystyle \omega\) parallel to line \(\displaystyle BC\) meet sides \(\displaystyle AB\) and \(\displaystyle AC\) at points \(\displaystyle K\) and \(\displaystyle L\), respectively, let the same tangent touch \(\displaystyle \omega\) at point \(\displaystyle Q\), and, finally, let line \(\displaystyle PT\) meet line \(\displaystyle BC\) at point \(\displaystyle X\). Then \(\displaystyle KP = LQ\), \(\displaystyle KQ = LP\), \(\displaystyle BD = r^2/KQ\), \(\displaystyle CD = r^2/LQ\), and \(\displaystyle XD = r^2/PQ\). These identities suffice to verify that \(\displaystyle XB \cdot XC = XD^2\).
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section*{Month: 202404}
+\addcontentsline{toc}{section}{Month: 202404}
+
+\subsection*{Problem 1}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A878&l=en}\\[1em]
+
+A. 878.Let point \(\displaystyle A\) be one of the intersections of circles \(\displaystyle c\) and \(\displaystyle k\). Let \(\displaystyle X_1\) and \(\displaystyle X_2\) be arbitrary points on circle \(\displaystyle c\). Let \(\displaystyle Y_i\) denote the intersection of line \(\displaystyle AX_i\) and circle \(\displaystyle k\) for \(\displaystyle i=1,2\). Let \(\displaystyle P_1\), \(\displaystyle P_2\) and \(\displaystyle P_3\) be arbitrary points on circle \(\displaystyle k\), and let \(\displaystyle O\) denote the center of circle \(\displaystyle k\). Let \(\displaystyle K_{ij}\) denote the center of circle \(\displaystyle (X_iY_iP_j)\) for \(\displaystyle i=1,2\) and \(\displaystyle j=1,2,3\). Let \(\displaystyle L_j\) denote the center of circle \(\displaystyle (OK_{1j}K_{2j})\) for \(\displaystyle j=1,2,3\). Prove that points \(\displaystyle L_1\), \(\displaystyle L_2\) and \(\displaystyle L_3\) are collinear.
+
+Proposed byVilmos Molnar-Szabo, Budapest
+
+(7 pont)
+
+Deadline expired on May 10, 2024.
+
+The basis of the proof is the following less well know rephrasing of the inscribed angle theorem: if we fix two points in the plane, and rotate lines around them with the same (oriented) angular speed, the intersections of the two rotating lines will be on a circle containing the two fixed points.
+
+Now we prove the following statement which will also lead to the solution of the original problem:
+
+Claim:Let point \(\displaystyle X\) be on circle \(\displaystyle c\) and point \(\displaystyle Y\) be on circle \(\displaystyle k\) such that \(\displaystyle X\), \(\displaystyle Y\) and one of the intersections of the two circles, point \(\displaystyle A\) are collinear. Let \(\displaystyle P\) be an arbitrary point on circle \(\displaystyle k\). Now if we move point \(\displaystyle X\) on \(\displaystyle c\) (\(\displaystyle P\) stays fixed), the center of circle \(\displaystyle PXY\) will move on a circle containing point \(\displaystyle O\) (the center of circle \(\displaystyle k\)).
+
+Proof:The key insight is this: if we move \(\displaystyle X\) around circle \(\displaystyle c\) with constant angular speed, point \(\displaystyle Y\) will move on circle \(\displaystyle k\) with the same (oriented) angular speed (this is an easy consequence of the inscribed angle theorem). This means that lines \(\displaystyle XY\) and \(\displaystyle YP\) also rotate with the same constant angular speed, so the same is also true for their perpendicular bisectors. If we find fixed points for both of them, we are done based on our initial remark. In the case of the perpendicular bisector of \(\displaystyle PY\) this is easy: it passes through the center of circle \(\displaystyle k\), i.e. point \(\displaystyle O\).
+
+In the case of line segment \(\displaystyle XY\) it's a bit more challenging to find the common point: we claim that it always passes through point \(\displaystyle M\), which is defined in the following way: draw a parallel with the common axis of symmetry of the two circles though the other common point of the two given circles (point \(\displaystyle B\)), and take its intersections \(\displaystyle U\) and \(\displaystyle V\) with the two given circles. Let \(\displaystyle M\) be the midpoint of line segment \(\displaystyle UV\).
+
+Indeed, we have to show that \(\displaystyle MX=MY\). Note that quadrilateral \(\displaystyle UXYV\) is a right trapezoid (with the right angles at \(\displaystyle X\) and \(\displaystyle Y\)) based on Thales's theorem (it can be self intersecting, too, but that does not affect the next argument). Now if we reflect \(\displaystyle X\) and \(\displaystyle Y\) across \(\displaystyle M\), we get rectangle \(\displaystyle XYX'Y'\). Therefore, diagonals \(\displaystyle XX'\) and \(\displaystyle YY'\) has the same length, and thus also their halves must have the same length, and we are done.
+
+Now the statement of the problem became obvious: since points \(\displaystyle M\) and \(\displaystyle O\) are independent from the choice of \(\displaystyle P\), the center of the circle containing \(\displaystyle K\) will always be on the perpendicular bisector of \(\displaystyle OM\), and thus our proof is concluded.
+
+Remark:in the argument the idea of the moving points and rotating lines can be substituted with the following simple argument: angles \(\displaystyle \angle MKO\) and \(\displaystyle \angle XYP\) are equal, since their rays are perpendicular to each other, and it's easy to see (by applying the inscribed angle theorem) that the latter does not depend on the choice of \(\displaystyle X\) and \(\displaystyle Y\).
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 2}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A879&l=en}\\[1em]
+
+A. 879.An integer \(\displaystyle k>2\) is given. Xavier and Yvette play the following game: a number \(\displaystyle n>k\) is initially written on the blackboard. The two players take turns, Xavier starts. In each turn the integer \(\displaystyle m\) on the blackboard is replaced by integer \(\displaystyle m'\) satisfying \(\displaystyle k\le m'<m\) and \(\displaystyle \gcd (m,m')=1\). The player who cannot make a legal move loses the game. We say that integer \(\displaystyle n>k\) is good if Yvette has a winning strategy. Prove that if \(\displaystyle n\), \(\displaystyle n'>k\) are two integers satisfying the condition that every prime \(\displaystyle p\le k\) divides \(\displaystyle n\) if and only if it divides \(\displaystyle n'\), then \(\displaystyle n\) is good if and only if \(\displaystyle n'\) is good.
+
+(7 pont)
+
+Deadline expired on May 10, 2024.
+
+Unfortunately this problem can be found on the 2013 IMO shortlist (this was not intended). The official solution can be found here:
+
+Official Solution
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 3}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A880&l=en}\\[1em]
+
+A. 880.Find all triples \(\displaystyle (a,b,c)\) of real numbers for which there exists a function \(\displaystyle f\colon \mathbb{Z}^+ \to \mathbb{Z}^+\) satisfying \(\displaystyle af(n)+bf(n+1)+cf(n+2)<0\) for every \(\displaystyle n \in \mathbb{Z}^+\) (\(\displaystyle \mathbb{Z}^{+}\) denotes the set of positive integers).
+
+Proposed byAndras Imolay, Budapest
+
+(7 pont)
+
+Deadline expired on May 10, 2024.
+
+Let's call a triple of real numbers \(\displaystyle (a,b,c)\) nice, if they satisfy the condition of the problem, i.e. an appropriate function exists.
+
+Case 1:\(\displaystyle c<0\).
+
+We claim that \(\displaystyle (a,b,c)\) is nice for arbitrary \(\displaystyle a,b\in \mathbb{R}\). We have to show an appropriate function \(\displaystyle f\). Let's define its values consecutively, paying attention that after defining the value at \(\displaystyle n+2\) the \(\displaystyle n^{\text{th}}\) condition is satisfied. Let \(\displaystyle f(1)=f(2)=1\), and let's assume that \(\displaystyle f(1)\), \(\displaystyle f(2)\),..., \(\displaystyle f(n+1)\) is defined such that for every \(\displaystyle k\le n-1\) condition \(\displaystyle af(k)+bf(k+1)+cf(k+2)\) is satisfied. Now choose \(\displaystyle f(n+2)\) large enoguh so that \(\displaystyle |cf(n+2)|>af(n)+bf(n+1)\) is satisfied. This is possible since \(\displaystyle c\neq 0\), and since \(\displaystyle c<0\), the \(\displaystyle n^{\text{th}}\) condition is satisfied as desired.
+
+Case 2:\(\displaystyle c=0\).
+
+We claim that \(\displaystyle (a,b,c)\) is nice iff \(\displaystyle b<0\) or \(\displaystyle a+b<0\).  In the former case we can define values \(\displaystyle f(n)\) consecutively so that \(\displaystyle f(n+1)\) is large enough to satisfy \(\displaystyle |bf(n+1)|>af(n)\), yielding an appropriate function. In the latter case (\(\displaystyle a+b<0\)), the constant 1 function satisfies the condition.
+
+We have to prove that if \(\displaystyle b\ge 0\) and \(\displaystyle a+b\ge 0\), then no appropriate function exists. This is obvious for \(\displaystyle a\ge 0\), otherwise observe that
+
+\(\displaystyle 0>af(n)+bf(n+1)=-a(f(n+1)-f(n))+(a+b)f(n+1).\)
+
+Since \(\displaystyle (a+b)f(n+1)\ge 0\) and \(\displaystyle a<0\), \(\displaystyle f(n+1)-f(n)<0\), i.e. \(\displaystyle f\) is strictly monotonously decreasing, however, this is not possible for a function mapping the positive integers to the positive integers.
+
+Case 3:\(\displaystyle c>0\).
+
+Subcase 3.1:\(\displaystyle a\le 0\).
+
+We claim that \(\displaystyle (a,b,c)\) is nice iff \(\displaystyle a+b+c<0\). If this is true, the constant 1 function clearly satisfies the condition. Now let's assume that \(\displaystyle a+b+c\ge 0\), and take the sum of the first \(\displaystyle n\) conditions:
+
+\(\displaystyle af(1)+(a+b)f(2)+(a+b+c)\sum\limits_{i=3}^n f(i)+(b+c)f(n+1)+cf(n+2)<0.\)
+
+Since \(\displaystyle a+b+c\ge 0\) and \(\displaystyle a\le 0\) also implies \(\displaystyle b+c\ge 0\), the third and the fourth addend is not negative, and since \(\displaystyle c>0\), the last addend is also positive. Thus only the first two addends can be non-positive, however, their values are fixed. Thus \(\displaystyle cf(n+2)<-af(1)-(a+b)f(2)\), and so \(\displaystyle f(n+2)\) is bounded from above (again using \(\displaystyle c>0)\). This means there are only finitely many possibilities for the value of \(\displaystyle af(n)+bf(n+1)+cf(n+2)\), and thus it has a largest possible negative value, \(\displaystyle t\). However, this means that the sum on the left hand side of our previous inequality is also at most \(\displaystyle nt\), which contradicts the fact that it must be at least \(\displaystyle af(1)+bf(2)\).
+
+Subcase 3.2:\(\displaystyle a>0\).
+
+Clearly \(\displaystyle b\ge 0\) means there is no appropriate function, therefore we assume \(\displaystyle b<0\) from here. We consider two more subcases.
+
+Subcase 3.2.1:\(\displaystyle c\ge a\).
+
+We claim that \(\displaystyle (a,b,c)\) is nice iff \(\displaystyle a+b+c<0\). In this case the constant 1 function is appropriate. If \(\displaystyle a+b+c\ge 0\), let's rearrange the original inequality:
+
+\(\displaystyle 0>af(n)+bf(n+1)+cf(n+2)=a(f(n)-f(n+1))+c(f(n+2)f(n+1))+(a+b+c)f(n+1)\ge a(f(n)-f(n+1))+c(f(n+2)-f(n+1)).\)
+
+Using notation \(\displaystyle g(n)=f(n+1)-f(n)\) we get that \(\displaystyle ag(n) > cg(n+1)\). Since \(\displaystyle c\ge a>0\), this implies that \(\displaystyle g\) is strictly monotonously decreasing. Since its values are integers, this means that \(\displaystyle g\) is negative from somewhere, and this implies that \(\displaystyle f\) is strictly monotonously decreasing from somewhere, and this is impossible (since its values are positive integers).
+
+Subcase 3.2.2:\(\displaystyle a>c\).
+
+This is the hardest of all the cases, and the argument could seem a bit of magic at first sight, so we'll show the intuition behind this idea. The key insight is to try exponential functions \(\displaystyle f(n)=s^n\). There are several reasons to consider these kind of functions: as it's well known from the theory of linear recursions, exponential functions will reduce our conditions to a single condition, namely \(\displaystyle a+bs+cs^2<0\). On the other hand, if we observe the sum from subcase 3.1 and assume \(\displaystyle a+b+c>0\), then it's intuitively clear that if the third addend is trumped by the fourth one, the function has to increase quite quickly. Now fixing \(\displaystyle a\) and \(\displaystyle c\) will provide an \(\displaystyle s\) where \(\displaystyle b\) is the largest possible: \(\displaystyle s=\sqrt{a}/\sqrt{c}\) will yield the largest \(\displaystyle b\) for which \(\displaystyle a+bs+cs^2=0\), and then \(\displaystyle b=-2\sqrt{ac}\). We hope that these considerations will make the following section easier to follow:
+
+We will prove that \(\displaystyle (a,b,c)\) is nice iff \(\displaystyle b\le -2\sqrt{ac}\). Clearly if \(\displaystyle b'\le b\), then \(\displaystyle f\) verifying that \(\displaystyle (a,b,c)\) is nice will also verify the niceness \(\displaystyle (a,b,c)\), so in order to find \(\displaystyle f\) we will assume \(\displaystyle b=-2\sqrt{ac}\). Let \(\displaystyle s=\sqrt{a}/\sqrt{c}\). Since \(\displaystyle a\neq c\), \(\displaystyle a+b+c=a+c-2\sqrt{ac}=(\sqrt{a}-\sqrt{c})^2>0\). Let \(\displaystyle N\) be a positive integer satisfying \(\displaystyle \frac{a+c}{a+b+c}<N\) and let \(\displaystyle k\) be chosen such that \(\displaystyle s^k>N\) (\(\displaystyle a>c>0\) implies \(\displaystyle s>1\), therefore \(\displaystyle k\) exists). Now let \(\displaystyle f(n)=\lceil s^{n+k} \rceil - N\). It's obvious that its values are positive integers, so let's check that it satisfies our conditions. First observe that by the choice of \(\displaystyle b\) and \(\displaystyle s\)
+
+\(\displaystyle a+bs+cs^2=a-2a+a=0.\)
+
+\(\displaystyle af(n)+bf(n+1)+cf(n+2)=a(\lceil s^{n+k} \rceil - N)+b(\lceil s^{n+k+1} \rceil - N)+c(\lceil s^{n+k+2} \rceil - N) \leq\)
+
+\(\displaystyle \leq a(s^{n+k} +1- N)+b( s^{n+k+1} - N)+c( s^{n+k+2} +1 - N)=\)
+
+\(\displaystyle =s^{n+k}(a+bs+cs^2)+(a+c)-(a+b+c)N=(a+c)-(a+b+c)N<0,\)
+
+thus \(\displaystyle f\) satisfies the conditions.
+
+Finally, we will prove that no appropriate function exists if \(\displaystyle b>-2\sqrt{ac}\). Let \(\displaystyle \varepsilon>0\) be defined as \(\displaystyle b=-2\sqrt{ac}+\varepsilon\). Substitute these into the functional inequalities, and use what we have already established: \(\displaystyle a = \sqrt{ac}\cdot s = cs^2\).
+
+\(\displaystyle af(n)+bf(n+1)+cf(n+2)=ag(n)s^n+(\varepsilon-2\sqrt{ac})g(n+1)s^{n+1}+cg(n+2)s^{n+2}=\)
+
+\(\displaystyle as^n(g(n)-2g(n+1)+g(n+2))+\varepsilon s^{n+1}g(n+1)<0.\)
+
+Let \(\displaystyle h\) be defined as \(\displaystyle h(n)=g(n+1)-g(n)\). Let's divide by \(\displaystyle as^n\) and subtsitue \(\displaystyle h\) to get
+
+\(\displaystyle h(n+1)<h(n)-\frac{\varepsilon s}{a}g(n+1).\)
+
+It's clear that the values of \(\displaystyle g\) are positive, therefore we can see that \(\displaystyle h(n)\) is strictly monotonously decreasing. We would like to get something similar as in subcase 3.2.1, but we have a little bit more work to do.
+
+If there exists \(\displaystyle k\) for which \(\displaystyle h(k)<0\), then for all \(\displaystyle l\ge k\) we  have \(\displaystyle h(l)\le h(k) < 0\), therefore \(\displaystyle g(l+1)-g(k)=\sum_{i=k}^{l} h(i)\le (l-k+1)h(k)\). Choosing \(\displaystyle l\) to be large enough the right hand side can be arbitrarily small, thus \(\displaystyle g(l+1)<0\) which is impossible. Now assume that no such \(\displaystyle k\) exists. This means that \(\displaystyle g\) is increasing, therefore \(\displaystyle g(n+1)\ge g(1)\) for all \(\displaystyle n\). However, this implies
+
+\(\displaystyle 
+h(n+1)<h(n)-\frac{\varepsilon s}{a}g(1),
+\)
+
+where \(\displaystyle \frac{\varepsilon s}{a}g(1)\) is a positive constant, therefore each subsequent value of \(\displaystyle h\) decreases by a fix positive value, and thus it will be negative for a large enough value, which contradicts our assumption. This finishes our proof.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section*{Month: 202405}
+\addcontentsline{toc}{section}{Month: 202405}
+
+\subsection*{Problem 1}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A881&l=en}\\[1em]
+
+A. 881.We visit all squares exactly once on a \(\displaystyle n\times n\) chessboard (colored in the usual way) with a king. Find the smallest number of times we had to switch colors during our walk.
+
+(Proposed byDomotor Palvolgyi, Budapest)
+
+(7 pont)
+
+Deadline expired on June 10, 2024.
+
+We claim that if \(\displaystyle n\) is odd, the solution is \(\displaystyle 2n-2\), while if \(\displaystyle n\) is even, the solution is \(\displaystyle n-1\). Examples of these constructions are shown in the diagrams below with the green lines indicating the paths. Generally, what we do is traverse the rows in pairs from top to bottom, with each pair of rows being traversed diagonally as shown in the diagram. In this way, we only need to change color at the ends of the rows and when transitioning to the next pair. Thus, in the case of an even \(\displaystyle n\), we finish with a total of \(\displaystyle n-1\) color changes, while in the case of an odd \(\displaystyle n\), the bottom row is left out and is simply traversed straight, resulting in an additional \(\displaystyle n-1\) color changes.
+
+Let's consider the lower bound to see why fewer color changes are not possible. Let \(\displaystyle n\) be fixed, and color the grid such that the top left corner is dark. Divide the grid into regions based on how many steps it takes the king to reach the edge of the board. Thus, the \(\displaystyle k\)-th region consists of those squares from which the king can reach the edge of the board in exactly \(\displaystyle k\) steps, but not fewer (the squares on the edge of the board form the 0th region). The diagrams above show what the regions look like, with the regions bounded by red lines. Let's call a square even if it is in an even-indexed region, otherwise, it is odd.
+
+The main idea of the solution is as follows. There are far more even dark squares than odd ones, and generally, the king cannot move from an even dark square to another even dark square. Let's calculate this precisely, and we will obtain the exact estimate for which we have already shown a construction. As with the construction, the calculation here will also depend on the parity of \(\displaystyle n\).
+
+Case 1.\(\displaystyle n\) is odd.
+
+Let \(\displaystyle n=2k+1\). Notice that there are \(\displaystyle k+1\) regions, numbered from 0 to \(\displaystyle k\). Obviously, there is 1 dark square in the \(\displaystyle k\)-th region and 4 dark squares in the \(\displaystyle (k-1)\)-th region. It can be seen that as we move outward, there are always 4 more dark squares than in the previous level, i.e., at level \(\displaystyle (k-m)\) there are \(\displaystyle 4m\) dark squares for all \(\displaystyle 1 \leq m \leq k\). By induction, we can see that there are exactly \(\displaystyle (2k+1)\) more even dark squares than odd ones. This is clear for \(\displaystyle k=0\), so let's assume we have already proven it for \(\displaystyle (k-1)\). In a \(\displaystyle (2k+1) \times (2k+1)\) grid, if we disregard the outer 0th layer, we get a \(\displaystyle (2k-1) \times (2k-1)\) grid, in which we already know that there are \(\displaystyle (2k-1)\) more even dark squares than odd ones. However, if we add back the outer region, the regions that were even become odd and vice versa, so without the addition of the 0th region's dark squares, there are \(\displaystyle (2k-1)\) more odd dark squares. Adding the 0th region's \(\displaystyle 4k\) dark squares, we obtain a total of \(\displaystyle (2k+1)\) more even dark squares, as we wanted.
+
+Assume there is a traversal of the king where it visits each square exactly once. We say that two adjacent squares are friends if the king steps from one to the other during its path, and a square's friends are those squares it is friends with. Thus, on the king's path, except for the start and end points (which have one friend each), every square has exactly two friends: one from which it arrived, and one to which it stepped. Let's examine the friends of the even dark squares. Let \(\displaystyle a\) be the number of even dark squares (we could easily calculate this exactly, but it is not necessary), then there are \(\displaystyle a-2k-1\) odd dark squares. Notice that the king cannot step from an even dark square to another even dark square. The \(\displaystyle a\) dark squares have at least \(\displaystyle 2a-2\) friends in total, counting multiplicity, while the odd dark squares have at most \(\displaystyle 2(a-2k-1)\) friends. Thus, there are at least
+
+\(\displaystyle 2a-2-2(a-2k-1)=4k=2n-2\)
+
+pairs of friends where one is an even dark square, and the other is not an odd dark square. This means the other pair must be a white square, which precisely means there were \(\displaystyle 2n-2\) color changes during the king's path.
+
+Case 2.\(\displaystyle n\) is even.
+
+Let \(\displaystyle n=2k\). This case works very similarly, with two minor differences: there are adjacent even dark squares, and the king's walk is guaranteed to end on a different color than it started. But these do not complicate the calculations, so we will not go into as much detail here.
+
+In this case, the number of dark squares in the regions also increases by four as we move outward, so simple induction shows that there are \(\displaystyle 2k\) more even dark squares than odd ones. There are \(\displaystyle k\) regions, and each region contains exactly two pairs of dark squares that are adjacent to each other, except for the central \(\displaystyle (k-1)\)-th region, which has only one such pair. Again, let's take an arbitrary walk, using the terms introduced in the previous case, and let \(\displaystyle a\) be the number of even dark squares. Then there are \(\displaystyle a-2k\) odd dark squares. Since the king's walk cannot start and end on a dark square simultaneously, the \(\displaystyle a\) even dark squares have at least \(\displaystyle 2a-1\) friends in total, counting multiplicity.
+
+If \(\displaystyle k\) is even, there are \(\displaystyle \frac{k}{2}\) even-indexed regions, and the central \(\displaystyle (k-1)\)-th region is not one of them, so there are \(\displaystyle k\) pairs of even dark squares that are adjacent. If \(\displaystyle k\) is odd, there are \(\displaystyle \frac{k+1}{2}\) even-indexed regions, including the central \(\displaystyle (k-1)\)-th region, so in this case too there are \(\displaystyle k\) pairs of even dark squares that are adjacent. Thus, the even dark squares have at most \(\displaystyle 2k\) even dark friends in total, counting multiplicity.
+
+The odd dark squares have at most \(\displaystyle 2(a-2k)\) friends in total, counting multiplicity, so there are at least
+
+\(\displaystyle (2a-1)-(2k)-2(a-2k)=2k-1=n-1\)
+
+friends of even dark squares (counting multiplicity) that are neither even nor odd dark squares, i.e., they are white squares. This is exactly what we wanted to show.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 2}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A882&l=en}\\[1em]
+
+A. 882.Let \(\displaystyle H_1\), \(\displaystyle H_2\), \(\displaystyle \ldots\), \(\displaystyle H_m\) be non-empty subsets of the positive integers, and let \(\displaystyle S\) denote their union. Prove that \(\displaystyle \sum_{i=1}^m \sum_{a, b\in H_i} \gcd(a,b) \ge \frac{1}{m} \sum_{a, b\in S} \gcd(a, b)\).
+
+(The \(\displaystyle \sum_{(a,b)\in X}\) notation means that the summation is over ordered pairs \(\displaystyle (a,b)\) where \(\displaystyle a\in X\) and \(\displaystyle b\in X\).)
+
+(Proposed byDavid Matolcsi, Berkeley)
+
+(7 pont)
+
+Deadline expired on June 10, 2024.
+
+We will use the following well know identity about Euler's totient function \(\displaystyle \varphi\):
+
+\(\displaystyle \sum_{d|n} \varphi(d)=n.\)
+
+Using this
+
+\(\displaystyle \sum_{a, b\in S} \gcd(a, b) = \sum_{a,b\in S} \sum_{d|\gcd(a,b)} = \varphi(d)=\sum_{a,b\in S} \sum_{d|a,d|b} \varphi(d),\)
+
+since exactly those numbers will divide both \(\displaystyle a\) and \(\displaystyle b\), which divide their greatest common divisor. Now let's focus on how many times will \(\displaystyle \varphi(d)\) appear in the sum: we have to count how many ways are there to choose two elements of \(\displaystyle S\) that is divisible by \(\displaystyle d\), which is clearly \(\displaystyle S_d^2\), where \(\displaystyle S_d\) denote the number of elements of \(\displaystyle S\) that is divisible by \(\displaystyle d\). Therefore,
+
+\(\displaystyle \sum_{a, b\in S} \gcd(a, b)=\sum_{d=1}^{\infty} \varphi(d) S_d^2\)
+
+Let \(\displaystyle H_{i,d}\) denote the number of elements in \(\displaystyle H_i\) that is divisible by \(\displaystyle d\), and let's apply the inequality between the arithmetic and the quadratic mean for numbers \(\displaystyle H_{i,d}\) (where \(\displaystyle d\) is fixed and \(\displaystyle i\) is the variable):
+
+\(\displaystyle \frac{\sum_{i=1}^m H_{i,d}^2}{m} \ge \left(\frac{\sum_{i=1}^{m}H_{i,d}}{m}\right)^2\ge \frac{S_d^2}{m^2}.\)
+
+Multiplying the above by \(\displaystyle m\) we get inequality
+
+\(\displaystyle \sum_{i=1}^m H_{i,d}^2\ge \frac{S_d^2}{m}.\)
+
+Now multiplying the above by \(\displaystyle \varphi(d)\) and summing it for all positive integers \(\displaystyle d\) we get
+
+\(\displaystyle \sum_{i=1}^{m} \sum_{a,b\in H_i}\gcd(a,b)=\sum_{i=1}^m\sum_{d=1}^{\infty} \varphi(d)H_{i,d}^2 = \sum_{d=1}^{\infty}\sum_{i=1}^m\varphi(d)H_{i,d}^2\ge \sum_{d=1}^{\infty}\varphi(d)\frac{S_d^2}{m} = \frac{1}{m}\sum_{a,b\in S}\gcd(a,b),\)
+
+and this completes our proof.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\subsection*{Problem 3}
+\noindent\url{https://www.komal.hu/feladat?a=feladat&f=A883&l=en}\\[1em]
+
+A. 883.Let \(\displaystyle J \subsetneq I \subseteq \mathbb{R}\) be non-empty open intervals, and let \(\displaystyle f_1\), \(\displaystyle f_2\), \(\displaystyle \ldots\) be real polynomials satisfying the following conditions:
+
+Do these conditions imply that \(\displaystyle \sum_{i=1}^\infty f_i(x)=1\) also for all \(\displaystyle x \in I\)?
+
+(Proposed byAndras Imolay, Budapest)
+
+(7 pont)
+
+Deadline expired on June 10, 2024.
+
+Solution 1.We will prove that the statement is not true, i.e. there exist intervals and polynomials satisfying the conditions. Let the indexing start at \(\displaystyle n=0\) and let \(\displaystyle f_n=C_nx^{n+1}(1-x)^n\), where \(\displaystyle C_n\) denotes the \(\displaystyle n^{\text{th}}\) Catalan number, i.e. the number of ways to start and arrive at 0 on the number line by doing \(\displaystyle 2n\) steps of unit length without visiting a negative number. Let \(\displaystyle I=(0,1)\) and \(\displaystyle J=(1/2,1)\).
+
+We will prove the following famous statement:
+
+Claim:Let's consider an infinite random walk on the number line starting from 0 where the probability of moving to the left is \(\displaystyle p\) and the probability of moving to the right is \(\displaystyle 1-p\). For \(\displaystyle p\ge 1/2\) we will visit -1 with probability 1 and for \(\displaystyle p<1/2\) we will visit -1 with probability less than 1.
+
+Proof:Let \(\displaystyle a\) denote the probability of visiting -1; this means that \(\displaystyle 1-a\) is the probability of only visiting non-negative numbers. If we only visit non-negative numbers, we have to move to the right first, and then we get back to 0 with probability a, and then the process starts over, or we don't, and then we can only visit positive values during the walk, thus we get the following equality: \(\displaystyle 1-a=(1-p)(a(1-a)+(1-a))\). Solving the equation yields \(\displaystyle a=1\) and \(\displaystyle a=p/(1-p)\). The latter is greater than 1 for \(\displaystyle p>1/2\), thus it cannot be the solution, which proves the first half of the claim.
+
+To prove the second half, it's enough to show that for \(\displaystyle p>1/2\) the probability of visiting 1 is less than 1. If we consider a sequence that lands on -1, let's reflect it across 0 to pair it up with a sequence that lands on 1. If we made \(\displaystyle k\) moves to the right in the first sequence, the probabilities of the two sequences are \(\displaystyle p^{k+1}(1-p)^k\) and \(\displaystyle p^k(1-p)^{k+1}\). Now note that the ratio of these is \(\displaystyle p/(1-p)\) regardless of \(\displaystyle k\), therefore the probability of reaching 1 is \(\displaystyle (1-p)/p\) times the probability of reaching -1, and thus we are done.
+
+Let \(\displaystyle f(p)\) denote the probability of visiting \(\displaystyle -1\) (this was probability \(\displaystyle a\) in the previous part). Then
+
+\(\displaystyle 
+f(p)=\sum_{i=0}^\infty f_i(p),
+\)
+
+since \(\displaystyle f_i(p)\) is the probability of visiting \(\displaystyle -1\) after \(\displaystyle 2i+1\) moves for the first time. Thus the claim shows that this gives an example for the claim, if we prove that the sum converges for \(\displaystyle 0\le p\le 1\). Since we sum non-negative values, and after factoring out \(\displaystyle p\) we can see that all terms of the sum take their maximum for \(\displaystyle p=1/2\), it's enough to prove convergence for \(\displaystyle p=1/2\). Using the formula for the Catalan numbers we have to prove that
+
+\(\displaystyle 
+\sum\limits_{k=1}^{\infty} \frac{1}{k+1}\binom{2k}{k}\frac{1}{4^k}
+\)
+
+is convergent. Thus we have to estimate binomial coefficient \(\displaystyle \binom{2k}{k}\) from the above: a well-known estimation is \(\displaystyle 4^k/\sqrt{2k}\). Therefore the convergence is the consequence of the following well known fact: \(\displaystyle \sum_{k=1}^{\infty}\frac{1}{k\sqrt{k}}<\infty\).
+
+Remark 1:the convergence can also be proved this way: if we only add up finitely many terms of the sum, we get the probability of an event defined on a finite event space, since the number of steps performed is bounded from the above. Therefore, the finite partial sums cannot exceed 1. Since we sum non-negative terms, partial sums being bounded from the above is equivalent to the sum being convergent.
+
+Remark 2:there is a very elegant way of proving that for \(\displaystyle p\neq 1/2\) it is not possible that both 1 and -1 are reached witj probability 1. Otherwise the probability of returning to 0 would also be 1. Now the elegant idea is to investigate the expected value of the number of returns to 0. If we return with probability 1, the expected value is infinite (since it would  satisfy equation \(\displaystyle E=E+1\) for a finite value, and also because actually the probability of returning infinitely many times is also 1). On the other hand, the expected value can be expressed as \(\displaystyle \sum_{i=1}^{\infty} \binom{2i}{i}p^i(1-p)^i\), and here the summands can be estimated with \(\displaystyle 4^ip^i(1-p)^i\) from above. Now these form a geometric sequence with a quotient less than 1 for \(\displaystyle p\neq 1/2\), thus this sum is finite, and we are done.
+
+Solution 2:Let \(\displaystyle  f_i(x) = x^2 (1 - x^2)^{i - 1} \), and let \(\displaystyle  I = (-1, 1) \) and \(\displaystyle  J = (0, 1) \). It is clear that \(\displaystyle  f_i(x) \geq 0 \) for all \(\displaystyle  i \in \mathbb{N} \) and \(\displaystyle  x \in I \). We claim that
+
+\(\displaystyle 
+\sum_{i=1}^\infty f_i(x) = \begin{cases}
+0 & \text{if } x = 0, \\
+1 & \text{if } x \in I \setminus \{0\}.
+\end{cases}
+\)
+
+It is clear that this would imply the statement of the problem. If \(\displaystyle  x = 0 \), then \(\displaystyle  f_i(x) = 0 \) for all \(\displaystyle  i \in \mathbb{N} \). If \(\displaystyle  x \neq 0 \) and \(\displaystyle  |x| < 1 \), then \(\displaystyle  0 < 1 - x^2 < 1 \), and the terms \(\displaystyle  f_1(x), f_2(x), \ldots \) form a geometric series, thus
+
+\(\displaystyle 
+\sum_{i=1}^\infty f_i(x) = \frac{x^2}{1 - (1 - x^2)} = 1,
+\)
+
+as claimed.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\end{document}

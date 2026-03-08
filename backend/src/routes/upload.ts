@@ -72,7 +72,7 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
 
       if (fileType === 'TEX') {
         const content = fs.readFileSync(storedPath, 'utf-8')
-        parsed = parseTexFile(content)
+        parsed = await parseTexFile(content)  // ✅ 加了 await
       } else {
         parsed = await parsePdfFile(storedPath)
       }
@@ -96,7 +96,6 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
               answer: q.answer,
               quizSetId: quizBankId,
               sourceFileId: sourceFile.id
-              // ✅ 移除了 authorId，Quiz model 里没有这个字段
             }
           })
         )
