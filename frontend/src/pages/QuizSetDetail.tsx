@@ -33,7 +33,19 @@ export default function QuizSetDetail() {
   const navigate = useNavigate()
 
   const [quizSet, setQuizSet] = useState<QuizSet | null>(null)
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null)
+
+  // ✅ 改动1：同步读取，不用 useState，避免时序问题
+  // 替换原来的 currentUserId 读取逻辑
+  const currentUserId = (() => {
+    const token = localStorage.getItem('token')
+    if (!token) return null
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      return payload.id ?? payload.userId ?? null
+    } catch {
+      return null
+    }
+  })()
 
   // 面板互斥
   const [showUpload, setShowUpload] = useState(false)
@@ -51,9 +63,21 @@ export default function QuizSetDetail() {
   const [editAnswer, setEditAnswer] = useState('')
   const [editTagInput, setEditTagInput] = useState('')
 
+  const [revealedIds, setRevealedIds] = useState<Set<number>>(new Set())
+
+  //加状态
+  const [selectedTag, setSelectedTag] = useState<string | null>(null)
+
+  function toggleAnswer(id: number) {
+    setRevealedIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
   useEffect(() => {
-    const raw = localStorage.getItem('user')
-    if (raw) setCurrentUserId(JSON.parse(raw).id)
+    // ✅ 改动2：删掉 setCurrentUserId，只保留 fetchQuizSet
     fetchQuizSet()
   }, [id])
 
@@ -61,7 +85,8 @@ export default function QuizSetDetail() {
     try {
       const res = await api.get(`/quiz/${id}`)
       setQuizSet(res.data)
-    } catch {
+    } catch (err: any) {
+      console.error('fetchQuizSet 失败:', err?.response?.status, err?.response?.data)
       navigate('/')
     }
   }
@@ -70,6 +95,14 @@ export default function QuizSetDetail() {
 
   const isAuthor = quizSet.author.id === currentUserId
   const canEdit = isAuthor || quizSet.visibility === 'PUBLIC_EDIT'
+
+  const allTags = Array.from(
+    new Set(quizSet.quizzes.flatMap(q => q.tags.map(t => t.tag.name)))
+  )
+
+  const filteredQuizzes = selectedTag
+    ? quizSet.quizzes.filter(q => q.tags.some(t => t.tag.name === selectedTag))
+    : quizSet.quizzes
 
   // ── 权限修改 ──────────────────────────────────────────────────
   async function handleVisibilityChange(v: Visibility) {
@@ -146,7 +179,6 @@ export default function QuizSetDetail() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, color: '#888' }}>
           <span>作者：{quizSet.author.username}</span>
 
-          {/* 作者可修改权限，非作者只显示标签 */}
           {isAuthor ? (
             <select
               value={quizSet.visibility}
@@ -162,6 +194,38 @@ export default function QuizSetDetail() {
           )}
         </div>
       </div>
+
+
+      {allTags.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+          <span style={{ fontSize: 13, color: '#888', alignSelf: 'center' }}>标签筛选：</span>
+          <button
+            onClick={() => setSelectedTag(null)}
+            style={{
+              fontSize: 12, padding: '2px 10px', borderRadius: 10, cursor: 'pointer',
+              background: selectedTag === null ? '#1677ff' : '#f0f0f0',
+              color: selectedTag === null ? '#fff' : '#555',
+              border: 'none'
+            }}
+          >
+            全部
+          </button>
+          {allTags.map(tag => (
+            <button
+              key={tag}
+              onClick={() => setSelectedTag(prev => prev === tag ? null : tag)}
+              style={{
+                fontSize: 12, padding: '2px 10px', borderRadius: 10, cursor: 'pointer',
+                background: selectedTag === tag ? '#1677ff' : '#f0f0f0',
+                color: selectedTag === tag ? '#fff' : '#555',
+                border: 'none'
+              }}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* 面板区 */}
       {showUpload && canEdit && (
@@ -191,17 +255,47 @@ export default function QuizSetDetail() {
         </form>
       )}
 
+      {filteredQuizzes.length > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+          <button
+            onClick={() => {
+              const allRevealed = filteredQuizzes.every(q => revealedIds.has(q.id))
+              if (allRevealed) {
+                setRevealedIds(prev => {
+                  const next = new Set(prev)
+                  filteredQuizzes.forEach(q => next.delete(q.id))
+                  return next
+                })
+              } else {
+                setRevealedIds(prev => {
+                  const next = new Set(prev)
+                  filteredQuizzes.forEach(q => next.add(q.id))
+                  return next
+                })
+              }
+            }}
+            style={{
+              fontSize: 13, padding: '4px 14px', borderRadius: 6,
+              cursor: 'pointer', background: '#f5f5f5',
+              border: '1px solid #ddd', color: '#555'
+            }}
+          >
+            {filteredQuizzes.every(q => revealedIds.has(q.id)) ? '全部隐藏答案' : '全部显示答案'}
+          </button>
+        </div>
+      )}
+
+
       {/* 题目列表 */}
-      {quizSet.quizzes.length === 0 ? (
+      {filteredQuizzes.length === 0 ? (
         <div style={{ color: '#999', textAlign: 'center', marginTop: 40 }}>暂无题目</div>
       ) : (
-        quizSet.quizzes.map(q => (
+        filteredQuizzes.map(q => (
           <div key={q.id} style={{
             padding: '12px 14px', marginBottom: 10,
             border: '1px solid #eee', borderRadius: 8
           }}>
             {editingId === q.id ? (
-              // 编辑态
               <div>
                 <input value={editQuestion} onChange={e => setEditQuestion(e.target.value)}
                   style={{ width: '100%', marginBottom: 6, padding: '5px 8px', boxSizing: 'border-box' }} />
@@ -216,11 +310,26 @@ export default function QuizSetDetail() {
                 </div>
               </div>
             ) : (
-              // 展示态
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <div style={{ fontWeight: 500, marginBottom: 4 }}>{q.question}</div>
-                  <div style={{ color: '#555', fontSize: 14, marginBottom: 6 }}>{q.answer}</div>
+
+                  <button
+                    onClick={() => toggleAnswer(q.id)}
+                    style={{
+                      fontSize: 12, marginBottom: 6, padding: '2px 10px',
+                      borderRadius: 4, cursor: 'pointer', background: '#f5f5f5',
+                      border: '1px solid #ddd', color: '#555'
+                    }}
+                  >
+                    {revealedIds.has(q.id) ? '隐藏答案' : '显示答案'}
+                  </button>
+
+                  {revealedIds.has(q.id) && (
+                    <div style={{ color: '#555', fontSize: 14, marginBottom: 6 }}>
+                      {q.answer}
+                    </div>
+                  )}
                   {q.tags.length > 0 && (
                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                       {q.tags.map(t => (

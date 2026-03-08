@@ -32,7 +32,11 @@ router.post('/login', async (req: Request, res: Response) => {
     const valid = await bcrypt.compare(password, user.password)
     if (!valid) return res.status(401).json({ error: '密码错误' })
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' })
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '7d' }
+    )
     res.json({ token })
   } catch (error) {
     res.status(500).json({ error: '登录失败' })

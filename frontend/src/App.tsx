@@ -17,7 +17,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/dashboard" element={<Navigate to="/" replace />} />
-        <Route path="/quizset/:id" element={<PrivateRoute><QuizSetDetail /></PrivateRoute>} />  {/* ← 加这行 */}
+        <Route path="/quiz/:id" element={<PrivateRoute><QuizSetDetail /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
   )
