@@ -98,6 +98,34 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   res.json(quizSet)
 })
 
+// ── DELETE /quiz/batch — 批量删除题目 ─────────────────────────
+router.delete('/batch', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const userId = (req as any).user!.id
+  const { ids } = req.body
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: 'ids 不能为空' })
+  }
+
+  const quizzes = await prisma.quiz.findMany({
+    where: { id: { in: ids } },
+    include: { quizSet: true }
+  })
+
+  for (const quiz of quizzes) {
+    const qs = quiz.quizSet as any
+    const hasPermission = qs.authorId === userId || qs.visibility === 'PUBLIC_EDIT'
+    if (!hasPermission) {
+      return res.status(403).json({ error: '无权删除部分题目' })
+    }
+  }
+
+  // QuizTag 有 onDelete: Cascade，直接删题目即可
+  await prisma.quiz.deleteMany({ where: { id: { in: ids } } })
+
+  res.json({ deleted: ids.length })
+})
+
 // ── DELETE /quiz/:id — 删除题库（仅作者）─────────────────────
 router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   const quizSetId = parseInt(String(req.params.id))
@@ -205,27 +233,5 @@ router.delete('/item/:id', authMiddleware, async (req: AuthRequest, res: Respons
   await prisma.quiz.delete({ where: { id: quizId } })
   res.json({ message: '删除成功' })
 })
-
-router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const id = parseInt(req.params.id as string)
-
-  try {
-    const quizSet = await prisma.quizSet.findUnique({ where: { id } })
-
-    if (!quizSet) return res.status(404).json({ error: '题库不存在' })
-
-    if (quizSet.authorId !== req.user!.id) {
-      return res.status(403).json({ error: '无权限删除此题库' })
-    }
-
-    await prisma.quiz.deleteMany({ where: { quizSetId: id } })
-    await prisma.quizSet.delete({ where: { id } })
-
-    res.json({ message: '删除成功' })
-  } catch (err) {
-    res.status(500).json({ error: '服务器错误' })
-  }
-})
-
 
 export default router

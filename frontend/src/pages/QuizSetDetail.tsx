@@ -69,12 +69,37 @@ export default function QuizSetDetail() {
   //加状态
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
+  //批量管理标签
+  const [isSelectMode, setIsSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+
   function toggleAnswer(id: number) {
     setRevealedIds(prev => {
       const next = new Set(prev)
       next.has(id) ? next.delete(id) : next.add(id)
       return next
     })
+  }
+
+  function toggleSelect(id: number) {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.size === filteredQuizzes.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filteredQuizzes.map(q => q.id)))
+    }
+  }
+
+  function exitSelectMode() {
+    setIsSelectMode(false)
+    setSelectedIds(new Set())
   }
 
   useEffect(() => {
@@ -90,6 +115,13 @@ export default function QuizSetDetail() {
       console.error('fetchQuizSet 失败:', err?.response?.status, err?.response?.data)
       navigate('/')
     }
+  }
+
+  async function handleBatchDelete() {
+    if (!confirm(`确定删除选中的 ${selectedIds.size} 道题？此操作不可撤销。`)) return
+    await api.delete('/quiz/batch', { data: { ids: Array.from(selectedIds) } })
+    exitSelectMode()
+    fetchQuizSet()
   }
 
   if (!quizSet) return <div style={{ padding: 40 }}>加载中...</div>
@@ -171,6 +203,16 @@ export default function QuizSetDetail() {
           <button onClick={() => { setShowExport(v => !v); setShowAddForm(false); setShowUpload(false) }}>
             {showExport ? '关闭导出' : '📤 导出'}
           </button>
+          {canEdit && (
+          <button onClick={() => {
+            setIsSelectMode(true)
+            setShowAddForm(false)
+            setShowUpload(false)
+            setShowExport(false)
+          }}>
+            ☑️ 批量删除
+          </button>
+          )}
         </div>
       </div>
 
@@ -289,6 +331,28 @@ export default function QuizSetDetail() {
         </div>
       )}
 
+      {/*选题区域*/}
+
+      {isSelectMode && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '8px 12px', background: '#fffbe6',
+          border: '1px solid #ffe58f', borderRadius: 8, marginBottom: 12
+        }}>
+          <input
+            type="checkbox"
+            checked={selectedIds.size === filteredQuizzes.length && filteredQuizzes.length > 0}
+            onChange={toggleSelectAll}
+          />
+          <span style={{ fontSize: 13 }}>
+            全选（已选 {selectedIds.size} / {filteredQuizzes.length} 题）
+          </span>
+          <button onClick={exitSelectMode} style={{ marginLeft: 'auto', fontSize: 13 }}>
+            取消
+          </button>
+        </div>
+      )}
+
 
       {/* 题目列表 */}
       {filteredQuizzes.length === 0 ? (
@@ -297,10 +361,20 @@ export default function QuizSetDetail() {
         filteredQuizzes.map(q => (
           <div key={q.id} style={{
             padding: '12px 14px', marginBottom: 10,
-            border: '1px solid #eee', borderRadius: 8
+            border: '1px solid #eee', borderRadius: 8,
+            display: 'flex', alignItems: 'flex-start' 
+            
           }}>
+            {isSelectMode && (
+              <input
+                type="checkbox"
+                checked={selectedIds.has(q.id)}
+                onChange={() => toggleSelect(q.id)}
+                style={{ marginRight: 10, marginTop: 4, flexShrink: 0 }}
+              />
+            )}
             {editingId === q.id ? (
-              <div>
+              <div style={{ flex: 1 }}>
                 <input value={editQuestion} onChange={e => setEditQuestion(e.target.value)}
                   style={{ width: '100%', marginBottom: 6, padding: '5px 8px', boxSizing: 'border-box' }} />
                 {editQuestion && (
@@ -324,7 +398,7 @@ export default function QuizSetDetail() {
                 </div>
               </div>
             ) : (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <div style={{ fontWeight: 500, marginBottom: 4 }}><MathText text={q.question} /></div>
 
@@ -370,6 +444,26 @@ export default function QuizSetDetail() {
             )}
           </div>
         ))
+      )}
+      {isSelectMode && selectedIds.size > 0 && (
+        <div style={{
+          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+          background: '#fff', border: '1px solid #ddd', borderRadius: 12,
+          padding: '12px 24px', boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+          display: 'flex', alignItems: 'center', gap: 16, zIndex: 100
+        }}>
+          <span style={{ fontSize: 14 }}>已选 <b>{selectedIds.size}</b> 题</span>
+          <button
+            onClick={handleBatchDelete}
+            style={{
+              background: '#ff4d4f', color: '#fff',
+              border: 'none', borderRadius: 6,
+              padding: '6px 18px', cursor: 'pointer', fontSize: 14
+            }}
+          >
+            🗑️ 删除
+          </button>
+        </div>
       )}
     </div>
   )
