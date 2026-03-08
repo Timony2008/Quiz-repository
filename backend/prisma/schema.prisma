@@ -28,11 +28,12 @@ model Quiz {
   id           Int         @id @default(autoincrement())
   question     String
   answer       String
+  latexSource  String?                                                        // ✅ 新增
   quizSetId    Int
   quizSet      QuizSet     @relation(fields: [quizSetId], references: [id], onDelete: Cascade)
   tags         QuizTag[]
-  sourceFileId Int?                                                          // ✅ 新增
-  sourceFile   SourceFile? @relation(fields: [sourceFileId], references: [id]) // ✅ 新增
+  sourceFileId Int?
+  sourceFile   SourceFile? @relation(fields: [sourceFileId], references: [id])
 }
 
 model Tag {

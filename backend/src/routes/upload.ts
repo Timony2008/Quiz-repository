@@ -68,11 +68,12 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
   // 异步解析，不阻塞响应
   ;(async () => {
     try {
-      let parsed: { question: string; answer: string }[] = []
+      // ✅ 类型加上 latex?
+      let parsed: { question: string; answer: string; latex?: string }[] = []
 
       if (fileType === 'TEX') {
         const content = fs.readFileSync(storedPath, 'utf-8')
-        parsed = await parseTexFile(content)  // ✅ 加了 await
+        parsed = await parseTexFile(content)
       } else {
         parsed = await parsePdfFile(storedPath)
       }
@@ -94,6 +95,7 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
             data: {
               question: q.question,
               answer: q.answer,
+              latexSource: q.latex ?? null,   // ✅ 写入 latexSource
               quizSetId: quizBankId,
               sourceFileId: sourceFile.id
             }

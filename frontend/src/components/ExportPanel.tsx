@@ -38,6 +38,7 @@ interface Quiz {
   id: number
   question: string
   answer: string
+  latexSource?: string   // ✅  新增  
   tags: { tag: Tag }[]
 }
 
@@ -126,74 +127,98 @@ export default function ExportPanel({ quizzes, onClose }: Props) {
   function exportPdf() {
     const win = window.open('', '_blank')
     if (!win) return
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8" />
-        <title>题目导出</title>
-        <style>
-          body { font-family: sans-serif; padding: 32px; line-height: 1.8; }
-          .quiz { margin-bottom: 24px; border-bottom: 1px solid #eee; padding-bottom: 16px; }
-          .question { font-weight: bold; margin-bottom: 4px; }
-          .answer { color: #444; margin-bottom: 4px; }
-          .tags { font-size: 12px; color: #999; }
-        </style>
-      </head>
-      <body>
-        ${selectedQuizzes.map((q, i) => `
-          <div class="quiz">
-            <div class="question">Q${i + 1}. ${q.question}</div>
-            <div class="answer">A: ${q.answer}</div>
-            <div class="tags">标签：${q.tags.map(t => t.tag.name).join(', ') || '无'}</div>
-          </div>
-        `).join('')}
-      </body>
-      </html>
-    `
-    win.document.write(html)
+
+    const quizzesHtml = selectedQuizzes.map((q, i) => `
+      <div class="quiz">
+        <div class="question">Q${i + 1}. ${q.question}</div>
+        <div class="answer">A: ${q.answer}</div>
+        <div class="tags">标签：${q.tags.map(t => t.tag.name).join(', ') || '无'}</div>
+      </div>
+    `).join('')
+
+    const html = `<!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8" />
+    <title>题目导出</title>
+    <script>
+      window.MathJax = {
+        startup: {
+          ready() {
+            MathJax.startup.defaultReady()
+            MathJax.startup.promise.then(() => window.print())
+          }
+        }
+      }
+    <\/script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"><\/script>
+    <style>
+      body { font-family: sans-serif; padding: 32px; line-height: 1.8; }
+      .quiz { margin-bottom: 24px; border-bottom: 1px solid #eee; padding-bottom: 16px; }
+      .question { font-weight: bold; margin-bottom: 4px; }
+      .answer { color: #444; margin-bottom: 4px; }
+      .tags { font-size: 12px; color: #999; }
+    </style>
+  </head>
+  <body>
+    ${quizzesHtml}
+  </body>
+  </html>`
+
+    win.document.documentElement.innerHTML = html
     win.document.close()
-    win.print()
   }
+
+
 
   function exportTex() {
     const docHeader = `\\documentclass[12pt, a4paper]{ctexart}
-\\usepackage{amsmath, amssymb, amsthm}
-\\usepackage{geometry}
-\\geometry{margin=2.5cm}
+  \\usepackage{amsmath, amssymb, amsthm}
+  \\usepackage{geometry}
+  \\geometry{margin=2.5cm}
 
-% 题目环境
-\\newenvironment{problem}
-  {\\par\\vspace{0.5em}\\noindent\\textbf{题目：}\\itshape}
-  {\\par\\vspace{0.3em}}
+  % 题目环境
+  \\newenvironment{problem}
+    {\\par\\vspace{0.5em}\\noindent\\textbf{题目：}\\itshape}
+    {\\par\\vspace{0.3em}}
 
-% 解答环境
-\\newenvironment{solution}
-  {\\par\\noindent\\textbf{解答：}\\normalfont}
-  {\\par\\vspace{0.8em}\\hrule\\vspace{0.5em}}
+  % 解答环境
+  \\newenvironment{solution}
+    {\\par\\noindent\\textbf{解答：}\\normalfont}
+    {\\par\\vspace{0.8em}\\hrule\\vspace{0.5em}}
 
-\\begin{document}
-`
+  \\begin{document}
+  `
     const docFooter = `
-\\end{document}`
+  \\end{document}`
 
     const body = selectedQuizzes.map((q, i) => {
+      // ✅ 优先用 AI 生成并存储的 latexSource
+      if (q.latexSource) {
+        return `% ---- 第 ${i + 1} 题 ----\n${q.latexSource}`
+      }
+
+      // fallback：实时生成（原有逻辑，老数据兜底）
       const question = processField(q.question)
       const answer = processField(q.answer)
       const questionComment = question.isPlain ? '% [plain text]\n' : ''
       const answerComment = answer.isPlain ? '% [plain text]\n' : ''
 
       return `% ---- 第 ${i + 1} 题 ----
-${questionComment}\\begin{problem}
-${question.content}
-\\end{problem}
-${answerComment}\\begin{solution}
-${answer.content}
-\\end{solution}`
+  ${questionComment}\\begin{problem}
+  ${question.content}
+  \\end{problem}
+  ${answerComment}\\begin{solution}
+  ${answer.content}
+  \\end{solution}`
     }).join('\n')
 
     downloadFile(docHeader + body + docFooter, 'quizzes.tex', 'text/plain;charset=utf-8')
   }
+
+
+
+  
 
   function handleExport() {
     if (selectedIds.size === 0) return
