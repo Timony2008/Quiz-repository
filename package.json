@@ -1,5 +1,9 @@
 {
   "dependencies": {
+    "katex": "^0.16.37",
     "openai": "^6.27.0"
+  },
+  "devDependencies": {
+    "@types/katex": "^0.16.8"
   }
 }

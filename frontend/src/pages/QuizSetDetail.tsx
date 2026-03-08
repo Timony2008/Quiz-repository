@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import api, { updateVisibility } from '../api'
 import UploadPanel from '../components/UploadPanel'
 import ExportPanel from '../components/ExportPanel'
+import { MathText } from '../components/MathText'
 
 type Visibility = 'PRIVATE' | 'PUBLIC' | 'PUBLIC_EDIT'
 
@@ -302,8 +303,18 @@ export default function QuizSetDetail() {
               <div>
                 <input value={editQuestion} onChange={e => setEditQuestion(e.target.value)}
                   style={{ width: '100%', marginBottom: 6, padding: '5px 8px', boxSizing: 'border-box' }} />
+                {editQuestion && (
+                  <div style={{ fontSize: 13, color: '#555', padding: '4px 8px', background: '#fafafa', borderRadius: 4, marginBottom: 8 }}>
+                    预览：<MathText text={editQuestion} />
+                  </div>
+                )}
                 <input value={editAnswer} onChange={e => setEditAnswer(e.target.value)}
                   style={{ width: '100%', marginBottom: 6, padding: '5px 8px', boxSizing: 'border-box' }} />
+                {editAnswer && (
+                  <div style={{ fontSize: 13, color: '#555', padding: '4px 8px', background: '#fafafa', borderRadius: 4, marginBottom: 8 }}>
+                    预览：<MathText text={editAnswer} />
+                  </div>
+                )}
                 <input value={editTagInput} onChange={e => setEditTagInput(e.target.value)}
                   placeholder="标签（逗号分隔）"
                   style={{ width: '100%', marginBottom: 8, padding: '5px 8px', boxSizing: 'border-box' }} />
@@ -315,7 +326,7 @@ export default function QuizSetDetail() {
             ) : (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <div style={{ fontWeight: 500, marginBottom: 4 }}>{q.question}</div>
+                  <div style={{ fontWeight: 500, marginBottom: 4 }}><MathText text={q.question} /></div>
 
                   <button
                     onClick={() => toggleAnswer(q.id)}
@@ -330,7 +341,7 @@ export default function QuizSetDetail() {
 
                   {revealedIds.has(q.id) && (
                     <div style={{ color: '#555', fontSize: 14, marginBottom: 6 }}>
-                      {q.answer}
+                      <MathText text={q.answer} />
                     </div>
                   )}
                   {q.tags.length > 0 && (
