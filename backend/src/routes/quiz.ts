@@ -206,4 +206,26 @@ router.delete('/item/:id', authMiddleware, async (req: AuthRequest, res: Respons
   res.json({ message: '删除成功' })
 })
 
+router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const id = parseInt(req.params.id as string)
+
+  try {
+    const quizSet = await prisma.quizSet.findUnique({ where: { id } })
+
+    if (!quizSet) return res.status(404).json({ error: '题库不存在' })
+
+    if (quizSet.authorId !== req.user!.id) {
+      return res.status(403).json({ error: '无权限删除此题库' })
+    }
+
+    await prisma.quiz.deleteMany({ where: { quizSetId: id } })
+    await prisma.quizSet.delete({ where: { id } })
+
+    res.json({ message: '删除成功' })
+  } catch (err) {
+    res.status(500).json({ error: '服务器错误' })
+  }
+})
+
+
 export default router

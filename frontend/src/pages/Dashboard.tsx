@@ -19,6 +19,18 @@ const VISIBILITY_LABEL: Record<Visibility, string> = {
   PUBLIC_EDIT: '✏️ 公开可编辑'
 }
 
+// Dashboard.tsx 顶部加这个函数
+function getUserIdFromToken(): number | null {
+  const token = localStorage.getItem('token')
+  if (!token) return null
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.id ?? payload.sub ?? null
+  } catch {
+    return null
+  }
+}
+
 export default function Dashboard() {
   const navigate = useNavigate()
   const [quizSets, setQuizSets] = useState<QuizSet[]>([])
@@ -29,8 +41,7 @@ export default function Dashboard() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null)
 
   useEffect(() => {
-    const raw = localStorage.getItem('user')
-    if (raw) setCurrentUserId(JSON.parse(raw).id)
+    setCurrentUserId(getUserIdFromToken())
     fetchQuizSets()
   }, [])
 
