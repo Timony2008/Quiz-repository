@@ -69,7 +69,7 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
   ;(async () => {
     try {
       // ✅ 类型加上 latex?
-      let parsed: { question: string; answer: string; latex?: string }[] = []
+      let parsed: { question: string; answer: string }[] = []
 
       if (fileType === 'TEX') {
         const content = fs.readFileSync(storedPath, 'utf-8')
@@ -95,7 +95,6 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
             data: {
               question: q.question,
               answer: q.answer,
-              latexSource: q.latex ?? null,   // ✅ 写入 latexSource
               quizSetId: quizBankId,
               sourceFileId: sourceFile.id
             }

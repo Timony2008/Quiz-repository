@@ -28,7 +28,6 @@ model Quiz {
   id           Int         @id @default(autoincrement())
   question     String
   answer       String
-  latexSource  String?                                                        // ✅ 新增
   quizSetId    Int
   quizSet      QuizSet     @relation(fields: [quizSetId], references: [id], onDelete: Cascade)
   tags         QuizTag[]

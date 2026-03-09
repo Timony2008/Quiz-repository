@@ -10,7 +10,7 @@ const client = new OpenAI({
 export interface QAPair {
   question: string
   answer: string
-  latex?: string   // ✅ 新增
+  // latex 字段已废弃，question/answer 本身就是 LaTeX 混合文本
 }
 
 function chunkText(text: string, maxChars = 6000): string[] {
@@ -38,20 +38,16 @@ async function parseChunk(text: string): Promise<QAPair[]> {
         role: 'system',
         content: `你是一个题目解析助手。从用户提供的文本中提取所有题目和答案。
 以 JSON 数组格式返回，格式严格如下，不要有任何多余文字：
-[{"question": "题目内容（纯文本）", "answer": "答案内容（纯文本）", "latex": "对应的LaTeX片段"}]
+[{"question": "题目内容", "answer": "答案内容"}]
 
-latex 字段的格式要求如下，严格遵守：
-\\begin{problem}
-题目的LaTeX内容
-\\end{problem}
-\\begin{solution}
-答案的LaTeX内容
-\\end{solution}
-
-注意事项：
-- question 和 answer 字段保留纯文本，供展示用
-- latex 字段用于导出，数学公式用 $...$ 或 \\[...\\] 包裹
-- 如果原文本本身就是LaTeX，直接保留原始命令；如果是纯文本，正常转义特殊字符`,
+格式要求，严格遵守：
+- question 和 answer 字段使用 LaTeX 混合文本格式
+- 行内数学公式用 $...$ 包裹，例如：求 $\\frac{x}{2}=1$ 的解
+- 独立展示的公式用 $$...$$ 包裹
+- 非数学部分保持普通文字
+- 如果输入文本来自 PDF 提取（可能含乱码或丢失上下标），请根据上下文推断并重建正确的 LaTeX 公式
+- 不要返回 latex 字段，不要使用 \\begin{problem} 等包裹块
+- 如果找不到明确的题目答案对，返回空数组 []`,
       },
       {
         role: 'user',
@@ -61,31 +57,22 @@ latex 字段的格式要求如下，严格遵守：
     temperature: 0.1,
   })
 
-  const raw = response.choices[0].message.content ?? ''
-
-  const jsonMatch = raw.match(/\[[\s\S]*\]/)
-  if (!jsonMatch) {
-    console.warn('AI 返回格式异常，原始内容：', raw)
-    return []
-  }
+  const raw = response.choices[0].message.content
+  if (!raw) return []
 
   try {
-    const parsed = JSON.parse(jsonMatch[0]) as QAPair[]
-    return parsed
-  } catch (e) {
-    console.warn('JSON 解析失败：', e)
+    const cleaned = raw.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim()
+    return JSON.parse(cleaned) as QAPair[]
+  } catch {
+    console.error('AI 返回解析失败:', raw)
     return []
   }
 }
 
 export async function parseWithAI(text: string): Promise<QAPair[]> {
   const chunks = chunkText(text)
-
-  if (chunks.length > 1) {
-    console.log(`文本过长，分为 ${chunks.length} 块处理`)
-  }
-
   const results: QAPair[] = []
+
   for (const chunk of chunks) {
     const pairs = await parseChunk(chunk)
     results.push(...pairs)

@@ -228,8 +228,22 @@ export default function QuizSetDetail() {
       answer: editAnswer,
       tags
     })
+    
+    // 乐观更新：直接修改本地 state，不等网络
+    setQuizSet(prev => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        quizzes: prev.quizzes.map(q =>
+          q.id === quizId
+            ? { ...q, question: editQuestion, answer: editAnswer }
+            : q
+        )
+      }
+    })
+    
     setEditingId(null)
-    fetchQuizSet()
+    fetchQuizSet() // 后台同步，确保 tags 也刷新
   }
 
   return (
@@ -422,19 +436,37 @@ export default function QuizSetDetail() {
 
       {/* 添加题目表单 */}
       {showAddForm && canEdit && (
-        <form onSubmit={handleAdd} style={{
-          marginBottom: 20, padding: 14,
-          border: '1px solid #ddd', borderRadius: 8
-        }}>
-          <input placeholder="题目 *" value={question} onChange={e => setQuestion(e.target.value)}
-            style={{ width: '100%', marginBottom: 8, padding: '6px 10px', boxSizing: 'border-box' }} />
-          <input placeholder="答案 *" value={answer} onChange={e => setAnswer(e.target.value)}
-            style={{ width: '100%', marginBottom: 8, padding: '6px 10px', boxSizing: 'border-box' }} />
+        <form onSubmit={handleAdd} style={{ marginBottom: 20, padding: 14, border: '1px solid #ddd', borderRadius: 8 }}>
+          <textarea
+            placeholder="题目 *"
+            value={question}
+            onChange={e => setQuestion(e.target.value)}
+            rows={3}
+            style={{ width: '100%', marginBottom: 4, padding: '6px 10px', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'monospace' }}
+          />
+          {question && (
+            <div style={{ fontSize: 13, color: '#555', padding: '4px 8px', background: '#fafafa', borderRadius: 4, marginBottom: 8 }}>
+              预览：<MathText text={question} />
+            </div>
+          )}
+          <textarea
+            placeholder="答案 *"
+            value={answer}
+            onChange={e => setAnswer(e.target.value)}
+            rows={3}
+            style={{ width: '100%', marginBottom: 4, padding: '6px 10px', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'monospace' }}
+          />
+          {answer && (
+            <div style={{ fontSize: 13, color: '#555', padding: '4px 8px', background: '#fafafa', borderRadius: 4, marginBottom: 8 }}>
+              预览：<MathText text={answer} />
+            </div>
+          )}
           <input placeholder="标签（逗号分隔）" value={tagInput} onChange={e => setTagInput(e.target.value)}
             style={{ width: '100%', marginBottom: 10, padding: '6px 10px', boxSizing: 'border-box' }} />
           <button type="submit">保存</button>
         </form>
       )}
+
 
       {filteredQuizzes.length > 0 && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -513,15 +545,29 @@ export default function QuizSetDetail() {
             )}
             {editingId === q.id ? (
               <div style={{ flex: 1 }}>
-                <input value={editQuestion} onChange={e => setEditQuestion(e.target.value)}
-                  style={{ width: '100%', marginBottom: 6, padding: '5px 8px', boxSizing: 'border-box' }} />
+                <textarea
+                  value={editQuestion}
+                  onChange={e => setEditQuestion(e.target.value)}
+                  rows={3}
+                  style={{
+                    width: '100%', marginBottom: 6, padding: '5px 8px',
+                    boxSizing: 'border-box', resize: 'vertical', fontFamily: 'monospace'
+                  }}
+                />
                 {editQuestion && (
                   <div style={{ fontSize: 13, color: '#555', padding: '4px 8px', background: '#fafafa', borderRadius: 4, marginBottom: 8 }}>
                     预览：<MathText text={editQuestion} />
                   </div>
                 )}
-                <input value={editAnswer} onChange={e => setEditAnswer(e.target.value)}
-                  style={{ width: '100%', marginBottom: 6, padding: '5px 8px', boxSizing: 'border-box' }} />
+                <textarea
+                  value={editAnswer}
+                  onChange={e => setEditAnswer(e.target.value)}
+                  rows={3}
+                  style={{
+                    width: '100%', marginBottom: 6, padding: '5px 8px',
+                    boxSizing: 'border-box', resize: 'vertical', fontFamily: 'monospace'
+                  }}
+                />
                 {editAnswer && (
                   <div style={{ fontSize: 13, color: '#555', padding: '4px 8px', background: '#fafafa', borderRadius: 4, marginBottom: 8 }}>
                     预览：<MathText text={editAnswer} />
