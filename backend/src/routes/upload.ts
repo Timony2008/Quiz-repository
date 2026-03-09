@@ -77,6 +77,8 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
       } else {
         parsed = await parsePdfFile(storedPath)
       }
+console.log('>>> parsed.length =', parsed.length)
+console.log('>>> parsed[0] =', JSON.stringify(parsed[0]))
 
       if (parsed.length === 0) {
         await prisma.sourceFile.update({
@@ -101,6 +103,9 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
           })
         )
       )
+
+
+      
 
       await prisma.sourceFile.update({
         where: { id: sourceFile.id },

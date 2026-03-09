@@ -427,7 +427,10 @@ export default function QuizSetDetail() {
         <UploadPanel
           quizSetId={quizSet.id}
           onClose={() => setShowUpload(false)}
-          onSuccess={() => { setShowUpload(false); fetchQuizSet() }}
+          onSuccess={() => {
+            fetchQuizSet()
+            setShowUpload(false)   // ← 加这一行
+          }}
         />
       )}
       {showExport && (

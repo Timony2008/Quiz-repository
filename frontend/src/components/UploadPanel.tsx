@@ -60,6 +60,8 @@ export default function UploadPanel({ quizSetId, onClose, onSuccess }: Props) {
     const file = e.target.files?.[0]
     if (!file) return
 
+    console.log('>>> quizSetId =', quizSetId)  // ← 加这行
+
     setStatus('uploading')
     setMessage('上传中')
     setCount(null)
