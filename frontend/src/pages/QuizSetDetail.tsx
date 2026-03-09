@@ -35,8 +35,6 @@ export default function QuizSetDetail() {
 
   const [quizSet, setQuizSet] = useState<QuizSet | null>(null)
 
-  // ✅ 改动1：同步读取，不用 useState，避免时序问题
-  // 替换原来的 currentUserId 读取逻辑
   const currentUserId = (() => {
     const token = localStorage.getItem('token')
     if (!token) return null
@@ -65,13 +63,20 @@ export default function QuizSetDetail() {
   const [editTagInput, setEditTagInput] = useState('')
 
   const [revealedIds, setRevealedIds] = useState<Set<number>>(new Set())
-
-  //加状态
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
-  //批量管理标签
+  // 批量删除
   const [isSelectMode, setIsSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+
+  // ── 标签管理新增状态 ──────────────────────────────────────────
+  const [showNewTagInput, setShowNewTagInput] = useState(false)
+  const [newTagName, setNewTagName] = useState('')
+  // 打标签模式：isTagMode=true 时底部浮层变为"完成打标签"
+  const [isTagMode, setIsTagMode] = useState(false)
+  const [pendingTagId, setPendingTagId] = useState<number | null>(null)
+
+  // ─────────────────────────────────────────────────────────────
 
   function toggleAnswer(id: number) {
     setRevealedIds(prev => {
@@ -102,8 +107,13 @@ export default function QuizSetDetail() {
     setSelectedIds(new Set())
   }
 
+  function exitTagMode() {
+    setIsTagMode(false)
+    setPendingTagId(null)
+    setSelectedIds(new Set())
+  }
+
   useEffect(() => {
-    // ✅ 改动2：删掉 setCurrentUserId，只保留 fetchQuizSet
     fetchQuizSet()
   }, [id])
 
@@ -124,26 +134,70 @@ export default function QuizSetDetail() {
     fetchQuizSet()
   }
 
+  // ── 删除标签 ──────────────────────────────────────────────────
+  async function handleDeleteTag(tagId: number, tagName: string) {
+    if (!confirm(`删除标签「${tagName}」？\n只删标签，不删题目。`)) return
+    await api.delete(`/tag/${tagId}`)
+    if (selectedTag === tagName) setSelectedTag(null)
+    fetchQuizSet()
+  }
+
+  // ── 创建标签 ──────────────────────────────────────────────────
+  async function handleCreateTag() {
+    if (!newTagName.trim()) return
+    try {
+      const res = await api.post('/tag', { name: newTagName.trim() })
+      const createdTag: Tag = res.data
+      setNewTagName('')
+      setShowNewTagInput(false)
+      // 进入打标签选题模式
+      setIsTagMode(true)
+      setPendingTagId(createdTag.id)
+      setSelectedIds(new Set())
+      // 关闭其他面板
+      setShowAddForm(false)
+      setShowUpload(false)
+      setShowExport(false)
+      fetchQuizSet()
+    } catch (err: any) {
+      if (err?.response?.status === 409) {
+        alert('标签已存在')
+      }
+    }
+  }
+
+  // ── 完成打标签：批量关联 ──────────────────────────────────────
+  async function handleAttachTag() {
+    if (!pendingTagId || selectedIds.size === 0) {
+      exitTagMode()
+      return
+    }
+    await api.post(`/tag/${pendingTagId}/attach`, { quizIds: Array.from(selectedIds) })
+    exitTagMode()
+    fetchQuizSet()
+  }
+
   if (!quizSet) return <div style={{ padding: 40 }}>加载中...</div>
 
   const isAuthor = quizSet.author.id === currentUserId
   const canEdit = isAuthor || quizSet.visibility === 'PUBLIC_EDIT'
 
-  const allTags = Array.from(
-    new Set(quizSet.quizzes.flatMap(q => q.tags.map(t => t.tag.name)))
+  // 收集所有 tag 对象（去重）
+  const allTagObjects: Tag[] = Array.from(
+    new Map(
+      quizSet.quizzes.flatMap(q => q.tags.map(t => t.tag)).map(t => [t.id, t])
+    ).values()
   )
 
   const filteredQuizzes = selectedTag
     ? quizSet.quizzes.filter(q => q.tags.some(t => t.tag.name === selectedTag))
     : quizSet.quizzes
 
-  // ── 权限修改 ──────────────────────────────────────────────────
   async function handleVisibilityChange(v: Visibility) {
     await updateVisibility(quizSet!.id, v)
     setQuizSet(prev => prev ? { ...prev, visibility: v } : prev)
   }
 
-  // ── 添加题目 ──────────────────────────────────────────────────
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
     if (!question.trim() || !answer.trim()) return
@@ -154,14 +208,12 @@ export default function QuizSetDetail() {
     fetchQuizSet()
   }
 
-  // ── 删除题目 ──────────────────────────────────────────────────
   async function handleDelete(quizId: number) {
     if (!confirm('确定删除这道题？')) return
     await api.delete(`/quiz/item/${quizId}`)
     fetchQuizSet()
   }
 
-  // ── 编辑题目 ──────────────────────────────────────────────────
   function startEdit(q: Quiz) {
     setEditingId(q.id)
     setEditQuestion(q.question)
@@ -181,10 +233,7 @@ export default function QuizSetDetail() {
   }
 
   return (
-      <div style={{
-        maxWidth: 900, margin: '0 auto',
-        padding: '32px 40px 0'   // ← 顶部加 24px
-      }}>
+    <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 40px 0' }}>
 
       {/* 顶栏 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -204,14 +253,14 @@ export default function QuizSetDetail() {
             {showExport ? '关闭导出' : '📤 导出'}
           </button>
           {canEdit && (
-          <button onClick={() => {
-            setIsSelectMode(true)
-            setShowAddForm(false)
-            setShowUpload(false)
-            setShowExport(false)
-          }}>
-            ☑️ 批量删除
-          </button>
+            <button onClick={() => {
+              setIsSelectMode(true)
+              setShowAddForm(false)
+              setShowUpload(false)
+              setShowExport(false)
+            }}>
+              ☑️ 批量删除
+            </button>
           )}
         </div>
       </div>
@@ -224,7 +273,6 @@ export default function QuizSetDetail() {
         )}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, color: '#888' }}>
           <span>作者：{quizSet.author.username}</span>
-
           {isAuthor ? (
             <select
               value={quizSet.visibility}
@@ -241,35 +289,122 @@ export default function QuizSetDetail() {
         </div>
       </div>
 
-
-      {allTags.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-          <span style={{ fontSize: 13, color: '#888', alignSelf: 'center' }}>标签筛选：</span>
-          <button
-            onClick={() => setSelectedTag(null)}
-            style={{
-              fontSize: 12, padding: '2px 10px', borderRadius: 10, cursor: 'pointer',
-              background: selectedTag === null ? '#1677ff' : '#f0f0f0',
-              color: selectedTag === null ? '#fff' : '#555',
-              border: 'none'
-            }}
-          >
-            全部
-          </button>
-          {allTags.map(tag => (
+      {/* ── 标签筛选栏 ── */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16, alignItems: 'center' }}>
+        {allTagObjects.length > 0 && (
+          <>
+            <span style={{ fontSize: 13, color: '#888', alignSelf: 'center' }}>标签筛选：</span>
             <button
-              key={tag}
-              onClick={() => setSelectedTag(prev => prev === tag ? null : tag)}
+              onClick={() => setSelectedTag(null)}
               style={{
                 fontSize: 12, padding: '2px 10px', borderRadius: 10, cursor: 'pointer',
-                background: selectedTag === tag ? '#1677ff' : '#f0f0f0',
-                color: selectedTag === tag ? '#fff' : '#555',
+                background: selectedTag === null ? '#1677ff' : '#f0f0f0',
+                color: selectedTag === null ? '#fff' : '#555',
                 border: 'none'
               }}
             >
-              {tag}
+              全部
             </button>
-          ))}
+            {allTagObjects.map(tag => (
+              <span
+                key={tag.id}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}
+              >
+                <button
+                  onClick={() => setSelectedTag(prev => prev === tag.name ? null : tag.name)}
+                  style={{
+                    fontSize: 12, padding: '2px 10px', borderRadius: 10, cursor: 'pointer',
+                    background: selectedTag === tag.name ? '#1677ff' : '#f0f0f0',
+                    color: selectedTag === tag.name ? '#fff' : '#555',
+                    border: 'none'
+                  }}
+                >
+                  {tag.name}
+                </button>
+                {/* × 删除按钮，仅作者可见 */}
+                {isAuthor && (
+                  <button
+                    onClick={() => handleDeleteTag(tag.id, tag.name)}
+                    title="删除标签"
+                    style={{
+                      fontSize: 11, lineHeight: 1, padding: '1px 4px',
+                      borderRadius: '50%', cursor: 'pointer',
+                      background: 'none', border: 'none',
+                      color: '#bbb', marginLeft: -4
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#ff4d4f')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#bbb')}
+                  >
+                    ×
+                  </button>
+                )}
+              </span>
+            ))}
+          </>
+        )}
+
+        {/* ＋ 新建标签按钮，仅作者可见 */}
+        {isAuthor && (
+          showNewTagInput ? (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <input
+                autoFocus
+                value={newTagName}
+                onChange={e => setNewTagName(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleCreateTag(); if (e.key === 'Escape') { setShowNewTagInput(false); setNewTagName('') } }}
+                placeholder="标签名"
+                style={{
+                  fontSize: 12, padding: '2px 8px', borderRadius: 8,
+                  border: '1px solid #1677ff', outline: 'none', width: 90
+                }}
+              />
+              <button
+                onClick={handleCreateTag}
+                style={{
+                  fontSize: 12, padding: '2px 10px', borderRadius: 8,
+                  background: '#1677ff', color: '#fff', border: 'none', cursor: 'pointer'
+                }}
+              >
+                确认
+              </button>
+              <button
+                onClick={() => { setShowNewTagInput(false); setNewTagName('') }}
+                style={{
+                  fontSize: 12, padding: '2px 8px', borderRadius: 8,
+                  background: '#f0f0f0', color: '#555', border: 'none', cursor: 'pointer'
+                }}
+              >
+                取消
+              </button>
+            </span>
+          ) : (
+            <button
+              onClick={() => setShowNewTagInput(true)}
+              style={{
+                fontSize: 12, padding: '2px 10px', borderRadius: 10, cursor: 'pointer',
+                background: '#f6ffed', color: '#52c41a',
+                border: '1px dashed #b7eb8f'
+              }}
+            >
+              ＋ 新建标签
+            </button>
+          )
+        )}
+      </div>
+
+      {/* 打标签模式提示栏 */}
+      {isTagMode && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '8px 12px', background: '#e6f4ff',
+          border: '1px solid #91caff', borderRadius: 8, marginBottom: 12
+        }}>
+          <span style={{ fontSize: 13 }}>
+            🏷️ 选择要打标签的题目（已选 <b>{selectedIds.size}</b> 题）
+          </span>
+          <button onClick={exitTagMode} style={{ marginLeft: 'auto', fontSize: 13 }}>
+            取消
+          </button>
         </div>
       )}
 
@@ -302,7 +437,27 @@ export default function QuizSetDetail() {
       )}
 
       {filteredQuizzes.length > 0 && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          {/* 批量删除全选栏 */}
+          {isSelectMode && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 12,
+              padding: '8px 12px', background: '#fffbe6',
+              border: '1px solid #ffe58f', borderRadius: 8, flex: 1, marginRight: 8
+            }}>
+              <input
+                type="checkbox"
+                checked={selectedIds.size === filteredQuizzes.length && filteredQuizzes.length > 0}
+                onChange={toggleSelectAll}
+              />
+              <span style={{ fontSize: 13 }}>
+                全选（已选 {selectedIds.size} / {filteredQuizzes.length} 题）
+              </span>
+              <button onClick={exitSelectMode} style={{ marginLeft: 'auto', fontSize: 13 }}>
+                取消
+              </button>
+            </div>
+          )}
           <button
             onClick={() => {
               const allRevealed = filteredQuizzes.every(q => revealedIds.has(q.id))
@@ -323,36 +478,13 @@ export default function QuizSetDetail() {
             style={{
               fontSize: 13, padding: '4px 14px', borderRadius: 6,
               cursor: 'pointer', background: '#f5f5f5',
-              border: '1px solid #ddd', color: '#555'
+              border: '1px solid #ddd', color: '#555', marginLeft: 'auto'
             }}
           >
             {filteredQuizzes.every(q => revealedIds.has(q.id)) ? '全部隐藏答案' : '全部显示答案'}
           </button>
         </div>
       )}
-
-      {/*选题区域*/}
-
-      {isSelectMode && (
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 12,
-          padding: '8px 12px', background: '#fffbe6',
-          border: '1px solid #ffe58f', borderRadius: 8, marginBottom: 12
-        }}>
-          <input
-            type="checkbox"
-            checked={selectedIds.size === filteredQuizzes.length && filteredQuizzes.length > 0}
-            onChange={toggleSelectAll}
-          />
-          <span style={{ fontSize: 13 }}>
-            全选（已选 {selectedIds.size} / {filteredQuizzes.length} 题）
-          </span>
-          <button onClick={exitSelectMode} style={{ marginLeft: 'auto', fontSize: 13 }}>
-            取消
-          </button>
-        </div>
-      )}
-
 
       {/* 题目列表 */}
       {filteredQuizzes.length === 0 ? (
@@ -361,15 +493,21 @@ export default function QuizSetDetail() {
         filteredQuizzes.map(q => (
           <div key={q.id} style={{
             padding: '12px 14px', marginBottom: 10,
-            border: '1px solid #eee', borderRadius: 8,
-            display: 'flex', alignItems: 'flex-start' 
-            
-          }}>
-            {isSelectMode && (
+            border: isTagMode && selectedIds.has(q.id) ? '1px solid #1677ff' : '1px solid #eee',
+            borderRadius: 8,
+            display: 'flex', alignItems: 'flex-start',
+            background: isTagMode && selectedIds.has(q.id) ? '#e6f4ff' : undefined,
+            cursor: isTagMode ? 'pointer' : undefined,
+            transition: 'border 0.15s, background 0.15s'
+          }}
+            onClick={isTagMode ? () => toggleSelect(q.id) : undefined}
+          >
+            {(isSelectMode || isTagMode) && (
               <input
                 type="checkbox"
                 checked={selectedIds.has(q.id)}
                 onChange={() => toggleSelect(q.id)}
+                onClick={e => e.stopPropagation()}
                 style={{ marginRight: 10, marginTop: 4, flexShrink: 0 }}
               />
             )}
@@ -401,9 +539,8 @@ export default function QuizSetDetail() {
               <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <div style={{ fontWeight: 500, marginBottom: 4 }}><MathText text={q.question} /></div>
-
                   <button
-                    onClick={() => toggleAnswer(q.id)}
+                    onClick={e => { e.stopPropagation(); toggleAnswer(q.id) }}
                     style={{
                       fontSize: 12, marginBottom: 6, padding: '2px 10px',
                       borderRadius: 4, cursor: 'pointer', background: '#f5f5f5',
@@ -412,7 +549,6 @@ export default function QuizSetDetail() {
                   >
                     {revealedIds.has(q.id) ? '隐藏答案' : '显示答案'}
                   </button>
-
                   {revealedIds.has(q.id) && (
                     <div style={{ color: '#555', fontSize: 14, marginBottom: 6 }}>
                       <MathText text={q.answer} />
@@ -431,10 +567,10 @@ export default function QuizSetDetail() {
                     </div>
                   )}
                 </div>
-                {canEdit && (
+                {canEdit && !isTagMode && (
                   <div style={{ display: 'flex', gap: 8, flexShrink: 0, marginLeft: 12 }}>
-                    <button onClick={() => startEdit(q)} style={{ fontSize: 13 }}>编辑</button>
-                    <button onClick={() => handleDelete(q.id)}
+                    <button onClick={e => { e.stopPropagation(); startEdit(q) }} style={{ fontSize: 13 }}>编辑</button>
+                    <button onClick={e => { e.stopPropagation(); handleDelete(q.id) }}
                       style={{ fontSize: 13, color: '#ff4d4f', background: 'none', border: 'none', cursor: 'pointer' }}>
                       删除
                     </button>
@@ -445,6 +581,8 @@ export default function QuizSetDetail() {
           </div>
         ))
       )}
+
+      {/* 底部浮层：批量删除 */}
       {isSelectMode && selectedIds.size > 0 && (
         <div style={{
           position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
@@ -465,6 +603,41 @@ export default function QuizSetDetail() {
           </button>
         </div>
       )}
+
+      {/* 底部浮层：完成打标签 */}
+      {isTagMode && (
+        <div style={{
+          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+          background: '#fff', border: '1px solid #91caff', borderRadius: 12,
+          padding: '12px 24px', boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+          display: 'flex', alignItems: 'center', gap: 16, zIndex: 100
+        }}>
+          <span style={{ fontSize: 14 }}>
+            🏷️ 已选 <b>{selectedIds.size}</b> 题
+          </span>
+          <button
+            onClick={handleAttachTag}
+            style={{
+              background: '#1677ff', color: '#fff',
+              border: 'none', borderRadius: 6,
+              padding: '6px 18px', cursor: 'pointer', fontSize: 14
+            }}
+          >
+            ✓ 完成打标签
+          </button>
+          <button
+            onClick={exitTagMode}
+            style={{
+              background: '#f0f0f0', color: '#555',
+              border: 'none', borderRadius: 6,
+              padding: '6px 14px', cursor: 'pointer', fontSize: 14
+            }}
+          >
+            取消
+          </button>
+        </div>
+      )}
+
     </div>
   )
 }
