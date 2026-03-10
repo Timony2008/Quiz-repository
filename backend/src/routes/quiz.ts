@@ -36,6 +36,14 @@ async function canEdit(quizSetId: number, userId: number) {
   return false
 }
 
+// 统一处理 difficulty 输入 → string | null（Prisma SQLite Float? 的实际类型）
+function parseDifficulty(raw: any): string | null {
+  if (raw === undefined || raw === null || raw === '') return null
+  const n = parseFloat(String(raw))
+  if (isNaN(n)) return null
+  return String(n)
+}
+
 // ── GET /quiz — 题库列表 ───────────────────────────────────────
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   const userId = (req as any).user!.id
@@ -91,7 +99,8 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
     include: {
       author: { select: { id: true, username: true } },
       quizzes: {
-        include: { tags: { include: { tag: true } } }
+        include: { tags: { include: { tag: true } } },
+        orderBy: { order: 'asc' }
       }
     }
   })
@@ -120,9 +129,7 @@ router.delete('/batch', authMiddleware, async (req: AuthRequest, res: Response) 
     }
   }
 
-  // QuizTag 有 onDelete: Cascade，直接删题目即可
   await prisma.quiz.deleteMany({ where: { id: { in: ids } } })
-
   res.json({ deleted: ids.length })
 })
 
@@ -171,6 +178,8 @@ router.post('/:id/items', authMiddleware, async (req: AuthRequest, res: Response
   if (access === false) return res.status(403).json({ error: '无编辑权限' })
 
   const { question, answer, tags = [] } = req.body
+  const difficulty = parseDifficulty(req.body.difficulty)  // ← string | null
+
   if (!question || !answer) return res.status(400).json({ error: '题目和答案不能为空' })
 
   const tagIds = tags.length > 0 ? await resolveTagIds(tags) : []
@@ -180,6 +189,7 @@ router.post('/:id/items', authMiddleware, async (req: AuthRequest, res: Response
       question,
       answer,
       quizSetId,
+      difficulty,                                           // ← string | null，Prisma 满意
       tags: {
         create: tagIds.map((tagId: number) => ({ tagId }))
       }
@@ -201,6 +211,8 @@ router.put('/item/:id', authMiddleware, async (req: AuthRequest, res: Response) 
   if (access === false) return res.status(403).json({ error: '无编辑权限' })
 
   const { question, answer, tags = [] } = req.body
+  const difficulty = parseDifficulty(req.body.difficulty)  // ← string | null
+
   const tagIds = tags.length > 0 ? await resolveTagIds(tags) : []
 
   await prisma.quizTag.deleteMany({ where: { quizId } })
@@ -210,6 +222,7 @@ router.put('/item/:id', authMiddleware, async (req: AuthRequest, res: Response) 
     data: {
       question,
       answer,
+      difficulty,                                           // ← string | null，Prisma 满意
       tags: {
         create: tagIds.map((tagId: number) => ({ tagId }))
       }
@@ -232,6 +245,35 @@ router.delete('/item/:id', authMiddleware, async (req: AuthRequest, res: Respons
 
   await prisma.quiz.delete({ where: { id: quizId } })
   res.json({ message: '删除成功' })
+})
+
+// ── POST /quiz/reorder — 批量更新题目顺序 ────────────────────────
+router.post('/reorder', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const userId = (req as any).user!.id
+  const items: { id: number; order: number }[] = req.body
+
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'items 不能为空' })
+  }
+
+  const quizzes = await prisma.quiz.findMany({
+    where: { id: { in: items.map(i => i.id) } },
+    include: { quizSet: true }
+  })
+
+  for (const quiz of quizzes) {
+    const qs = quiz.quizSet as any
+    const hasPermission = qs.authorId === userId || qs.visibility === 'PUBLIC_EDIT'
+    if (!hasPermission) return res.status(403).json({ error: '无权排序' })
+  }
+
+  await prisma.$transaction(
+    items.map(({ id, order }) =>
+      prisma.quiz.update({ where: { id }, data: { order } })
+    )
+  )
+
+  res.json({ updated: items.length })
 })
 
 export default router

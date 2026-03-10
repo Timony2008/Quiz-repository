@@ -31,6 +31,9 @@ model Quiz {
   quizSetId    Int
   quizSet      QuizSet     @relation(fields: [quizSetId], references: [id], onDelete: Cascade)
   tags         QuizTag[]
+  difficulty   Float?                       // ← Int? 改为 Float?
+  order        Int         @default(0)
+  updatedAt    DateTime    @updatedAt      // ← 新增
   sourceFileId Int?
   sourceFile   SourceFile? @relation(fields: [sourceFileId], references: [id])
 }

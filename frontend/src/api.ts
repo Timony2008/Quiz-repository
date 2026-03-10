@@ -15,3 +15,7 @@ export default api
 export function updateVisibility(quizSetId: number, visibility: 'PRIVATE' | 'PUBLIC' | 'PUBLIC_EDIT') {
   return api.patch(`/quiz/${quizSetId}/visibility`, { visibility })
 }
+
+export function reorderQuizzes(items: { id: number; order: number }[]) {
+  return api.post('/quiz/reorder', items)
+}
