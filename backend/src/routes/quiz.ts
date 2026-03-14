@@ -37,11 +37,11 @@ async function canEdit(quizSetId: number, userId: number) {
 }
 
 // 统一处理 difficulty 输入 → string | null（Prisma SQLite Float? 的实际类型）
-function parseDifficulty(raw: any): string | null {
+function parseDifficulty(raw: any): number | null {
   if (raw === undefined || raw === null || raw === '') return null
   const n = parseFloat(String(raw))
   if (isNaN(n)) return null
-  return String(n)
+  return n
 }
 
 // ── GET /quiz — 题库列表 ───────────────────────────────────────
