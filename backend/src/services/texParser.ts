@@ -9,7 +9,6 @@ export async function parseTexFile(content: string): Promise<ParsedQuiz[]> {
   const results: ParsedQuiz[] = []
 
   // 第一步：匹配 \begin{question}...\end{question} 结构化格式
-  // 直接保留原始 LaTeX 内容，不做任何纯文本转换
   const blockRegex =
     /\\begin\{question\}([\s\S]*?)\\end\{question\}[\s\S]*?\\begin\{answer\}([\s\S]*?)\\end\{answer\}/g
 
@@ -30,7 +29,7 @@ export async function parseTexFile(content: string): Promise<ParsedQuiz[]> {
   // 第二步：结构不明确，交给 AI 解析
   console.log('未找到结构化格式，使用 AI 解析...')
   const pairs = await parseWithAI(content)
-  return pairs.map(p => ({
+  return pairs.map((p) => ({
     question: p.question,
     answer: p.answer,
   }))

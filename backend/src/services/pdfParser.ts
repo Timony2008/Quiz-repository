@@ -1,29 +1,34 @@
 import fs from 'fs'
+import { execSync } from 'child_process'
 import { ParsedQuiz } from './texParser'
 import { parseWithAI } from './aiParser'
 
+function extractTextWithPoppler(filePath: string): string {
+  try {
+    // -layout 保留排版结构，-enc UTF-8 强制 UTF-8 输出
+    const result = execSync(
+      `pdftotext -layout -enc UTF-8 "${filePath}" -`,
+      { encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 }
+    )
+    return result
+  } catch (err) {
+    throw new Error(`pdftotext 执行失败，请确认已安装 poppler：${err}`)
+  }
+}
+
 export async function parsePdfFile(filePath: string): Promise<ParsedQuiz[]> {
-  const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
-
-  const buffer = fs.readFileSync(filePath)
-  const uint8Array = new Uint8Array(buffer)
-
-  const doc = await pdfjsLib.getDocument({ data: uint8Array }).promise
-
-  let text = ''
-  for (let i = 1; i <= doc.numPages; i++) {
-    const page = await doc.getPage(i)
-    const content = await page.getTextContent()
-    text += content.items.map((item: any) => ('str' in item ? item.str : '')).join(' ') + '\n'
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`文件不存在：${filePath}`)
   }
 
-  console.log('PDF 文本提取成功，长度:', text.length)
+  const extractedText = extractTextWithPoppler(filePath)
 
-  // 直接交给 AI，让 AI 重建 LaTeX 混合文本
-  const pairs = await parseWithAI(text)
+  if (!extractedText || extractedText.trim().length === 0) {
+    throw new Error('PDF 文本提取失败，可能是扫描版图片 PDF')
+  }
 
-  return pairs.map(p => ({
-    question: p.question,
-    answer: p.answer,
-  }))
+  console.log('提取到文本长度:', extractedText.length)
+  console.log('文本预览:', extractedText.slice(0, 200))
+
+  return await parseWithAI(extractedText)
 }
