@@ -2,20 +2,22 @@ import { Router, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { authMiddleware, AuthRequest } from '../middleware/auth'
 
-type Visibility = 'PRIVATE' | 'PUBLIC' | 'PUBLIC_EDIT'
+type TagDimension = 'KNOWLEDGE' | 'METHOD' | 'SOURCE' | 'CONTEXT'
 
 const router = Router()
 const prisma = new PrismaClient()
 
+// ── resolveTagIds — 兼容 dimension ───────────────────────────
+// KNOWLEDGE / SOURCE 必须已存在；其余兜底用 CONTEXT 创建
 async function resolveTagIds(tagNames: string[]): Promise<number[]> {
   const tags = await Promise.all(
-    tagNames.map(name =>
-      prisma.tag.upsert({
-        where: { name },
-        create: { name },
-        update: {}
+    tagNames.map(async name => {
+      const existing = await prisma.tag.findUnique({ where: { name } })
+      if (existing) return existing
+      return prisma.tag.create({
+        data: { name, dimension: 'CONTEXT' }
       })
-    )
+    })
   )
   return tags.map(t => t.id)
 }
@@ -36,7 +38,7 @@ async function canEdit(quizSetId: number, userId: number) {
   return false
 }
 
-// 统一处理 difficulty 输入 → string | null（Prisma SQLite Float? 的实际类型）
+// 统一处理 difficulty 输入 → number | null
 function parseDifficulty(raw: any): number | null {
   if (raw === undefined || raw === null || raw === '') return null
   const n = parseFloat(String(raw))
@@ -44,15 +46,60 @@ function parseDifficulty(raw: any): number | null {
   return n
 }
 
-// ── GET /quiz — 题库列表 ───────────────────────────────────────
+// ── GET /quiz — 题库列表，支持多维度交叉查询 ─────────────────
+// ?knowledge=多项式&source=IMO&method=构造&context=2018
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   const userId = (req as any).user!.id
+  const { knowledge, method, source, context } = req.query
+
+  // 收集需要过滤的标签（按维度）
+  const dimensionFilters: { dimension: TagDimension; name: string }[] = []
+  if (knowledge) dimensionFilters.push({ dimension: 'KNOWLEDGE', name: String(knowledge) })
+  if (method)    dimensionFilters.push({ dimension: 'METHOD',    name: String(method) })
+  if (source)    dimensionFilters.push({ dimension: 'SOURCE',    name: String(source) })
+  if (context)   dimensionFilters.push({ dimension: 'CONTEXT',   name: String(context) })
+
+  let quizIdFilter: number[] | undefined
+
+  if (dimensionFilters.length > 0) {
+    // 找出每个维度对应的 tag
+    const tagResults = await Promise.all(
+      dimensionFilters.map(f =>
+        prisma.tag.findFirst({ where: { name: f.name, dimension: f.dimension } })
+      )
+    )
+
+    // 任意一个标签不存在，直接返回空
+    if (tagResults.some(t => t === null)) {
+      return res.json([])
+    }
+
+    // 对每个 tagId 找出关联的 quizId，取交集
+    const quizIdSets = await Promise.all(
+      tagResults.map(tag =>
+        prisma.quizTag
+          .findMany({ where: { tagId: tag!.id }, select: { quizId: true } })
+          .then(rows => new Set(rows.map(r => r.quizId)))
+      )
+    )
+
+    const intersection = quizIdSets.reduce((acc, cur) => {
+      return new Set([...acc].filter(id => cur.has(id)))
+    })
+
+    quizIdFilter = [...intersection]
+    if (quizIdFilter.length === 0) return res.json([])
+  }
+
   const quizSets = await prisma.quizSet.findMany({
     where: {
       OR: [
         { authorId: userId },
         { visibility: { in: ['PUBLIC', 'PUBLIC_EDIT'] } } as any
-      ]
+      ],
+      ...(quizIdFilter !== undefined && {
+        quizzes: { some: { id: { in: quizIdFilter } } }
+      })
     },
     include: {
       author: { select: { id: true, username: true } },
@@ -60,6 +107,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
     },
     orderBy: { id: 'desc' }
   })
+
   res.json(quizSets)
 })
 
@@ -178,7 +226,7 @@ router.post('/:id/items', authMiddleware, async (req: AuthRequest, res: Response
   if (access === false) return res.status(403).json({ error: '无编辑权限' })
 
   const { question, answer, tags = [] } = req.body
-  const difficulty = parseDifficulty(req.body.difficulty)  // ← string | null
+  const difficulty = parseDifficulty(req.body.difficulty)
 
   if (!question || !answer) return res.status(400).json({ error: '题目和答案不能为空' })
 
@@ -189,7 +237,7 @@ router.post('/:id/items', authMiddleware, async (req: AuthRequest, res: Response
       question,
       answer,
       quizSetId,
-      difficulty,                                           // ← string | null，Prisma 满意
+      difficulty,
       tags: {
         create: tagIds.map((tagId: number) => ({ tagId }))
       }
@@ -211,7 +259,7 @@ router.put('/item/:id', authMiddleware, async (req: AuthRequest, res: Response) 
   if (access === false) return res.status(403).json({ error: '无编辑权限' })
 
   const { question, answer, tags = [] } = req.body
-  const difficulty = parseDifficulty(req.body.difficulty)  // ← string | null
+  const difficulty = parseDifficulty(req.body.difficulty)
 
   const tagIds = tags.length > 0 ? await resolveTagIds(tags) : []
 
@@ -222,7 +270,7 @@ router.put('/item/:id', authMiddleware, async (req: AuthRequest, res: Response) 
     data: {
       question,
       answer,
-      difficulty,                                           // ← string | null，Prisma 满意
+      difficulty,
       tags: {
         create: tagIds.map((tagId: number) => ({ tagId }))
       }
@@ -247,7 +295,7 @@ router.delete('/item/:id', authMiddleware, async (req: AuthRequest, res: Respons
   res.json({ message: '删除成功' })
 })
 
-// ── POST /quiz/reorder — 批量更新题目顺序 ────────────────────────
+// ── POST /quiz/reorder — 批量更新题目顺序 ────────────────────
 router.post('/reorder', authMiddleware, async (req: AuthRequest, res: Response) => {
   const userId = (req as any).user!.id
   const items: { id: number; order: number }[] = req.body
@@ -267,13 +315,16 @@ router.post('/reorder', authMiddleware, async (req: AuthRequest, res: Response) 
     if (!hasPermission) return res.status(403).json({ error: '无权排序' })
   }
 
-  await prisma.$transaction(
-    items.map(({ id, order }) =>
-      prisma.quiz.update({ where: { id }, data: { order } })
+  await Promise.all(
+    items.map(item =>
+      prisma.quiz.update({
+        where: { id: item.id },
+        data: { order: item.order }
+      })
     )
   )
 
-  res.json({ updated: items.length })
+  res.json({ message: '排序已更新' })
 })
 
 export default router

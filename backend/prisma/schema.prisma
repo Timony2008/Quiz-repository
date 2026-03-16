@@ -15,12 +15,12 @@ model User {
 }
 
 model QuizSet {
-  id          Int        @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   title       String
   description String?
-  visibility  String     @default("PRIVATE")
+  visibility  String  @default("PRIVATE")
   authorId    Int
-  author      User       @relation(fields: [authorId], references: [id])
+  author      User    @relation(fields: [authorId], references: [id])
   quizzes     Quiz[]
 }
 
@@ -31,29 +31,35 @@ model Quiz {
   quizSetId    Int
   quizSet      QuizSet     @relation(fields: [quizSetId], references: [id], onDelete: Cascade)
   tags         QuizTag[]
-  difficulty   Float?                       // ← Int? 改为 Float?
+  difficulty   Float?
   order        Int         @default(0)
-  updatedAt    DateTime    @updatedAt      // ← 新增
+  updatedAt    DateTime    @updatedAt
   sourceFileId Int?
   sourceFile   SourceFile? @relation(fields: [sourceFileId], references: [id])
 }
 
 model Tag {
-  id      Int       @id @default(autoincrement())
-  name    String    @unique
-  quizzes QuizTag[]
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  // dimension 取值: "KNOWLEDGE" | "SOURCE" | "YEAR" | "METHOD" | "CONTEXT"
+  dimension String    @default("KNOWLEDGE")
+  parentId  Int?                                        // 仅 KNOWLEDGE 维度使用
+  parent    Tag?      @relation("TagHierarchy", fields: [parentId], references: [id])
+  children  Tag[]     @relation("TagHierarchy")
+  aliases   String    @default("[]")                   // JSON 字符串，如 '["数论","NT"]'
+  quizzes   QuizTag[]
+  createdAt DateTime  @default(now())
 }
 
 model QuizTag {
   quizId Int
   tagId  Int
   quiz   Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  tag    Tag  @relation(fields: [tagId], references: [id])
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([quizId, tagId])
 }
 
-// ✅ 全新模型
 model SourceFile {
   id         Int      @id @default(autoincrement())
   filename   String

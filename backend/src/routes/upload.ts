@@ -6,6 +6,7 @@ import { authMiddleware, AuthRequest } from '../middleware/auth'
 import { PrismaClient } from '@prisma/client'
 import { parseTexFile } from '../services/texParser'
 import { parsePdfFile } from '../services/pdfParser'
+import { QAPairWithTags } from '../services/aiParser'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -36,6 +37,62 @@ const upload = multer({
     }
   }
 })
+
+// ── 将 AI 推断的标签写入 QuizTag ──────────────────────────────
+// 对 KNOWLEDGE / METHOD / SOURCE 只 findFirst（不随意创建）
+// 对 CONTEXT 允许 upsert 创建
+async function applyAITags(quizId: number, tags: QAPairWithTags['tags']) {
+  const tagIds: number[] = []
+
+  // --- KNOWLEDGE（多个，只从已有标签中匹配）---
+  for (const name of tags.knowledge ?? []) {
+    const tag = await prisma.tag.findFirst({
+      where: { name, dimension: 'KNOWLEDGE' }
+    })
+    if (tag) tagIds.push(tag.id)
+    else console.warn(`[AI Tags] KNOWLEDGE 标签不存在，跳过: ${name}`)
+  }
+
+  // --- METHOD（多个，只从已有标签中匹配）---
+  for (const name of tags.method ?? []) {
+    const tag = await prisma.tag.findFirst({
+      where: { name, dimension: 'METHOD' }
+    })
+    if (tag) tagIds.push(tag.id)
+    else console.warn(`[AI Tags] METHOD 标签不存在，跳过: ${name}`)
+  }
+
+  // --- SOURCE（最多一个，只从已有标签中匹配）---
+  if (tags.source) {
+    const tag = await prisma.tag.findFirst({
+      where: { name: tags.source, dimension: 'SOURCE' }
+    })
+    if (tag) tagIds.push(tag.id)
+    else console.warn(`[AI Tags] SOURCE 标签不存在，跳过: ${tags.source}`)
+  }
+
+  // --- CONTEXT（自由标签，允许自动创建）---
+  for (const name of tags.context ?? []) {
+    const tag = await prisma.tag.upsert({
+      where: { name },
+      create: { name, dimension: 'CONTEXT' },
+      update: {}
+    })
+    tagIds.push(tag.id)
+  }
+
+  // 去重后批量写入 QuizTag
+  const uniqueIds = [...new Set(tagIds)]
+  if (uniqueIds.length > 0) {
+    for (const tagId of uniqueIds) {
+      await prisma.quizTag.upsert({
+        where: { quizId_tagId: { quizId, tagId } },
+        create: { quizId, tagId },
+        update: {}
+      })
+    }
+  }
+}
 
 // ── 上传接口 ──────────────────────────────────────────────────
 router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest, res: Response) => {
@@ -68,17 +125,17 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
   // 异步解析，不阻塞响应
   ;(async () => {
     try {
-      // ✅ 类型加上 latex?
-      let parsed: { question: string; answer: string }[] = []
+      let parsed: QAPairWithTags[] = []
 
       if (fileType === 'TEX') {
         const content = fs.readFileSync(storedPath, 'utf-8')
-        parsed = await parseTexFile(content)
+        parsed = await parseTexFile(content) as QAPairWithTags[]
       } else {
-        parsed = await parsePdfFile(storedPath)
+        parsed = await parsePdfFile(storedPath) as QAPairWithTags[]
       }
-console.log('>>> parsed.length =', parsed.length)
-console.log('>>> parsed[0] =', JSON.stringify(parsed[0]))
+
+      console.log('>>> parsed.length =', parsed.length)
+      console.log('>>> parsed[0] =', JSON.stringify(parsed[0]))
 
       if (parsed.length === 0) {
         await prisma.sourceFile.update({
@@ -91,26 +148,33 @@ console.log('>>> parsed[0] =', JSON.stringify(parsed[0]))
         return
       }
 
-      await prisma.$transaction(
-        parsed.map(q =>
-          prisma.quiz.create({
-            data: {
-              question: q.question,
-              answer: q.answer,
-              quizSetId: quizBankId,
-              sourceFileId: sourceFile.id
-            }
-          })
-        )
-      )
+      // 逐题创建 Quiz，再写入 AI 推断的标签
+      for (const q of parsed) {
+        const quiz = await prisma.quiz.create({
+          data: {
+            question: q.question,
+            answer: q.answer,
+            quizSetId: quizBankId,
+            sourceFileId: sourceFile.id
+          }
+        })
 
-
-      
+        // 如果 AI 返回了 tags 字段，写入标签
+        if (q.tags) {
+          try {
+            await applyAITags(quiz.id, q.tags)
+          } catch (tagErr) {
+            // 标签写入失败不影响题目本身
+            console.error(`[AI Tags] quizId=${quiz.id} 标签写入失败:`, tagErr)
+          }
+        }
+      }
 
       await prisma.sourceFile.update({
         where: { id: sourceFile.id },
         data: { status: 'DONE', quizCount: parsed.length }
       })
+
     } catch (err) {
       console.error('解析失败:', err)
       await prisma.sourceFile.update({
