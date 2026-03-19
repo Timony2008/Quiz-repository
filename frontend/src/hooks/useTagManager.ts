@@ -5,7 +5,8 @@ import type { Tag, QuizFilterParams } from '../types'
 export function useTagManager(
   onSuccess: () => void,
   filters: QuizFilterParams,
-  setFilters: (f: QuizFilterParams) => void
+  setFilters: (f: QuizFilterParams) => void,
+  quizSetId?: number          // ← 新增
 ) {
   const [showNewTagInput, setShowNewTagInput] = useState(false)
   const [newTagName, setNewTagName] = useState('')
@@ -24,6 +25,7 @@ export function useTagManager(
       const res = await api.post('/tag', {
         name: newTagName.trim(),
         dimension: newTagDimension,
+        quizSetId: quizSetId ?? null,   // ← 新增，null = 全局，有值 = 私有
       })
       const createdTag: Tag = res.data
       setNewTagName('')

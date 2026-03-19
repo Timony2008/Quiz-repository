@@ -22,7 +22,9 @@ model QuizSet {
   authorId    Int
   author      User    @relation(fields: [authorId], references: [id])
   quizzes     Quiz[]
+  privateTags Tag[]                      // ← 新增
 }
+
 
 model Quiz {
   id           Int         @id @default(autoincrement())
@@ -39,24 +41,25 @@ model Quiz {
 }
 
 model Tag {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  // dimension 取值: "KNOWLEDGE" | "SOURCE" | "YEAR" | "METHOD" | "CONTEXT"
-  dimension String    @default("KNOWLEDGE")
-  parentId  Int?                                        // 仅 KNOWLEDGE 维度使用
-  parent    Tag?      @relation("TagHierarchy", fields: [parentId], references: [id])
-  children  Tag[]     @relation("TagHierarchy")
-  aliases   String    @default("[]")                   // JSON 字符串，如 '["数论","NT"]'
-  quizzes   QuizTag[]
-  createdAt DateTime  @default(now())
+  id         Int       @id @default(autoincrement())
+  name       String
+  isGlobal   Boolean   @default(false)   // true = 管理员维护的全局标签
+  parentId   Int?                        // 仅全局标签使用层级
+  parent     Tag?      @relation("TagHierarchy", fields: [parentId], references: [id])
+  children   Tag[]     @relation("TagHierarchy")
+  quizSetId  Int?  @default(0)                        // 私有标签归属题库，全局标签为 null
+  quizSet    QuizSet?  @relation(fields: [quizSetId], references: [id], onDelete: Cascade)
+  quizzes    QuizTag[]
+  createdAt  DateTime  @default(now())
+  @@unique([name, quizSetId])            // 同一题库内标签名唯一；全局标签 quizSetId=null 也唯一
 }
 
 model QuizTag {
   quizId Int
   tagId  Int
+  order  Int  @default(0)               // ← 新增，控制 chip 显示顺序
   quiz   Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
   tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
   @@id([quizId, tagId])
 }
 

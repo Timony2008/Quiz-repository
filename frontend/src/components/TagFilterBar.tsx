@@ -25,6 +25,7 @@ interface TagItem {
 
 interface Props {
   allTagObjects: TagItem[]
+  globalTagObjects: TagItem[]    // ← 新增
   filters: QuizFilterParams
   isAuthor: boolean
   showNewTagInput: boolean
@@ -40,7 +41,7 @@ interface Props {
 }
 
 export default function TagFilterBar({
-  allTagObjects, filters, isAuthor,
+  allTagObjects, globalTagObjects, filters, isAuthor,
   showNewTagInput, newTagName, newTagDimension,
   onFilterChange, onDeleteTag,
   onShowNewTagInput, onHideNewTagInput,
@@ -70,6 +71,31 @@ export default function TagFilterBar({
 
   return (
     <div style={{ marginBottom: 16 }}>
+      {/* ── 全局标签行（只读，不显示删除按钮）── */}
+      {dimOrder.map(dim => {
+        const tags = globalTagObjects.filter(t => t.dimension === dim)
+        if (tags.length === 0) return null
+        const color = DIM_COLOR[dim]
+        const key = dim.toLowerCase() as keyof QuizFilterParams
+
+        return (
+          <div key={`global-${dim}`} style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 4, alignItems: 'center' }}>
+            <span style={{ fontSize: 12, color: '#aaa', minWidth: 40 }}>{DIM_LABEL[dim]}：</span>
+            {tags.map(tag => (
+              <button
+                key={tag.id}
+                onClick={() => toggleTag(dim, tag.name)}
+                style={{
+                  fontSize: 12, padding: '2px 10px', borderRadius: 10, cursor: 'pointer',
+                  background: isActive(dim, tag.name) ? color.active : color.bg,
+                  color: isActive(dim, tag.name) ? '#fff' : color.text,
+                  border: `1px solid ${isActive(dim, tag.name) ? color.active : 'transparent'}`,
+                }}
+              >{tag.name}</button>
+            ))}
+          </div>
+        )
+      })}
 
       {/* ── 各维度标签行 ── */}
       {dimOrder.map(dim => {

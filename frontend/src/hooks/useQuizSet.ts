@@ -5,7 +5,7 @@ import type { DragEndEvent } from '@dnd-kit/core'
 import api, { updateVisibility, reorderQuizzes } from '../api'
 import { toDiffNum } from '../components/DifficultyBadge'
 import type { Quiz } from '../type/quiz'
-import type { Tag, QuizFilterParams } from '../types'  // ← 从 types.ts 引入
+import type { Tag, QuizFilterParams } from '../types'
 
 export type Visibility = 'PRIVATE' | 'PUBLIC' | 'PUBLIC_EDIT'
 export type SortMode = 'custom' | 'difficulty_asc' | 'difficulty_desc' | 'time_desc' | 'time_asc'
@@ -37,11 +37,13 @@ export function useQuizSet(id: string | undefined) {
   const navigate = useNavigate()
   const [quizSet, setQuizSet] = useState<QuizSet | null>(null)
   const [sortMode, setSortMode] = useState<SortMode>('custom')
-  const [filters, setFilters] = useState<QuizFilterParams>({})   // ← 替换 selectedTag
+  const [filters, setFilters] = useState<QuizFilterParams>({})
   const [isReorderMode, setIsReorderMode] = useState(false)
   const [localQuizzes, setLocalQuizzes] = useState<Quiz[]>([])
+  const [globalTagObjects, setGlobalTagObjects] = useState<Tag[]>([])  // ← 新增
 
   useEffect(() => { fetchQuizSet() }, [id])
+  useEffect(() => { fetchGlobalTags() }, [])                           // ← 新增
 
   async function fetchQuizSet() {
     try {
@@ -51,6 +53,15 @@ export function useQuizSet(id: string | undefined) {
     } catch (err: any) {
       console.error('fetchQuizSet 失败:', err?.response?.status, err?.response?.data)
       navigate('/')
+    }
+  }
+
+  async function fetchGlobalTags() {                                   // ← 新增
+    try {
+      const res = await api.get('/tag/global')
+      setGlobalTagObjects(res.data)
+    } catch (err) {
+      console.error('fetchGlobalTags 失败:', err)
     }
   }
 
@@ -113,7 +124,7 @@ export function useQuizSet(id: string | undefined) {
   })
 
   // ── 收集所有标签（保留 dimension）────────────────────────────
-  const allTagObjects: Tag[] = Array.from(
+  const allTagObjects = Array.from(
     new Map(
       (quizSet?.quizzes ?? [])
         .flatMap(q => q.tags.map(t => t.tag))
@@ -124,10 +135,11 @@ export function useQuizSet(id: string | undefined) {
   return {
     quizSet, setQuizSet,
     sortMode, setSortMode,
-    filters, setFilters,          // ← 新
+    filters, setFilters,
     isReorderMode,
     filteredQuizzes,
     allTagObjects,
+    globalTagObjects,          // ← 新增
     handleDragEnd,
     handleSaveReorder,
     enterReorderMode,

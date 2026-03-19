@@ -37,7 +37,7 @@ export default function QuizSetDetail() {
   const quizSetHook = useQuizSet(id)
   const {
     quizSet, sortMode, setSortMode, filters, setFilters,
-    isReorderMode, filteredQuizzes, allTagObjects,
+    isReorderMode, filteredQuizzes, allTagObjects, globalTagObjects,  // ← 加这个
     handleDragEnd, handleSaveReorder, enterReorderMode, cancelReorderMode,
     handleVisibilityChange, fetchQuizSet,
   } = quizSetHook
@@ -59,7 +59,7 @@ export default function QuizSetDetail() {
     toggleSelect, toggleSelectAll, exitSelectMode, handleBatchDelete,
   } = selectHook
 
-  const tagHook = useTagManager(fetchQuizSet, filters, setFilters)
+  const tagHook = useTagManager(fetchQuizSet, filters, setFilters, quizSet?.id)
   const {
     showNewTagInput, setShowNewTagInput, newTagName, setNewTagName,
     newTagDimension, setNewTagDimension,   // ← 新增
@@ -108,6 +108,7 @@ export default function QuizSetDetail() {
 
       <TagFilterBar
         allTagObjects={allTagObjects}
+        globalTagObjects={globalTagObjects}
         filters={filters}                                    // ← 替换 selectedTag
         isAuthor={isAuthor}
         showNewTagInput={showNewTagInput}
