@@ -1,6 +1,7 @@
 import { Router, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { authMiddleware, AuthRequest } from '../middleware/auth'
+import { resolveTagIds } from '../services/tagService'
 
 type TagDimension = 'KNOWLEDGE' | 'METHOD' | 'SOURCE' | 'CONTEXT'
 
@@ -9,19 +10,6 @@ const prisma = new PrismaClient()
 
 // ── resolveTagIds — 兼容 dimension ───────────────────────────
 // KNOWLEDGE / SOURCE 必须已存在；其余兜底用 CONTEXT 创建
-async function resolveTagIds(tagNames: string[]): Promise<number[]> {
-  const tags = await Promise.all(
-    tagNames.map(async name => {
-      const existing = await prisma.tag.findUnique({ where: { name } })
-      if (existing) return existing
-      return prisma.tag.create({
-        data: { name, dimension: 'CONTEXT' }
-      })
-    })
-  )
-  return tags.map(t => t.id)
-}
-
 async function canRead(quizSetId: number, userId: number) {
   const qs = await prisma.quizSet.findUnique({ where: { id: quizSetId } })
   if (!qs) return null

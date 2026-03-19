@@ -1,191 +1,172 @@
 import { Router, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { authMiddleware, AuthRequest } from '../middleware/auth'
-
-type TagDimension = 'KNOWLEDGE' | 'METHOD' | 'SOURCE' | 'CONTEXT'
+import {
+  resolveTagIds, buildTagTree, safeParseAliases, TagDimension
+} from '../services/tagService'
 
 const router = Router()
 const prisma = new PrismaClient()
 
+const VALID_DIMENSIONS: TagDimension[] = ['KNOWLEDGE', 'METHOD', 'SOURCE', 'CONTEXT', 'YEAR']
 
-// ── GET /api/tag — 获取标签列表 ───────────────────────────────
-// ?dimension=KNOWLEDGE 返回树形结构
-// ?dimension=METHOD 等返回平铺列表
+// ── GET /api/tag — 平铺列表（可按 dimension 筛选）────────────
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   const { dimension } = req.query
-
-  // 校验 dimension 参数
-  const validDimensions = ['KNOWLEDGE', 'METHOD', 'SOURCE', 'CONTEXT']
-  if (dimension && !validDimensions.includes(String(dimension))) {
-    return res.status(400).json({ error: `无效的 dimension，可选值：${validDimensions.join(', ')}` })
+  if (dimension && !VALID_DIMENSIONS.includes(dimension as TagDimension)) {
+    res.status(400).json({ error: 'invalid dimension' }); return
   }
-
-  const where = dimension ? { dimension: String(dimension) as TagDimension } : {}
-
   const tags = await prisma.tag.findMany({
-    where,
-    orderBy: { id: 'asc' }
+    where: dimension ? { dimension: dimension as string } : undefined,
+    include: {
+      _count: { select: { quizzes: true } },
+      parent: { select: { id: true, name: true } },
+      children: { select: { id: true, name: true } },
+    },
+    orderBy: { name: 'asc' }
   })
-
-  // KNOWLEDGE 维度返回树形结构
-  if (dimension === 'KNOWLEDGE') {
-    const roots = tags.filter(t => t.parentId === null)
-    const children = tags.filter(t => t.parentId !== null)
-
-    const tree = roots.map(root => ({
-      ...root,
-      children: children.filter(c => c.parentId === root.id)
-    }))
-
-    return res.json(tree)
-  }
-
-  res.json(tags)
+  res.json(tags.map(t => ({
+    ...t,
+    aliases: safeParseAliases(t.aliases),
+    quizCount: t._count.quizzes,
+  })))
 })
 
-// ── POST /api/tag — 创建标签 ──────────────────────────────────
-// 必须传 dimension；KNOWLEDGE / SOURCE 不允许前端随意创建
+// ── GET /api/tag/tree — 完整树形（可按 dimension 筛选）───────
+router.get('/tree', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const { dimension } = req.query
+  if (dimension && !VALID_DIMENSIONS.includes(dimension as TagDimension)) {
+    res.status(400).json({ error: 'invalid dimension' }); return
+  }
+  const tree = await buildTagTree(dimension as string | undefined)
+  res.json(tree)
+})
+
+// ── GET /api/tag/:id — 单个标签详情 ─────────────────────────
+router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const id = parseInt(String(req.params.id))
+  const tag = await prisma.tag.findUnique({
+    where: { id },
+    include: {
+      parent: { select: { id: true, name: true } },
+      children: { select: { id: true, name: true } },
+      _count: { select: { quizzes: true } }
+    }
+  })
+  if (!tag) { res.status(404).json({ error: 'not found' }); return }
+  res.json({ ...tag, aliases: safeParseAliases(tag.aliases), quizCount: tag._count.quizzes })
+})
+
+// ── GET /api/tag/:id/quizzes — 某标签下所有题（含子标签）────
+router.get('/:id/quizzes', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const id = parseInt(String(req.params.id))
+
+  // 递归收集自身 + 所有子孙 tag id
+  async function collectIds(tagId: number): Promise<number[]> {
+    const children = await prisma.tag.findMany({
+      where: { parentId: tagId }, select: { id: true }
+    })
+    const childIds = await Promise.all(children.map(c => collectIds(c.id)))
+    return [tagId, ...childIds.flat()]
+  }
+
+  const tagIds = await collectIds(id)
+  const quizzes = await prisma.quiz.findMany({
+    where: { tags: { some: { tagId: { in: tagIds } } } },
+    include: {
+      tags: { include: { tag: true } },
+      quizSet: { select: { id: true, title: true } }
+    },
+    orderBy: { updatedAt: 'desc' }
+  })
+  res.json(quizzes)
+})
+
+// ── POST /api/tag — 创建标签 ─────────────────────────────────
 router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const { name, dimension = 'CONTEXT', parentId, aliases = [] } = req.body
+  if (!name?.trim()) { res.status(400).json({ error: 'name required' }); return }
+  if (!VALID_DIMENSIONS.includes(dimension)) {
+    res.status(400).json({ error: 'invalid dimension' }); return
+  }
+
+  // parentId 只允许 KNOWLEDGE 维度使用
+  const resolvedParentId = dimension === 'KNOWLEDGE' && parentId ? parentId : null
+
+  try {
+    const tag = await prisma.tag.create({
+      data: {
+        name: name.trim(),
+        dimension,
+        parentId: resolvedParentId,
+        aliases: JSON.stringify(aliases),
+      }
+    })
+    res.json({ ...tag, aliases })
+  } catch (e: any) {
+    if (e.code === 'P2002') { res.status(409).json({ error: 'tag already exists' }); return }
+    throw e
+  }
+})
+
+// ── PUT /api/tag/:id — 更新标签 ──────────────────────────────
+router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const id = parseInt(String(req.params.id))
   const { name, dimension, parentId, aliases } = req.body
 
-  if (!name || !name.trim()) {
-    return res.status(400).json({ error: '标签名不能为空' })
+  if (dimension && !VALID_DIMENSIONS.includes(dimension)) {
+    res.status(400).json({ error: 'invalid dimension' }); return
   }
 
-  const validDimensions = ['KNOWLEDGE', 'METHOD', 'SOURCE', 'CONTEXT']
-  if (!dimension || !validDimensions.includes(dimension)) {
-    return res.status(400).json({ error: `必须指定 dimension，可选值：${validDimensions.join(', ')}` })
+  const data: any = {}
+  if (name !== undefined)      data.name = name.trim()
+  if (dimension !== undefined) data.dimension = dimension
+  if (aliases !== undefined)   data.aliases = JSON.stringify(aliases)
+  if (parentId !== undefined)  data.parentId = parentId   // null 表示移到顶层
+
+  try {
+    const tag = await prisma.tag.update({ where: { id }, data })
+    res.json({ ...tag, aliases: safeParseAliases(tag.aliases) })
+  } catch (e: any) {
+    if (e.code === 'P2025') { res.status(404).json({ error: 'not found' }); return }
+    if (e.code === 'P2002') { res.status(409).json({ error: 'name conflict' }); return }
+    throw e
   }
-
-  // KNOWLEDGE / SOURCE 维度受保护，不允许前端随意创建
-  const protectedDimensions = ['KNOWLEDGE', 'SOURCE']
-  if (protectedDimensions.includes(dimension)) {
-    return res.status(403).json({ error: `${dimension} 维度的标签只能由管理员通过 seed 维护` })
-  }
-
-  // 检查重名
-  const existing = await prisma.tag.findUnique({ where: { name: name.trim() } })
-  if (existing) {
-    return res.status(409).json({ error: '标签名已存在', tag: existing })
-  }
-
-  const tag = await prisma.tag.create({
-    data: {
-      name: name.trim(),
-      dimension: dimension as TagDimension,
-      parentId: parentId ?? null,
-      aliases: aliases ?? null
-    }
-  })
-
-  res.status(201).json(tag)
 })
 
-// ── PATCH /api/tag/:id — 更新标签 ────────────────────────────
-// 支持重命名 / 修改 parentId / 更新 aliases
-router.patch('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const tagId = parseInt(String(req.params.id))
-  const { name, parentId, aliases } = req.body
-
-  const tag = await prisma.tag.findUnique({ where: { id: tagId } })
-  if (!tag) return res.status(404).json({ error: '标签不存在' })
-
-  // 重名检查（排除自身）
-  if (name && name.trim() !== tag.name) {
-    const conflict = await prisma.tag.findUnique({ where: { name: name.trim() } })
-    if (conflict) {
-      return res.status(409).json({ error: '标签名已存在', tag: conflict })
-    }
-  }
-
-  // parentId 不能指向自身
-  if (parentId !== undefined && parentId === tagId) {
-    return res.status(400).json({ error: 'parentId 不能指向自身' })
-  }
-
-  const updated = await prisma.tag.update({
-    where: { id: tagId },
-    data: {
-      ...(name !== undefined && { name: name.trim() }),
-      ...(parentId !== undefined && { parentId: parentId === null ? null : Number(parentId) }),
-      ...(aliases !== undefined && { aliases })
-    }
-  })
-
-  res.json(updated)
-})
-
-// ── POST /api/tag/merge — 合并标签 ───────────────────────────
-// 将标签 A 的所有 QuizTag 迁移到标签 B，然后删除 A
-router.post('/merge', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const { sourceId, targetId } = req.body
-
-  if (!sourceId || !targetId) {
-    return res.status(400).json({ error: '需要提供 sourceId 和 targetId' })
-  }
-  if (sourceId === targetId) {
-    return res.status(400).json({ error: 'sourceId 和 targetId 不能相同' })
-  }
-
-  const [source, target] = await Promise.all([
-    prisma.tag.findUnique({ where: { id: sourceId } }),
-    prisma.tag.findUnique({ where: { id: targetId } })
-  ])
-
-  if (!source) return res.status(404).json({ error: `标签 ${sourceId} 不存在` })
-  if (!target) return res.status(404).json({ error: `标签 ${targetId} 不存在` })
-
-  // 找出 source 下所有 QuizTag
-  const sourceQuizTags = await prisma.quizTag.findMany({ where: { tagId: sourceId } })
-
-  // 找出 target 下已有的 quizId，避免重复插入
-  const targetQuizIds = new Set(
-    (await prisma.quizTag.findMany({ where: { tagId: targetId } })).map(qt => qt.quizId)
-  )
-
-  // 需要迁移的（target 尚未有的）
-  const toMigrate = sourceQuizTags.filter(qt => !targetQuizIds.has(qt.quizId))
-
-  await prisma.$transaction([
-    // 插入迁移记录
-    prisma.quizTag.createMany({
-      data: toMigrate.map(qt => ({ quizId: qt.quizId, tagId: targetId }))
-    }),
-    // 删除 source 的所有 QuizTag
-    prisma.quizTag.deleteMany({ where: { tagId: sourceId } }),
-    // 删除 source 标签本身
-    prisma.tag.delete({ where: { id: sourceId } })
-  ])
-
-  res.json({
-    message: `标签「${source.name}」已合并到「${target.name}」`,
-    migratedCount: toMigrate.length
-  })
-})
-
-// ── DELETE /api/tag/:id — 删除标签 ───────────────────────────
-// 删除前检查是否有题目关联，有则返回警告
+// ── DELETE /api/tag/:id — 删除标签（不删题目）───────────────
 router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const id = parseInt(String(req.params.id))
+  await prisma.tag.updateMany({ where: { parentId: id }, data: { parentId: null } })
+  await prisma.tag.delete({ where: { id } })
+  res.json({ ok: true })
+})
+
+// ── POST /api/tag/:id/attach — 批量打标签 ───────────────────
+router.post('/:id/attach', authMiddleware, async (req: AuthRequest, res: Response) => {
   const tagId = parseInt(String(req.params.id))
-  const { force } = req.query  // ?force=true 强制删除
-
-  const tag = await prisma.tag.findUnique({ where: { id: tagId } })
-  if (!tag) return res.status(404).json({ error: '标签不存在' })
-
-  const quizCount = await prisma.quizTag.count({ where: { tagId } })
-
-  if (quizCount > 0 && force !== 'true') {
-    return res.status(409).json({
-      error: `该标签关联了 ${quizCount} 道题目，删除将移除所有关联`,
-      quizCount,
-      hint: '如确认删除，请携带 ?force=true 重新请求'
-    })
+  const { quizIds } = req.body
+  if (!Array.isArray(quizIds) || quizIds.length === 0) {
+    res.status(400).json({ error: 'quizIds required' }); return
   }
+  await Promise.all(
+    quizIds.map((quizId: number) =>
+      prisma.quizTag.upsert({
+        where:  { quizId_tagId: { quizId, tagId } },
+        update: {},
+        create: { quizId, tagId },
+      })
+    )
+  )
+  res.json({ ok: true, attached: quizIds.length })
+})
 
-  await prisma.quizTag.deleteMany({ where: { tagId } })
-  await prisma.tag.delete({ where: { id: tagId } })
-
-  res.json({ message: '标签已删除', quizCount })
+// ── DELETE /api/tag/:tagId/detach/:quizId — 移除单题标签 ────
+router.delete('/:tagId/detach/:quizId', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const tagId  = parseInt(String(req.params.tagId))
+  const quizId = parseInt(String(req.params.quizId))
+  await prisma.quizTag.deleteMany({ where: { tagId, quizId } })
+  res.json({ ok: true })
 })
 
 export default router

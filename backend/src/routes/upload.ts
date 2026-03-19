@@ -39,12 +39,10 @@ const upload = multer({
 })
 
 // ── 将 AI 推断的标签写入 QuizTag ──────────────────────────────
-// 对 KNOWLEDGE / METHOD / SOURCE 只 findFirst（不随意创建）
-// 对 CONTEXT 允许 upsert 创建
 async function applyAITags(quizId: number, tags: QAPairWithTags['tags']) {
   const tagIds: number[] = []
 
-  // --- KNOWLEDGE（多个，只从已有标签中匹配）---
+  // --- KNOWLEDGE（只从已有标签中匹配）---
   for (const name of tags.knowledge ?? []) {
     const tag = await prisma.tag.findFirst({
       where: { name, dimension: 'KNOWLEDGE' }
@@ -53,7 +51,7 @@ async function applyAITags(quizId: number, tags: QAPairWithTags['tags']) {
     else console.warn(`[AI Tags] KNOWLEDGE 标签不存在，跳过: ${name}`)
   }
 
-  // --- METHOD（多个，只从已有标签中匹配）---
+  // --- METHOD（只从已有标签中匹配）---
   for (const name of tags.method ?? []) {
     const tag = await prisma.tag.findFirst({
       where: { name, dimension: 'METHOD' }
@@ -83,18 +81,25 @@ async function applyAITags(quizId: number, tags: QAPairWithTags['tags']) {
 
   // 去重后批量写入 QuizTag
   const uniqueIds = [...new Set(tagIds)]
-  if (uniqueIds.length > 0) {
-    for (const tagId of uniqueIds) {
-      await prisma.quizTag.upsert({
-        where: { quizId_tagId: { quizId, tagId } },
-        create: { quizId, tagId },
-        update: {}
-      })
-    }
+  for (const tagId of uniqueIds) {
+    await prisma.quizTag.upsert({
+      where: { quizId_tagId: { quizId, tagId } },
+      create: { quizId, tagId },
+      update: {}
+    })
   }
 }
 
-// ── 上传接口 ──────────────────────────────────────────────────
+// ── 权限检查 ──────────────────────────────────────────────────
+async function canEdit(quizSetId: number, userId: number) {
+  const qs = await prisma.quizSet.findUnique({ where: { id: quizSetId } })
+  if (!qs) return false
+  if (qs.authorId === userId) return true
+  if ((qs as any).visibility === 'PUBLIC_EDIT') return true
+  return false
+}
+
+// ── POST /api/upload — 上传并异步解析写库 ───────────────────
 router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest, res: Response) => {
   if (!req.file) {
     res.status(400).json({ error: '请上传文件' })
@@ -148,7 +153,6 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
         return
       }
 
-      // 逐题创建 Quiz，再写入 AI 推断的标签
       for (const q of parsed) {
         const quiz = await prisma.quiz.create({
           data: {
@@ -159,12 +163,10 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
           }
         })
 
-        // 如果 AI 返回了 tags 字段，写入标签
         if (q.tags) {
           try {
             await applyAITags(quiz.id, q.tags)
           } catch (tagErr) {
-            // 标签写入失败不影响题目本身
             console.error(`[AI Tags] quizId=${quiz.id} 标签写入失败:`, tagErr)
           }
         }
@@ -188,7 +190,7 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
   })()
 })
 
-// ── 查询解析状态 ──────────────────────────────────────────────
+// ── GET /api/upload/status/:id — 查询解析状态 ───────────────
 router.get('/status/:id', async (req: AuthRequest, res: Response) => {
   const id = parseInt(req.params.id as string)
   const sourceFile = await prisma.sourceFile.findUnique({ where: { id } })
