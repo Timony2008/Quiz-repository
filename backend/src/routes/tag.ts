@@ -58,14 +58,38 @@ router.get('/search', authMiddleware, async (req: AuthRequest, res: Response) =>
       ],
     },
     include: {
-      _count:  { select: { quizzes: true } },
-      parent:  { select: { id: true, name: true } },
+      _count:    { select: { quizzes: true } },
+      parent:    { select: { id: true, name: true } },
+      children:  { select: { id: true, name: true } },  // ← 加上 children
     },
     orderBy: { name: 'asc' },
     take: 20,
   })
 
-  res.json(tags.map(t => ({
+  // ── 命中父标签时，把它的子标签也拉进结果 ──────────────────
+  const extraIds = new Set<number>()
+  for (const t of tags) {
+    for (const child of t.children) {
+      if (!tags.find(x => x.id === child.id)) {
+        extraIds.add(child.id)
+      }
+    }
+  }
+
+  let extras: typeof tags = []
+  if (extraIds.size > 0) {
+    extras = await prisma.tag.findMany({
+      where:   { id: { in: [...extraIds] } },
+      include: {
+        _count:   { select: { quizzes: true } },
+        parent:   { select: { id: true, name: true } },
+        children: { select: { id: true, name: true } },
+      },
+    })
+  }
+
+  const all = [...tags, ...extras]
+  res.json(all.map(t => ({
     ...t,
     quizCount: t._count.quizzes,
     _count: undefined,
@@ -140,6 +164,27 @@ router.patch('/:id', authMiddleware, async (req: AuthRequest, res: Response) => 
     },
   })
   res.json(tag)
+})
+
+// ── POST /api/tag/:id/attach ─ 批量打标签 ────────────────────
+router.post('/:id/attach', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const tagId    = parseInt(String(req.params.id))
+  const quizIds: number[] = req.body.quizIds ?? []
+
+  if (!quizIds.length) { res.status(400).json({ error: 'quizIds required' }); return }
+
+  // upsert 避免重复关联报错
+  await prisma.$transaction(
+    quizIds.map(quizId =>
+      prisma.quizTag.upsert({
+        where:  { quizId_tagId: { quizId, tagId } },
+        update: {},
+        create: { quizId, tagId },
+      })
+    )
+  )
+
+  res.status(204).send()
 })
 
 // ── DELETE /api/tag/:id ─ 删除标签 ───────────────────────────

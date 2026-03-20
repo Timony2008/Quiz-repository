@@ -1,210 +1,116 @@
+// src/components/TagFilterBar.tsx
+import TagSearchInput, { type TagOption } from './TagSearchInput'
 import type { QuizFilterParams } from '../types'
-
-
-
-// dimension 显示名映射
-const DIM_LABEL: Record<string, string> = {
-  KNOWLEDGE: '知识点',
-  METHOD:    '方法',
-  SOURCE:    '来源',
-  CONTEXT:   '背景',
-}
-
-const DIM_COLOR: Record<string, { bg: string; active: string; text: string }> = {
-  KNOWLEDGE: { bg: '#f0f5ff', active: '#2f54eb', text: '#2f54eb' },
-  METHOD:    { bg: '#f6ffed', active: '#52c41a', text: '#52c41a' },
-  SOURCE:    { bg: '#fff7e6', active: '#fa8c16', text: '#fa8c16' },
-  CONTEXT:   { bg: '#f9f0ff', active: '#722ed1', text: '#722ed1' },
-}
 
 interface TagItem {
   id: number
   name: string
-  dimension?: string | null
+  isGlobal?: boolean
 }
 
 interface Props {
   allTagObjects: TagItem[]
-  globalTagObjects: TagItem[]    // ← 新增
+  globalTagObjects: TagItem[]
   filters: QuizFilterParams
   isAuthor: boolean
-  showNewTagInput: boolean
-  newTagName: string
-  newTagDimension: string
+  // ↓ 这三个 prop 不再需要，但保留签名兼容性（传了也不报错）
+  showNewTagInput?: boolean
+  newTagName?: string
   onFilterChange: (f: QuizFilterParams) => void
   onDeleteTag: (id: number, name: string) => void
-  onShowNewTagInput: () => void
-  onHideNewTagInput: () => void
-  onNewTagNameChange: (v: string) => void
-  onNewTagDimensionChange: (d: string) => void
-  onCreateTag: () => void
+  onShowNewTagInput?: () => void
+  onHideNewTagInput?: () => void
+  onNewTagNameChange?: (v: string) => void
+  // ↓ 新建标签时调用（传标签名，hook 内部处理 API）
+  onCreateTag: (name: string) => void
 }
 
 export default function TagFilterBar({
   allTagObjects, globalTagObjects, filters, isAuthor,
-  showNewTagInput, newTagName, newTagDimension,
-  onFilterChange, onDeleteTag,
-  onShowNewTagInput, onHideNewTagInput,
-  onNewTagNameChange, onNewTagDimensionChange, onCreateTag,
+  onFilterChange, onDeleteTag, onCreateTag,
 }: Props) {
 
-  // 按 dimension 分组
-  const grouped = allTagObjects.reduce<Record<string, TagItem[]>>((acc, tag) => {
-    const dim = tag.dimension ?? 'CONTEXT'
-    if (!acc[dim]) acc[dim] = []
-    acc[dim].push(tag)
-    return acc
-  }, {})
+  const globalIds  = new Set(globalTagObjects.map(t => t.id))
+  const activeTagId = (filters as any).tagId as number | undefined
 
-  const dimOrder = ['KNOWLEDGE', 'METHOD', 'SOURCE', 'CONTEXT']
-
-  function toggleTag(dim: string, name: string) {
-    const key = dim.toLowerCase() as keyof QuizFilterParams
-    const current = filters[key]
-    onFilterChange({ ...filters, [key]: current === name ? undefined : name })
+  function toggleFilter(id: number) {
+    onFilterChange({
+      ...filters,
+      tagId: activeTagId === id ? undefined : id,
+    } as any)
   }
 
-  function isActive(dim: string, name: string) {
-    const key = dim.toLowerCase() as keyof QuizFilterParams
-    return filters[key] === name
+  function chipStyle(active: boolean, isGlobal: boolean): React.CSSProperties {
+    if (active) return {
+      fontSize: 12, padding: '3px 10px', borderRadius: 12, cursor: 'pointer',
+      background: '#1677ff', color: '#fff', border: '1px solid #1677ff',
+      display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap',
+    }
+    return {
+      fontSize: 12, padding: '3px 10px', borderRadius: 12, cursor: 'pointer',
+      background: isGlobal ? '#f5f5f5' : '#e6f4ff',
+      color:      isGlobal ? '#666'    : '#1677ff',
+      border:     `1px solid ${isGlobal ? '#e0e0e0' : '#91caff'}`,
+      display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap',
+    }
   }
+
+  // TagSearchInput 需要的 options 格式
+  const tagOptions: TagOption[] = allTagObjects.map(t => ({
+    id: t.id, name: t.name, isGlobal: globalIds.has(t.id),
+  }))
 
   return (
     <div style={{ marginBottom: 16 }}>
-      {/* ── 全局标签行（只读，不显示删除按钮）── */}
-      {dimOrder.map(dim => {
-        const tags = globalTagObjects.filter(t => t.dimension === dim)
-        if (tags.length === 0) return null
-        const color = DIM_COLOR[dim]
-        const key = dim.toLowerCase() as keyof QuizFilterParams
 
-        return (
-          <div key={`global-${dim}`} style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 4, alignItems: 'center' }}>
-            <span style={{ fontSize: 12, color: '#aaa', minWidth: 40 }}>{DIM_LABEL[dim]}：</span>
-            {tags.map(tag => (
-              <button
-                key={tag.id}
-                onClick={() => toggleTag(dim, tag.name)}
-                style={{
-                  fontSize: 12, padding: '2px 10px', borderRadius: 10, cursor: 'pointer',
-                  background: isActive(dim, tag.name) ? color.active : color.bg,
-                  color: isActive(dim, tag.name) ? '#fff' : color.text,
-                  border: `1px solid ${isActive(dim, tag.name) ? color.active : 'transparent'}`,
-                }}
-              >{tag.name}</button>
-            ))}
-          </div>
-        )
-      })}
-
-      {/* ── 各维度标签行 ── */}
-      {dimOrder.map(dim => {
-        const tags = grouped[dim]
-        if (!tags || tags.length === 0) return null
-        const color = DIM_COLOR[dim]
-        const key = dim.toLowerCase() as keyof QuizFilterParams
-        const hasActive = !!filters[key]
-
-        return (
-          <div key={dim} style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8, alignItems: 'center' }}>
-            <span style={{ fontSize: 12, color: '#aaa', minWidth: 40 }}>{DIM_LABEL[dim]}：</span>
-
-            {/* 全部（清除该维度筛选）*/}
-            {hasActive && (
-              <button
-                onClick={() => onFilterChange({ ...filters, [key]: undefined })}
-                style={{
-                  fontSize: 12, padding: '2px 10px', borderRadius: 10, cursor: 'pointer',
-                  background: '#f0f0f0', color: '#555', border: 'none'
-                }}
-              >全部</button>
-            )}
-
-            {tags.map(tag => (
-              <span key={tag.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+      {/* ── 筛选 chip 行 ──────────────────────────────────── */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', marginBottom: 8 }}>
+        {allTagObjects.map(tag => {
+          const isGlobal = globalIds.has(tag.id)
+          return (
+            <span key={tag.id} style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <button onClick={() => toggleFilter(tag.id)} style={chipStyle(activeTagId === tag.id, isGlobal)}>
+                {tag.name}
+              </button>
+              {isAuthor && !isGlobal && (
                 <button
-                  onClick={() => toggleTag(dim, tag.name)}
+                  onClick={() => onDeleteTag(tag.id, tag.name)}
+                  title="删除标签"
                   style={{
-                    fontSize: 12, padding: '2px 10px', borderRadius: 10, cursor: 'pointer',
-                    background: isActive(dim, tag.name) ? color.active : color.bg,
-                    color: isActive(dim, tag.name) ? '#fff' : color.text,
-                    border: `1px solid ${isActive(dim, tag.name) ? color.active : 'transparent'}`,
+                    fontSize: 11, padding: '0 3px', marginLeft: -6, borderRadius: '50%',
+                    cursor: 'pointer', background: 'none', border: 'none', color: '#bbb',
                   }}
-                >{tag.name}</button>
+                  onMouseEnter={e => (e.currentTarget.style.color = '#ff4d4f')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#bbb')}
+                >×</button>
+              )}
+            </span>
+          )
+        })}
 
-                {isAuthor && (
-                  <button
-                    onClick={() => onDeleteTag(tag.id, tag.name)}
-                    title="删除标签"
-                    style={{
-                      fontSize: 11, padding: '1px 4px', borderRadius: '50%',
-                      cursor: 'pointer', background: 'none', border: 'none',
-                      color: '#bbb', marginLeft: -4
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.color = '#ff4d4f')}
-                    onMouseLeave={e => (e.currentTarget.style.color = '#bbb')}
-                  >×</button>
-                )}
-              </span>
-            ))}
-          </div>
-        )
-      })}
-
-      {/* ── 新建标签 ── */}
-      {isAuthor && (
-        showNewTagInput ? (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-            <input
-              autoFocus value={newTagName}
-              onChange={e => onNewTagNameChange(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter') onCreateTag()
-                if (e.key === 'Escape') onHideNewTagInput()
-              }}
-              placeholder="标签名"
-              style={{
-                fontSize: 12, padding: '2px 8px', borderRadius: 8,
-                border: '1px solid #1677ff', outline: 'none', width: 90
-              }}
-            />
-            <select
-              value={newTagDimension}
-              onChange={e => onNewTagDimensionChange(e.target.value)}
-              style={{
-                fontSize: 12, padding: '2px 6px', borderRadius: 8,
-                border: '1px solid #d9d9d9', outline: 'none'
-              }}
-            >
-              {dimOrder.map(d => (
-                <option key={d} value={d}>{DIM_LABEL[d]}</option>
-              ))}
-            </select>
-            <button
-              onClick={onCreateTag}
-              style={{
-                fontSize: 12, padding: '2px 10px', borderRadius: 8,
-                background: '#1677ff', color: '#fff', border: 'none', cursor: 'pointer'
-              }}
-            >确认</button>
-            <button
-              onClick={onHideNewTagInput}
-              style={{
-                fontSize: 12, padding: '2px 8px', borderRadius: 8,
-                background: '#f0f0f0', color: '#555', border: 'none', cursor: 'pointer'
-              }}
-            >取消</button>
-          </div>
-        ) : (
+        {activeTagId !== undefined && (
           <button
-            onClick={onShowNewTagInput}
+            onClick={() => onFilterChange({ ...filters, tagId: undefined } as any)}
             style={{
-              fontSize: 12, padding: '2px 10px', borderRadius: 10, cursor: 'pointer',
-              background: '#f6ffed', color: '#52c41a', border: '1px dashed #b7eb8f',
-              marginTop: 4
+              fontSize: 12, padding: '2px 10px', borderRadius: 10,
+              background: '#f0f0f0', color: '#555', border: 'none', cursor: 'pointer',
             }}
-          >＋ 新建标签</button>
-        )
+          >✕ 清除</button>
+        )}
+      </div>
+
+      {/* ── 搜索 / 新建标签输入框（作者才显示）──────────── */}
+      {isAuthor && (
+        <div style={{ maxWidth: 320 }}>
+          <TagSearchInput
+            options={tagOptions}
+            selectedIds={activeTagId !== undefined ? [activeTagId] : []}
+            onToggle={tag => toggleFilter(tag.id)}
+            onCreateNew={onCreateTag}   // 传标签名，hook 处理 API
+            canCreate={true}
+            placeholder="搜索标签 / 新建标签…"
+          />
+        </div>
       )}
     </div>
   )

@@ -19,18 +19,15 @@ export function useTagManager(
     setPendingTagId(null)
   }
 
-  async function handleCreateTag() {
-    if (!newTagName.trim()) return
+  async function handleCreateTag(name: string) {
+    if (!name.trim()) return
     try {
       const res = await api.post('/tag', {
-        name: newTagName.trim(),
-        dimension: newTagDimension,
-        quizSetId: quizSetId ?? null,   // ← 新增，null = 全局，有值 = 私有
+        name: name.trim(),
+        dimension: 'KNOWLEDGE',   // 前端不再让用户选 dimension，后端默认
+        quizSetId: quizSetId ?? null,
       })
       const createdTag: Tag = res.data
-      setNewTagName('')
-      setNewTagDimension('KNOWLEDGE')
-      setShowNewTagInput(false)
       setIsTagMode(true)
       setPendingTagId(createdTag.id)
       onSuccess()

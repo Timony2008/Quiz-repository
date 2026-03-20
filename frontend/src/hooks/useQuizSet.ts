@@ -58,7 +58,7 @@ export function useQuizSet(id: string | undefined) {
 
   async function fetchGlobalTags() {                                   // ← 新增
     try {
-      const res = await api.get('/tag/global')
+      const res = await api.get('/tag?scope=global')
       setGlobalTagObjects(res.data)
     } catch (err) {
       console.error('fetchGlobalTags 失败:', err)
@@ -112,14 +112,10 @@ export function useQuizSet(id: string | undefined) {
         }
       })
 
-  // ── 多维度交叉过滤 ────────────────────────────────────────────
+// ── 多维度交叉过滤 ────────────────────────────────────────────
   const filteredQuizzes = sortedQuizzes.filter(q => {
-    const tagNames = q.tags.map(t => t.tag.name)
-    if (filters.knowledge && !tagNames.includes(filters.knowledge)) return false
-    if (filters.method    && !tagNames.includes(filters.method))    return false
-    if (filters.source    && !tagNames.includes(filters.source))    return false
-    if (filters.context   && !tagNames.includes(filters.context))   return false
-    if (filters.difficulty && q.difficulty !== filters.difficulty)  return false
+    if (filters.tagId !== undefined && !q.tags.some(t => t.tag.id === filters.tagId)) return false
+    if (filters.difficulty && q.difficulty !== filters.difficulty) return false
     return true
   })
 

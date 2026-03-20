@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Tag" ADD COLUMN "dimension" TEXT DEFAULT 'CONTEXT';

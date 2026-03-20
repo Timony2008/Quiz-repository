@@ -8,6 +8,7 @@ export interface Tag {
   id: number
   name: string
   dimension: TagDimension
+  isGlobal?: boolean          // ← 新增：全局标签 true，本库私有 false/undefined
   parentId?: number | null
   aliases?: string[]          // 别名列表，用于搜索匹配
   children?: Tag[]            // 树形结构（KNOWLEDGE 维度使用）
@@ -24,14 +25,16 @@ export interface AITagSuggestion {
   confidence: number          // 0.0 ~ 1.0
 }
 
-// ── Quiz ─────────────────────────────────────────────────────
+// src/types.ts — Quiz 接口
 export interface Quiz {
   id: number
   question: string
   answer: string
-  difficulty?: Difficulty
-  tags: { tag: Tag }[]        // 关联标签（含维度信息）
-  aiSuggestion?: AITagSuggestion  // 上传时 AI 推荐，确认前存在
+  difficulty?: Difficulty        // 'EASY' | 'MEDIUM' | 'HARD' | undefined
+  tags: { tag: Tag }[]
+  order: number                  // ← 补上
+  updatedAt: string              // ← 补上
+  aiSuggestion?: AITagSuggestion
 }
 
 // ── QuizSet ──────────────────────────────────────────────────
@@ -52,4 +55,5 @@ export interface QuizFilterParams {
   context?: string
   difficulty?: Difficulty
   keyword?: string
+  tagId?: number
 }

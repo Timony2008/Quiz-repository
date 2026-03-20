@@ -1,7 +1,8 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { MathText } from './MathText'
-import type { Quiz } from '../type/quiz'   // ← 从共享文件 import
+import type { Quiz } from '../types'
+import TagSearchInput, { type TagOption } from './TagSearchInput'
 
 interface Props {
   quiz: Quiz
@@ -27,20 +28,28 @@ interface Props {
   onEditAnswerChange: (v: string) => void
   onEditTagInputChange: (v: string) => void
   onEditDifficultyChange: (v: string) => void
+  editTagIds: number[]                        // 当前编辑中已选标签 id
+  tagOptions: TagOption[]                     // 可选标签列表
+  onEditTagToggle: (tag: TagOption) => void   // 选中/取消某标签
+  onEditTagCreate?: (name: string) => void    // 新建标签
+  canCreate?: boolean
 }
 
+// ── 难度数值转换 ──────────────────────────────────────────────
+// 统一处理 string / number / null / undefined，返回 -1 表示无效
 function toDiffNum(val: number | string | null | undefined): number {
   if (val == null) return -1
   const n = typeof val === 'string' ? parseFloat(val) : val
   return isNaN(n) ? -1 : n
 }
 
+// ── 难度色阶：绿(≤4) → 黄(≤5.5) → 红(>5.5) ─────────────────
 function difficultyColor(val: number | string | null | undefined): string {
   const n = toDiffNum(val)
-  if (n < 0)   return '#999'
-  if (n <= 4)   return '#52c41a'   // 绿：1 ~ 4
-  if (n <= 5.5) return '#faad14'   // 黄：4 ~ 5.5
-  return '#ff4d4f'                 // 红：5.5 ~ 7
+  if (n < 0)    return '#999'
+  if (n <= 4)   return '#52c41a'
+  if (n <= 5.5) return '#faad14'
+  return '#ff4d4f'
 }
 
 export default function DraggableQuizItem(props: Props) {
@@ -51,9 +60,12 @@ export default function DraggableQuizItem(props: Props) {
     difficultyBadge,
     onToggleAnswer, onToggleSelect, onStartEdit, onDelete,
     onEditSave, onEditCancel,
-    onEditQuestionChange, onEditAnswerChange, onEditTagInputChange, onEditDifficultyChange
+    onEditQuestionChange, onEditAnswerChange, onEditTagInputChange, onEditDifficultyChange,
+    // ↓ 新增
+    editTagIds, tagOptions, onEditTagToggle, onEditTagCreate, canCreate,
   } = props
 
+  // ── dnd-kit：仅在 isReorderMode 时启用拖拽 ───────────────────
   const {
     attributes, listeners, setNodeRef,
     transform, transition, isDragging
@@ -65,6 +77,7 @@ export default function DraggableQuizItem(props: Props) {
     opacity: isDragging ? 0.5 : 1,
   }
 
+  // ── 编辑态难度校验 ────────────────────────────────────────────
   const editDiffNum = parseFloat(editDifficulty)
   const editDiffValid =
     editDifficulty.trim() !== '' &&
@@ -79,6 +92,7 @@ export default function DraggableQuizItem(props: Props) {
         ...style,
         padding: '12px 14px',
         marginBottom: 10,
+        // isTagMode 选中时蓝色高亮边框
         border: isTagMode && isSelected ? '1px solid #1677ff' : '1px solid #eee',
         borderRadius: 8,
         display: 'flex',
@@ -91,7 +105,8 @@ export default function DraggableQuizItem(props: Props) {
       }}
       onClick={isTagMode ? onToggleSelect : undefined}
     >
-      {/* 拖拽把手 */}
+
+      {/* ── 拖拽把手（仅 isReorderMode 显示）─────────────────── */}
       {isReorderMode && (
         <span
           {...attributes} {...listeners}
@@ -103,7 +118,7 @@ export default function DraggableQuizItem(props: Props) {
         >⠿</span>
       )}
 
-      {/* 多选框 */}
+      {/* ── 多选框（selectMode / tagMode 均显示）──────────────── */}
       {(isSelectMode || isTagMode) && (
         <input
           type="checkbox"
@@ -114,9 +129,11 @@ export default function DraggableQuizItem(props: Props) {
         />
       )}
 
-      {/* ── 编辑态 ── */}
+      {/* ════════════════ 编辑态 ════════════════ */}
       {isEditing ? (
         <div style={{ flex: 1 }}>
+
+          {/* 题目输入 + 实时预览 */}
           <textarea
             value={editQuestion}
             onChange={e => onEditQuestionChange(e.target.value)}
@@ -135,6 +152,7 @@ export default function DraggableQuizItem(props: Props) {
             </div>
           )}
 
+          {/* 答案输入 + 实时预览 */}
           <textarea
             value={editAnswer}
             onChange={e => onEditAnswerChange(e.target.value)}
@@ -153,14 +171,17 @@ export default function DraggableQuizItem(props: Props) {
             </div>
           )}
 
-          <input
-            value={editTagInput}
-            onChange={e => onEditTagInputChange(e.target.value)}
-            placeholder="标签（逗号分隔）"
-            style={{ width: '100%', marginBottom: 8, padding: '5px 8px', boxSizing: 'border-box' }}
+          {/* 标签输入 → 搜索下拉 + chip */}
+          <TagSearchInput
+            options={tagOptions}
+            selectedIds={editTagIds}
+            onToggle={onEditTagToggle}
+            onCreateNew={onEditTagCreate}
+            canCreate={canCreate}
+            placeholder="搜索或添加标签…"
           />
 
-          {/* 难度输入 1 ~ 7 */}
+          {/* 难度输入 1 ~ 7，支持小数 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <input
               type="number"
@@ -191,12 +212,14 @@ export default function DraggableQuizItem(props: Props) {
         </div>
 
       ) : (
-        /* ── 展示态 ── */
+        /* ════════════════ 展示态 ════════════════ */
         <div style={{
           flex: 1, display: 'flex',
           justifyContent: 'space-between', alignItems: 'flex-start'
         }}>
           <div style={{ flex: 1 }}>
+
+            {/* 题目文本 + 难度 badge（同行） */}
             <div style={{
               fontWeight: 500, marginBottom: 6,
               display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap'
@@ -219,6 +242,7 @@ export default function DraggableQuizItem(props: Props) {
               })())}
             </div>
 
+            {/* 显示 / 隐藏答案按钮 */}
             <button
               onClick={e => { e.stopPropagation(); onToggleAnswer() }}
               style={{
@@ -230,26 +254,44 @@ export default function DraggableQuizItem(props: Props) {
               {isRevealed ? '隐藏答案' : '显示答案'}
             </button>
 
+            {/* 答案内容（isRevealed 时展开） */}
             {isRevealed && (
               <div style={{ color: '#555', fontSize: 14, marginBottom: 6 }}>
                 <MathText text={quiz.answer} />
               </div>
             )}
 
+            {/* ── 标签平铺 chip ──────────────────────────────────
+                数据结构：quiz.tags = [{ tag: { id, name, isGlobal } }]
+                全局标签：灰底灰字；本库标签：蓝底蓝字
+                如后端暂未返回 isGlobal，chip 统一显示为本库样式  */}
             {quiz.tags.length > 0 && (
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
-                {quiz.tags.map(t => (
-                  <span key={t.tag.id} style={{
-                    background: '#f0f0f0', padding: '1px 8px',
-                    borderRadius: 10, fontSize: 12
-                  }}>
-                    {t.tag.name}
-                  </span>
-                ))}
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>
+                {quiz.tags.map(t => {
+                  const isGlobal = t.tag.isGlobal ?? false
+                  return (
+                    <span
+                      key={t.tag.id}
+                      style={{
+                        fontSize: 11,
+                        padding: '1px 8px',
+                        borderRadius: 10,
+                        whiteSpace: 'nowrap',
+                        // 全局标签灰色，本库标签蓝色——与 TagFilterBar chip 保持一致
+                        background: isGlobal ? '#f5f5f5' : '#e6f4ff',
+                        color:      isGlobal ? '#666'    : '#1677ff',
+                        border:     `1px solid ${isGlobal ? '#e0e0e0' : '#91caff'}`,
+                      }}
+                    >
+                      {t.tag.name}
+                    </span>
+                  )
+                })}
               </div>
             )}
           </div>
 
+          {/* ── 编辑 / 删除按钮（canEdit 且非 tagMode）────────── */}
           {canEdit && !isTagMode && (
             <div style={{ display: 'flex', gap: 8, flexShrink: 0, marginLeft: 12 }}>
               <button

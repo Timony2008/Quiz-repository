@@ -17,6 +17,7 @@ export function useQuizEdit(quizSetId: string | undefined, onSuccess: () => void
   const [editAnswer, setEditAnswer] = useState('')
   const [editTagInput, setEditTagInput] = useState('')
   const [editDifficulty, setEditDifficulty] = useState('')
+  const [editTagIds, setEditTagIds] = useState<number[]>([])  // ← 新增
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
@@ -48,19 +49,23 @@ export function useQuizEdit(quizSetId: string | undefined, onSuccess: () => void
     setEditAnswer(q.answer)
     setEditTagInput(q.tags.map(t => t.tag.name).join(', '))
     setEditDifficulty(q.difficulty != null ? String(toDiffNum(q.difficulty)) : '')
+    setEditTagIds(q.tags.map(t => t.tag.id))  // ← 新增：编辑开始时用题目现有标签初始化
   }
 
   async function handleEditSave(quizId: number) {
-    const tags = editTagInput.split(',').map(t => t.trim()).filter(Boolean)
     const diffVal = editDifficulty.trim() !== '' ? parseFloat(editDifficulty) : null
     if (diffVal !== null && (isNaN(diffVal) || diffVal < 1 || diffVal > 7)) {
       alert('难度请输入 1 ~ 7 之间的数字')
       return
     }
     await api.put(`/quiz/item/${quizId}`, {
-      question: editQuestion, answer: editAnswer, tags, difficulty: diffVal
+      question: editQuestion,
+      answer: editAnswer,
+      tagIds: editTagIds,   // ← 改：从 id 数组提交，不再用逗号字符串
+      difficulty: diffVal,
     })
     setEditingId(null)
+    setEditTagIds([])       // ← 新增：保存后清空
     onSuccess()
   }
 
@@ -75,6 +80,7 @@ export function useQuizEdit(quizSetId: string | undefined, onSuccess: () => void
     editAnswer, setEditAnswer,
     editTagInput, setEditTagInput,
     editDifficulty, setEditDifficulty,
+    editTagIds, setEditTagIds,   // ← 新增
     handleAdd,
     handleDelete,
     startEdit,

@@ -43,6 +43,7 @@ model Quiz {
 model Tag {
   id         Int       @id @default(autoincrement())
   name       String
+  dimension  String?   @default("CONTEXT")   // ← 加这行
   isGlobal   Boolean   @default(false)   // true = 管理员维护的全局标签
   parentId   Int?                        // 仅全局标签使用层级
   parent     Tag?      @relation("TagHierarchy", fields: [parentId], references: [id])
