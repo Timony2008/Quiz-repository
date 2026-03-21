@@ -3,6 +3,12 @@ import { PrismaClient } from '@prisma/client'
 import { authMiddleware, AuthRequest } from '../middleware/auth'
 import { buildTagTree, resolveTagIds, collectDescendantIds } from '../services/tagService'
 
+function normalizeDimension(v: any): 'KNOWLEDGE' | 'METHOD' | 'SOURCE' | 'CONTEXT' {
+  return v === 'KNOWLEDGE' || v === 'METHOD' || v === 'SOURCE' || v === 'CONTEXT'
+    ? v
+    : 'CONTEXT'
+}
+
 const router = Router()
 const prisma = new PrismaClient()
 
@@ -130,7 +136,7 @@ router.get('/:id/quizzes', authMiddleware, async (req: AuthRequest, res: Respons
 // ── POST /api/tag ─ 创建标签 ──────────────────────────────────
 // isGlobal=true 仅管理员可用（后续加权限校验）
 router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const { name, parentId, quizSetId, isGlobal = false } = req.body
+  const { name, parentId, quizSetId, isGlobal = false, dimension } = req.body
   if (!name?.trim()) { res.status(400).json({ error: 'name required' }); return }
 
   try {
@@ -140,6 +146,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
         isGlobal:  Boolean(isGlobal),
         parentId:  parentId  ?? null,
         quizSetId: quizSetId ?? null,
+        dimension: normalizeDimension(dimension),
       },
     })
     res.status(201).json(tag)
@@ -153,14 +160,16 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
 
 // ── PATCH /api/tag/:id ─ 修改标签 ────────────────────────────
 router.patch('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  console.log('PATCH /tag/:id body =', req.body)
   const id = parseInt(String(req.params.id))
-  const { name, parentId } = req.body
+  const { name, parentId, dimension } = req.body
 
   const tag = await prisma.tag.update({
     where: { id },
     data:  {
       ...(name     !== undefined && { name: name.trim() }),
       ...(parentId !== undefined && { parentId }),
+      ...(dimension !== undefined && { dimension: normalizeDimension(dimension) }),
     },
   })
   res.json(tag)

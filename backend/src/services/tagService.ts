@@ -2,10 +2,19 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+type TagDimension = 'KNOWLEDGE' | 'METHOD' | 'SOURCE' | 'CONTEXT'
+
+function normalizeDimension(v: any): TagDimension {
+  return v === 'KNOWLEDGE' || v === 'METHOD' || v === 'SOURCE' || v === 'CONTEXT'
+    ? v
+    : 'CONTEXT'
+}
+
 // ── 树节点类型 ────────────────────────────────────────────────
 export interface TagNode {
   id:         number
   name:       string
+  dimension:  TagDimension        // ✅ 新增
   isGlobal:   boolean
   parentId:   number | null
   quizSetId:  number | null
@@ -26,6 +35,7 @@ export async function buildTagTree(): Promise<TagNode[]> {
     map.set(t.id, {
       id:        t.id,
       name:      t.name,
+      dimension: normalizeDimension((t as any).dimension), // ✅ 新增
       isGlobal:  t.isGlobal,
       parentId:  t.parentId,
       quizSetId: t.quizSetId,
@@ -64,9 +74,9 @@ export async function resolveTagIds(
       })
       if (existing) return existing.id
 
-      // 3. 都没有 → 创建私有标签
+      // 3. 都没有 → 创建私有标签（默认 CONTEXT）
       const created = await prisma.tag.create({
-        data: { name, isGlobal: false, quizSetId }
+        data: { name, isGlobal: false, quizSetId, dimension: 'CONTEXT' }
       })
       return created.id
     })
