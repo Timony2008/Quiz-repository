@@ -94,6 +94,7 @@ export default function Dashboard() {
           </button>
           <button onClick={handleLogout}>退出登录</button>
         </div>
+        <button onClick={() => navigate('/tags')}>🏷️ 全局标签</button>
       </div>
 
       {/* 新建表单 */}

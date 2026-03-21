@@ -6,7 +6,7 @@ export function useTagManager(
   onSuccess: () => void,
   filters: QuizFilterParams,
   setFilters: (f: QuizFilterParams) => void,
-  quizSetId?: number          // ← 新增
+  quizSetId?: number
 ) {
   const [showNewTagInput, setShowNewTagInput] = useState(false)
   const [newTagName, setNewTagName] = useState('')
@@ -19,18 +19,28 @@ export function useTagManager(
     setPendingTagId(null)
   }
 
-  async function handleCreateTag(name: string) {
+  // attachToQuizId 有值 → 编辑态直接打标，不进 tagMode
+  // attachToQuizId 无值 → FilterBar 新建，进 tagMode 让用户批量选题
+  async function handleCreateTag(name: string, attachToQuizId?: number) {
     if (!name.trim()) return
     try {
       const res = await api.post('/tag', {
         name: name.trim(),
-        dimension: 'KNOWLEDGE',   // 前端不再让用户选 dimension，后端默认
+        dimension: 'KNOWLEDGE',
         quizSetId: quizSetId ?? null,
       })
       const createdTag: Tag = res.data
-      setIsTagMode(true)
-      setPendingTagId(createdTag.id)
-      onSuccess()
+
+      if (attachToQuizId !== undefined) {
+        await api.post(`/tag/${createdTag.id}/attach`, {
+          quizIds: [attachToQuizId],
+        })
+        onSuccess()
+      } else {
+        setIsTagMode(true)
+        setPendingTagId(createdTag.id)
+        onSuccess()
+      }
     } catch (err: any) {
       if (err?.response?.status === 409) alert('标签已存在')
     }
@@ -39,13 +49,20 @@ export function useTagManager(
   async function handleDeleteTag(tagId: number, tagName: string) {
     if (!confirm(`删除标签「${tagName}」？\n只删标签，不删题目。`)) return
     await api.delete(`/tag/${tagId}`)
-    // 清除该标签对应的筛选维度
-    const updated = { ...filters }
-    const keys: (keyof QuizFilterParams)[] = ['knowledge', 'method', 'source', 'context']
-    for (const k of keys) {
-      if (updated[k] === tagName) delete updated[k]
+
+    // 如果当前筛选包含这个标签，删除它
+    const prevTagIds = (((filters as any).tagIds ?? []) as number[])
+    const prevTagId = (filters as any).tagId as number | undefined
+
+    if (prevTagIds.includes(tagId)) {
+      const nextTagIds = prevTagIds.filter(id => id !== tagId)
+      setFilters({ ...filters, tagIds: nextTagIds, tagId: undefined } as any)
+    } else if (prevTagId === tagId) {
+      setFilters({ ...filters, tagId: undefined } as any)
+    } else {
+      setFilters({ ...filters })
     }
-    setFilters(updated)
+
     onSuccess()
   }
 

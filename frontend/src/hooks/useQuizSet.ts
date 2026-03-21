@@ -113,8 +113,14 @@ export function useQuizSet(id: string | undefined) {
       })
 
 // ── 多维度交叉过滤 ────────────────────────────────────────────
+  const selectedTagIds = (filters as any).tagIds as number[] | undefined
+
   const filteredQuizzes = sortedQuizzes.filter(q => {
-    if (filters.tagId !== undefined && !q.tags.some(t => t.tag.id === filters.tagId)) return false
+    if (selectedTagIds && selectedTagIds.length > 0) {
+      const quizTagIds = q.tags.map(t => t.tag.id)
+      const hit = selectedTagIds.some(id => quizTagIds.includes(id)) // OR 逻辑
+      if (!hit) return false
+    }
     if (filters.difficulty && q.difficulty !== filters.difficulty) return false
     return true
   })
