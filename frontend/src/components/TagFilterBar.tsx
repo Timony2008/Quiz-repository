@@ -13,7 +13,6 @@ interface Props {
   globalTagObjects: TagItem[]
   filters: QuizFilterParams
   isAuthor: boolean
-  // ↓ 这三个 prop 不再需要，但保留签名兼容性（传了也不报错）
   showNewTagInput?: boolean
   newTagName?: string
   onFilterChange: (f: QuizFilterParams) => void
@@ -21,7 +20,7 @@ interface Props {
   onShowNewTagInput?: () => void
   onHideNewTagInput?: () => void
   onNewTagNameChange?: (v: string) => void
-  // ↓ 新建标签时调用（传标签名，hook 内部处理 API）
+  // name 只传，hook 内部决定走 tagMode 流程
   onCreateTag: (name: string) => void
 }
 
@@ -30,7 +29,7 @@ export default function TagFilterBar({
   onFilterChange, onDeleteTag, onCreateTag,
 }: Props) {
 
-  const globalIds  = new Set(globalTagObjects.map(t => t.id))
+  const globalIds   = new Set(globalTagObjects.map(t => t.id))
   const activeTagId = (filters as any).tagId as number | undefined
 
   function toggleFilter(id: number) {
@@ -55,7 +54,6 @@ export default function TagFilterBar({
     }
   }
 
-  // TagSearchInput 需要的 options 格式
   const tagOptions: TagOption[] = allTagObjects.map(t => ({
     id: t.id, name: t.name, isGlobal: globalIds.has(t.id),
   }))
@@ -106,7 +104,7 @@ export default function TagFilterBar({
             options={tagOptions}
             selectedIds={activeTagId !== undefined ? [activeTagId] : []}
             onToggle={tag => toggleFilter(tag.id)}
-            onCreateNew={onCreateTag}   // 传标签名，hook 处理 API
+            onCreateNew={onCreateTag}   // 单参数，不传 quizId → 走 tagMode
             canCreate={true}
             placeholder="搜索标签 / 新建标签…"
           />

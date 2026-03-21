@@ -31,7 +31,7 @@ interface Props {
   editTagIds: number[]                        // 当前编辑中已选标签 id
   tagOptions: TagOption[]                     // 可选标签列表
   onEditTagToggle: (tag: TagOption) => void   // 选中/取消某标签
-  onEditTagCreate?: (name: string) => void    // 新建标签
+  onEditTagCreate: (name: string, attachToQuizId?: number) => void
   canCreate?: boolean
 }
 
@@ -176,7 +176,7 @@ export default function DraggableQuizItem(props: Props) {
             options={tagOptions}
             selectedIds={editTagIds}
             onToggle={onEditTagToggle}
-            onCreateNew={onEditTagCreate}
+            onCreateNew={(name) => onEditTagCreate(name, quiz.id)}
             canCreate={canCreate}
             placeholder="搜索或添加标签…"
           />

@@ -253,11 +253,16 @@ router.put('/item/:id', authMiddleware, async (req: AuthRequest, res: Response) 
   const access = await canEdit(quiz.quizSetId, userId)
   if (access === false) { res.status(403).json({ error: '无编辑权限' }); return }
 
-  const { question, answer, tags = [] } = req.body
+  const { question, answer } = req.body
   const difficulty = parseDifficulty(req.body.difficulty)
 
-  // resolveTagIds 新签名：需要传 quizSetId
-  const tagIds = tags.length > 0 ? await resolveTagIds(tags, quiz.quizSetId) : []
+  // ↓ 改：优先用 tagIds（id数组），兼容旧的 tags（名字数组）
+  let tagIds: number[] = []
+  if (Array.isArray(req.body.tagIds) && req.body.tagIds.length > 0) {
+    tagIds = req.body.tagIds                                      // 前端直接传 id 数组
+  } else if (Array.isArray(req.body.tags) && req.body.tags.length > 0) {
+    tagIds = await resolveTagIds(req.body.tags, quiz.quizSetId)   // 兼容旧名字数组
+  }
 
   await prisma.quizTag.deleteMany({ where: { quizId } })
 
@@ -277,6 +282,7 @@ router.put('/item/:id', authMiddleware, async (req: AuthRequest, res: Response) 
   })
   res.json(updated)
 })
+
 
 // ── PATCH /quiz/:id/items/reorder — 题目排序 ─────────────────
 // body: { orders: [{ id: number, order: number }] }

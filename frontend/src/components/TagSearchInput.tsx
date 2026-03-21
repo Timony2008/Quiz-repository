@@ -1,9 +1,4 @@
 // src/components/TagSearchInput.tsx
-// 通用标签搜索输入组件
-// - 实时搜索已有标签（本库 + 全局）
-// - 下拉区分全局（灰）/ 私有（蓝）
-// - 选中后以 chip 展示，点 × 删除
-// - 输入不匹配任何标签时，显示「新建」选项
 import { useState, useRef, useEffect } from 'react'
 
 export interface TagOption {
@@ -13,16 +8,11 @@ export interface TagOption {
 }
 
 interface Props {
-  // 所有可选标签（本库 + 全局合并，已去重）
   options: TagOption[]
-  // 当前已选中的标签 id 列表
   selectedIds: number[]
-  // 选中 / 取消选中某个已有标签
   onToggle: (tag: TagOption) => void
-  // 用户输入了一个不存在的名字，要求新建
   onCreateNew?: (name: string) => void
   placeholder?: string
-  // 是否允许新建标签（作者才有权限）
   canCreate?: boolean
 }
 
@@ -32,10 +22,9 @@ export default function TagSearchInput({
   canCreate = false,
 }: Props) {
   const [query, setQuery] = useState('')
-  const [open, setOpen] = useState(false)
+  const [open, setOpen]   = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
 
-  // 点击组件外部时关闭下拉
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
@@ -47,84 +36,94 @@ export default function TagSearchInput({
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  // 已选标签对象列表（用于渲染 chip）
   const selectedTags = options.filter(t => selectedIds.includes(t.id))
-
-  // 过滤逻辑：名字包含 query（不区分大小写），且未选中
   const filtered = options.filter(t =>
     t.name.toLowerCase().includes(query.toLowerCase()) &&
     !selectedIds.includes(t.id)
   )
-
-  // 是否显示「新建」选项：有输入 + 无完全匹配 + 有权限
   const exactMatch = options.some(
     t => t.name.toLowerCase() === query.trim().toLowerCase()
   )
   const showCreate = canCreate && query.trim() !== '' && !exactMatch
 
   return (
-    <div ref={wrapRef} style={{ position: 'relative' }}>
+    <div ref={wrapRef} style={{ position: 'relative', marginBottom: 10 }}>
 
-      {/* ── 已选 chip 行 ──────────────────────────────────── */}
-      {selectedTags.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
-          {selectedTags.map(tag => (
-            <span
-              key={tag.id}
+      {/* ── chip + 输入框同行 ──────────────────────────────── */}
+      <div style={{
+        display: 'flex', flexWrap: 'wrap', alignItems: 'center',
+        gap: 4, padding: '4px 8px',
+        border: '1px solid #d9d9d9', borderRadius: 8,
+        cursor: 'text',
+        // 聚焦时由 input 的 onFocus 触发父容器高亮
+      }}
+        onClick={() => wrapRef.current?.querySelector('input')?.focus()}
+      >
+        {/* 已选 chip */}
+        {selectedTags.map(tag => (
+          <span
+            key={tag.id}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 3,
+              fontSize: 12, padding: '2px 8px', borderRadius: 10,
+              background: tag.isGlobal ? '#f5f5f5' : '#e6f4ff',
+              color:      tag.isGlobal ? '#666'    : '#1677ff',
+              border:     `1px solid ${tag.isGlobal ? '#e0e0e0' : '#91caff'}`,
+              flexShrink: 0,
+            }}
+          >
+            {tag.name}
+            <button
+              onMouseDown={e => { e.stopPropagation(); onToggle(tag) }}
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: 3,
-                fontSize: 12, padding: '2px 8px', borderRadius: 10,
-                background: tag.isGlobal ? '#f5f5f5' : '#e6f4ff',
-                color:      tag.isGlobal ? '#666'    : '#1677ff',
-                border:     `1px solid ${tag.isGlobal ? '#e0e0e0' : '#91caff'}`,
+                background: 'none', border: 'none', cursor: 'pointer',
+                padding: 0, lineHeight: 1, fontSize: 13,
+                color: tag.isGlobal ? '#aaa' : '#91caff',
               }}
-            >
-              {tag.name}
-              <button
-                onClick={() => onToggle(tag)}
-                style={{
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  padding: 0, lineHeight: 1, fontSize: 13,
-                  color: tag.isGlobal ? '#aaa' : '#91caff',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.color = '#ff4d4f')}
-                onMouseLeave={e => (e.currentTarget.style.color = tag.isGlobal ? '#aaa' : '#91caff')}
-              >×</button>
-            </span>
-          ))}
-        </div>
-      )}
+              onMouseEnter={e => (e.currentTarget.style.color = '#ff4d4f')}
+              onMouseLeave={e => (e.currentTarget.style.color = tag.isGlobal ? '#aaa' : '#91caff')}
+            >×</button>
+          </span>
+        ))}
 
-      {/* ── 搜索输入框 ────────────────────────────────────── */}
-      <input
-        value={query}
-        onChange={e => { setQuery(e.target.value); setOpen(true) }}
-        onFocus={() => setOpen(true)}
-        onKeyDown={e => {
-          // Enter 且只有一个候选 → 直接选中
-          if (e.key === 'Enter') {
-            if (filtered.length === 1) {
-              onToggle(filtered[0])
-              setQuery('')
-            } else if (showCreate && onCreateNew) {
-              onCreateNew(query.trim())
-              setQuery('')
-              setOpen(false)
+        {/* 输入框：跟在 chip 后面，自动撑开剩余宽度 */}
+        <input
+          value={query}
+          onChange={e => { setQuery(e.target.value); setOpen(true) }}
+          onFocus={e => {
+            setOpen(true)
+            // 让外层容器显示蓝色边框
+            const wrap = e.currentTarget.closest<HTMLDivElement>('.tag-input-wrap')
+            if (wrap) wrap.style.borderColor = '#1677ff'
+          }}
+          onBlur={e => {
+            const wrap = e.currentTarget.closest<HTMLDivElement>('.tag-input-wrap')
+            if (wrap) wrap.style.borderColor = '#d9d9d9'
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              if (filtered.length === 1) {
+                onToggle(filtered[0]); setQuery('')
+              } else if (showCreate && onCreateNew) {
+                onCreateNew(query.trim()); setQuery(''); setOpen(false)
+              }
             }
-          }
-          if (e.key === 'Escape') { setOpen(false); setQuery('') }
-        }}
-        placeholder={placeholder}
-        style={{
-          width: '100%', padding: '5px 10px', fontSize: 13,
-          borderRadius: 8, border: '1px solid #d9d9d9',
-          outline: 'none', boxSizing: 'border-box',
-        }}
-        onFocusCapture={e => (e.currentTarget.style.borderColor = '#1677ff')}
-        onBlurCapture={e  => (e.currentTarget.style.borderColor = '#d9d9d9')}
-      />
+            if (e.key === 'Escape') { setOpen(false); setQuery('') }
+            // Backspace 且输入框为空时，删除最后一个 chip
+            if (e.key === 'Backspace' && query === '' && selectedTags.length > 0) {
+              onToggle(selectedTags[selectedTags.length - 1])
+            }
+          }}
+          placeholder={selectedTags.length === 0 ? placeholder : ''}
+          style={{
+            flex: '1 1 80px', minWidth: 80,
+            border: 'none', outline: 'none',
+            fontSize: 13, padding: '2px 0', background: 'transparent',
+          }}
+        />
+      </div>
 
-      {/* ── 下拉列表 ──────────────────────────────────────── */}
+      {/* ── 下拉列表（位置不变）──────────────────────────── */}
       {open && (filtered.length > 0 || showCreate) && (
         <div style={{
           position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 200,
@@ -132,8 +131,6 @@ export default function TagSearchInput({
           boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
           marginTop: 4, maxHeight: 220, overflowY: 'auto',
         }}>
-
-          {/* 已有标签列表 */}
           {filtered.map(tag => (
             <div
               key={tag.id}
@@ -145,7 +142,6 @@ export default function TagSearchInput({
               onMouseEnter={e => (e.currentTarget.style.background = '#f5f5f5')}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
-              {/* 全局 / 私有标签视觉区分 */}
               <span style={{
                 fontSize: 11, padding: '1px 6px', borderRadius: 8,
                 background: tag.isGlobal ? '#f5f5f5' : '#e6f4ff',
@@ -159,14 +155,9 @@ export default function TagSearchInput({
             </div>
           ))}
 
-          {/* 新建选项（虚线分隔） */}
           {showCreate && (
             <div
-              onMouseDown={() => {
-                onCreateNew?.(query.trim())
-                setQuery('')
-                setOpen(false)
-              }}
+              onMouseDown={() => { onCreateNew?.(query.trim()); setQuery(''); setOpen(false) }}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '7px 12px', cursor: 'pointer', fontSize: 13,
