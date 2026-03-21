@@ -17,6 +17,7 @@ interface Props {
   onToggleUpload: () => void
   onToggleExport: () => void
   onEnterSelectMode: () => void
+  onEnterTagMode: () => void // 新增
   onEnterReorderMode: () => void
   onSaveReorder: () => void
   onCancelReorder: () => void
@@ -30,7 +31,8 @@ export default function QuizSetHeader({
   showAddForm, showUpload, showExport,
   sortMode,
   onToggleAddForm, onToggleUpload, onToggleExport,
-  onEnterSelectMode, onEnterReorderMode,
+  onEnterSelectMode, onEnterTagMode,
+  onEnterReorderMode,
   onSaveReorder, onCancelReorder,
   onSortChange, onVisibilityChange,
 }: Props) {
@@ -38,7 +40,6 @@ export default function QuizSetHeader({
 
   return (
     <>
-      {/* 顶栏按钮 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
         <button onClick={() => navigate('/')}>← 返回</button>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -54,6 +55,10 @@ export default function QuizSetHeader({
           {canEdit && !isReorderMode && (
             <button onClick={onEnterSelectMode}>☑️ 批量删除</button>
           )}
+          {canEdit && !isReorderMode && (
+            <button onClick={onEnterTagMode}>🏷️ 批量打标签</button>
+          )}
+
           {!isReorderMode && (
             <select
               value={sortMode}
@@ -68,6 +73,7 @@ export default function QuizSetHeader({
               {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           )}
+
           {canEdit && !isSelectMode && !isTagMode && (
             isReorderMode ? (
               <>
@@ -83,7 +89,6 @@ export default function QuizSetHeader({
         </div>
       </div>
 
-      {/* 题库标题 + 权限 */}
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ margin: '0 0 4px' }}>{quizSet.title}</h2>
         {quizSet.description && (

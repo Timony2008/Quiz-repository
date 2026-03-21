@@ -19,8 +19,17 @@ export function useTagManager(
     setPendingTagId(null)
   }
 
-  // attachToQuizId 有值 → 编辑态直接打标，不进 tagMode
-  // attachToQuizId 无值 → FilterBar 新建，进 tagMode 让用户批量选题
+  // 新增：只进入批量打标签模式（不预设标签）
+  function enterTagMode() {
+    setIsTagMode(true)
+  }
+
+  // 新增：进入批量打标签并指定已有标签
+  function startTagModeWithTag(tagId: number) {
+    setIsTagMode(true)
+    setPendingTagId(tagId)
+  }
+
   async function handleCreateTag(name: string, attachToQuizId?: number) {
     if (!name.trim()) return
     try {
@@ -50,7 +59,6 @@ export function useTagManager(
     if (!confirm(`删除标签「${tagName}」？\n只删标签，不删题目。`)) return
     await api.delete(`/tag/${tagId}`)
 
-    // 如果当前筛选包含这个标签，删除它
     const prevTagIds = (((filters as any).tagIds ?? []) as number[])
     const prevTagId = (filters as any).tagId as number | undefined
 
@@ -67,7 +75,14 @@ export function useTagManager(
   }
 
   async function handleAttachTag(selectedIds: Set<number>) {
-    if (!pendingTagId || selectedIds.size === 0) { exitTagMode(); return }
+    if (!pendingTagId) {
+      alert('请先选择一个标签')
+      return
+    }
+    if (selectedIds.size === 0) {
+      alert('请先选择至少一道题')
+      return
+    }
     await api.post(`/tag/${pendingTagId}/attach`, { quizIds: Array.from(selectedIds) })
     exitTagMode()
     onSuccess()
@@ -77,9 +92,13 @@ export function useTagManager(
     showNewTagInput, setShowNewTagInput,
     newTagName, setNewTagName,
     newTagDimension, setNewTagDimension,
+
     isTagMode, setIsTagMode,
-    pendingTagId,
+    pendingTagId, setPendingTagId, // 新增导出 setter，便于页面直接选标签
+    enterTagMode,                   // 新增
+    startTagModeWithTag,            // 新增
     exitTagMode,
+
     handleCreateTag,
     handleDeleteTag,
     handleAttachTag,

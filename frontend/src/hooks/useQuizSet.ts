@@ -37,13 +37,16 @@ export function useQuizSet(id: string | undefined) {
   const navigate = useNavigate()
   const [quizSet, setQuizSet] = useState<QuizSet | null>(null)
   const [sortMode, setSortMode] = useState<SortMode>('custom')
-  const [filters, setFilters] = useState<QuizFilterParams>({})
+  const [filters, setFilters] = useState<QuizFilterParams>({
+    tagMatchMode: 'OR',
+    tagViewMode: 'ALL',
+  })
   const [isReorderMode, setIsReorderMode] = useState(false)
   const [localQuizzes, setLocalQuizzes] = useState<Quiz[]>([])
-  const [globalTagObjects, setGlobalTagObjects] = useState<Tag[]>([])  // ← 新增
+  const [globalTagObjects, setGlobalTagObjects] = useState<Tag[]>([])
 
   useEffect(() => { fetchQuizSet() }, [id])
-  useEffect(() => { fetchGlobalTags() }, [])                           // ← 新增
+  useEffect(() => { fetchGlobalTags() }, [])
 
   async function fetchQuizSet() {
     try {
@@ -56,7 +59,7 @@ export function useQuizSet(id: string | undefined) {
     }
   }
 
-  async function fetchGlobalTags() {                                   // ← 新增
+  async function fetchGlobalTags() {
     try {
       const res = await api.get('/tag?scope=global')
       setGlobalTagObjects(res.data)
@@ -97,7 +100,6 @@ export function useQuizSet(id: string | undefined) {
     setQuizSet(prev => prev ? { ...prev, visibility: v } : prev)
   }
 
-  // ── 排序 ─────────────────────────────────────────────────────
   const baseQuizzes = isReorderMode ? localQuizzes : (quizSet?.quizzes ?? [])
 
   const sortedQuizzes = isReorderMode
@@ -112,25 +114,27 @@ export function useQuizSet(id: string | undefined) {
         }
       })
 
-// ── 多维度交叉过滤 ────────────────────────────────────────────
-  const selectedTagIds = (filters as any).tagIds as number[] | undefined
+  const selectedTagIds = filters.tagIds
+  const matchMode = filters.tagMatchMode ?? 'OR'
 
   const filteredQuizzes = sortedQuizzes.filter(q => {
     if (selectedTagIds && selectedTagIds.length > 0) {
       const quizTagIds = q.tags.map(t => t.tag.id)
-      const hit = selectedTagIds.some(id => quizTagIds.includes(id)) // OR 逻辑
+      const hit = matchMode === 'AND'
+        ? selectedTagIds.every(id => quizTagIds.includes(id))
+        : selectedTagIds.some(id => quizTagIds.includes(id))
       if (!hit) return false
     }
     if (filters.difficulty && q.difficulty !== filters.difficulty) return false
     return true
   })
 
-  // ── 收集所有标签（保留 dimension）────────────────────────────
   const allTagObjects = Array.from(
     new Map(
-      (quizSet?.quizzes ?? [])
-        .flatMap(q => q.tags.map(t => t.tag))
-        .map(t => [t.id, t])
+      [
+        ...(quizSet?.quizzes ?? []).flatMap(q => q.tags.map(t => t.tag)),
+        ...globalTagObjects,
+      ].map(t => [t.id, t])
     ).values()
   )
 
@@ -141,7 +145,7 @@ export function useQuizSet(id: string | undefined) {
     isReorderMode,
     filteredQuizzes,
     allTagObjects,
-    globalTagObjects,          // ← 新增
+    globalTagObjects,
     handleDragEnd,
     handleSaveReorder,
     enterReorderMode,

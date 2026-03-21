@@ -1,17 +1,36 @@
-// ── 基础枚举 ─────────────────────────────────────────────────
 export type Visibility = 'PRIVATE' | 'PUBLIC' | 'PUBLIC_EDIT'
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD'
 export type TagDimension = 'KNOWLEDGE' | 'METHOD' | 'SOURCE' | 'CONTEXT'
+
+export type TagMatchMode = 'OR' | 'AND'
+export type TagViewMode = 'ALL' | 'SELECTED' | 'GROUPED'
 
 // ── Tag ──────────────────────────────────────────────────────
 export interface Tag {
   id: number
   name: string
   dimension: TagDimension
-  isGlobal?: boolean          // ← 新增：全局标签 true，本库私有 false/undefined
+  isGlobal?: boolean
   parentId?: number | null
-  aliases?: string[]          // 别名列表，用于搜索匹配
-  children?: Tag[]            // 树形结构（KNOWLEDGE 维度使用）
+  aliases?: string[]
+  children?: Tag[]
+}
+
+export interface QuizFilterParams {
+  knowledge?: string
+  method?: string
+  source?: string
+  context?: string
+  difficulty?: Difficulty
+  keyword?: string
+
+  // 兼容你现有逻辑
+  tagId?: number
+  tagIds?: number[]
+
+  // 新增
+  tagMatchMode?: TagMatchMode   // OR / AND
+  tagViewMode?: TagViewMode     // ALL / SELECTED / GROUPED
 }
 
 // AI 推荐标签（半透明展示用）
@@ -47,13 +66,3 @@ export interface QuizSet {
   quizzes: Quiz[]
 }
 
-// ── 筛选参数（Dashboard 多维度交叉查询用）────────────────────
-export interface QuizFilterParams {
-  knowledge?: string
-  method?: string
-  source?: string
-  context?: string
-  difficulty?: Difficulty
-  keyword?: string
-  tagId?: number
-}

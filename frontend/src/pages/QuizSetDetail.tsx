@@ -1,6 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// QuizSetDetail.tsx
-// ─────────────────────────────────────────────────────────────
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
@@ -21,7 +18,7 @@ import DraggableQuizItem from '../components/DraggableQuizItem'
 import { DifficultyBadge } from '../components/DifficultyBadge'
 import UploadPanel       from '../components/UploadPanel'
 import ExportPanel       from '../components/ExportPanel'
-import type { TagOption } from '../components/TagSearchInput'  // ← 新增 import
+import TagSearchInput, { type TagOption } from '../components/TagSearchInput'
 
 function getCurrentUserId(): number | null {
   const token = localStorage.getItem('token')
@@ -72,8 +69,8 @@ export default function QuizSetDetail() {
     editingId, setEditingId,
     editQuestion, setEditQuestion,
     editAnswer, setEditAnswer,
-    editTagInput, setEditTagInput,   // 暂时保留，等后续清理
-    editTagIds, setEditTagIds,       // ← 新增：从 useQuizEdit 解构
+    editTagInput, setEditTagInput,
+    editTagIds, setEditTagIds,
     editDifficulty, setEditDifficulty,
     handleAdd, handleDelete, startEdit, handleEditSave,
   } = editHook
@@ -91,6 +88,9 @@ export default function QuizSetDetail() {
     showNewTagInput, setShowNewTagInput,
     newTagName, setNewTagName,
     isTagMode,
+    pendingTagId,
+    setPendingTagId,
+    enterTagMode,
     exitTagMode,
     handleCreateTag,
     handleDeleteTag,
@@ -99,19 +99,21 @@ export default function QuizSetDetail() {
 
   if (!quizSet) return <div style={{ padding: 40 }}>加载中...</div>
 
-  // ── 权限判断 ───────────────────────────────────────────────
   const currentUserId = getCurrentUserId()
   const isAuthor = quizSet.author.id === currentUserId
   const canEdit  = isAuthor || quizSet.visibility === 'PUBLIC_EDIT'
 
-  // ── ★ 在 if(!quizSet) 之后、return 之前计算 tagOptions ────
-  // allTagObjects 此时已有值，globalTagObjects 同理
   const globalIds = new Set(globalTagObjects.map(t => t.id))
   const tagOptions: TagOption[] = allTagObjects.map(t => ({
-    id:       t.id,
-    name:     t.name,
+    id: t.id,
+    name: t.name,
     isGlobal: globalIds.has(t.id),
+    parentId: (t as any).parentId ?? null,
   }))
+
+  const pendingTag = pendingTagId
+    ? tagOptions.find(t => t.id === pendingTagId) ?? null
+    : null
 
   function toggleAnswer(qid: number) {
     setRevealedIds(prev => {
@@ -129,7 +131,6 @@ export default function QuizSetDetail() {
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 40px 0' }}>
-
       <QuizSetHeader
         quizSet={quizSet}
         isAuthor={isAuthor}
@@ -145,9 +146,17 @@ export default function QuizSetDetail() {
         onToggleUpload={() => { setShowUpload(v => !v); setShowAddForm(false); setShowExport(false) }}
         onToggleExport={() => { setShowExport(v => !v); setShowAddForm(false); setShowUpload(false) }}
         onEnterSelectMode={() => { setIsSelectMode(true); closeAllPanels() }}
+        onEnterTagMode={() => {
+          enterTagMode()
+          closeAllPanels()
+          setIsSelectMode(false)
+          setSelectedIds(new Set())
+        }}
         onEnterReorderMode={() => {
-          enterReorderMode(); closeAllPanels()
-          setIsSelectMode(false); setSelectedIds(new Set())
+          enterReorderMode()
+          closeAllPanels()
+          setIsSelectMode(false)
+          setSelectedIds(new Set())
         }}
         onSaveReorder={handleSaveReorder}
         onCancelReorder={cancelReorderMode}
@@ -170,6 +179,36 @@ export default function QuizSetDetail() {
         onCreateTag={handleCreateTag}
       />
 
+      {isTagMode && (
+        <div style={{
+          display: 'flex', flexDirection: 'column', gap: 8,
+          padding: '10px 12px', marginBottom: 12,
+          background: '#e6f4ff', border: '1px solid #91caff', borderRadius: 8,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 13 }}>
+              🏷️ 批量打标签：先选标签，再勾题（已选 <b>{selectedIds.size}</b> 题）
+            </span>
+            <button onClick={exitTagMode} style={{ marginLeft: 'auto', fontSize: 13 }}>取消</button>
+          </div>
+
+          <div style={{ maxWidth: 420 }}>
+            <TagSearchInput
+              options={tagOptions}
+              selectedIds={pendingTagId ? [pendingTagId] : []}
+              onToggle={(tag) => setPendingTagId(tag.id)}
+              onCreateNew={undefined}
+              canCreate={false}
+              placeholder="选择要批量应用的已有标签"
+            />
+          </div>
+
+          <div style={{ fontSize: 12, color: '#555' }}>
+            当前标签：{pendingTag ? `「${pendingTag.name}」` : '（未选择）'}
+          </div>
+        </div>
+      )}
+
       {isReorderMode && (
         <div style={{
           display: 'flex', alignItems: 'center', gap: 12,
@@ -177,19 +216,6 @@ export default function QuizSetDetail() {
           background: '#fffbe6', border: '1px solid #ffe58f', borderRadius: 8,
         }}>
           <span style={{ fontSize: 13 }}>⠿ 拖拽左侧把手调整题目顺序，完成后点击「保存排序」</span>
-        </div>
-      )}
-
-      {isTagMode && (
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 12,
-          padding: '8px 12px', marginBottom: 12,
-          background: '#e6f4ff', border: '1px solid #91caff', borderRadius: 8,
-        }}>
-          <span style={{ fontSize: 13 }}>
-            🏷️ 选择要打标签的题目（已选 <b>{selectedIds.size}</b> 题）
-          </span>
-          <button onClick={exitTagMode} style={{ marginLeft: 'auto', fontSize: 13 }}>取消</button>
         </div>
       )}
 
@@ -207,8 +233,8 @@ export default function QuizSetDetail() {
 
       {showAddForm && canEdit && (
         <AddQuizForm
-          question={question}   answer={answer}
-          tagInput={tagInput}   difficulty={difficulty}
+          question={question} answer={answer}
+          tagInput={tagInput} difficulty={difficulty}
           onQuestionChange={setQuestion}
           onAnswerChange={setAnswer}
           onTagInputChange={setTagInput}
@@ -329,18 +355,30 @@ export default function QuizSetDetail() {
           padding: '12px 24px', zIndex: 100, boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
           display: 'flex', alignItems: 'center', gap: 16,
         }}>
-          <span style={{ fontSize: 14 }}>🏷️ 已选 <b>{selectedIds.size}</b> 题</span>
+          <span style={{ fontSize: 14 }}>
+            🏷️ {pendingTag ? `标签「${pendingTag.name}」` : '未选标签'}，已选 <b>{selectedIds.size}</b> 题
+          </span>
           <button
             onClick={() => handleAttachTag(selectedIds)}
-            style={{ background: '#1677ff', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 18px', cursor: 'pointer', fontSize: 14 }}
-          >✓ 完成打标签</button>
+            disabled={!pendingTagId || selectedIds.size === 0}
+            style={{
+              background: (!pendingTagId || selectedIds.size === 0) ? '#bfbfbf' : '#1677ff',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 6,
+              padding: '6px 18px',
+              cursor: (!pendingTagId || selectedIds.size === 0) ? 'not-allowed' : 'pointer',
+              fontSize: 14
+            }}
+          >
+            ✓ 应用标签
+          </button>
           <button
             onClick={exitTagMode}
             style={{ background: '#f0f0f0', color: '#555', border: 'none', borderRadius: 6, padding: '6px 14px', cursor: 'pointer', fontSize: 14 }}
           >取消</button>
         </div>
       )}
-
     </div>
   )
 }
