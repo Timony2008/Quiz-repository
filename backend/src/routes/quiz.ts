@@ -30,6 +30,14 @@ function parseDifficulty(raw: any): number | null {
   return isNaN(n) ? null : n
 }
 
+// ── note 归一化 ───────────────────────────────────────────────
+// undefined/null/空白字符串 -> null，其他 -> trim 后字符串
+function normalizeNote(raw: any): string | null {
+  if (raw === undefined || raw === null) return null
+  const s = String(raw).trim()
+  return s === '' ? null : s
+}
+
 // ── GET /quiz — 题库列表，支持标签名模糊筛选 ─────────────────
 // ?tags=多项式,构造   （逗号分隔，取交集）
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
@@ -177,7 +185,7 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) =>
   const userId    = req.userId!
 
   const qs = await prisma.quizSet.findUnique({ where: { id: quizSetId } })
-  if (!qs)                   { res.status(404).json({ error: '题库不存在' });       return }
+  if (!qs)                    { res.status(404).json({ error: '题库不存在' });       return }
   if (qs.authorId !== userId) { res.status(403).json({ error: '只有作者可以删除题库' }); return }
 
   await prisma.quizSet.delete({ where: { id: quizSetId } })
@@ -196,7 +204,7 @@ router.patch('/:id/visibility', authMiddleware, async (req: AuthRequest, res: Re
   }
 
   const qs = await prisma.quizSet.findUnique({ where: { id: quizSetId } })
-  if (!qs)                   { res.status(404).json({ error: '题库不存在' });         return }
+  if (!qs)                    { res.status(404).json({ error: '题库不存在' });         return }
   if (qs.authorId !== userId) { res.status(403).json({ error: '只有作者可以修改权限' }); return }
 
   const updated = await prisma.quizSet.update({
@@ -215,20 +223,21 @@ router.post('/:id/items', authMiddleware, async (req: AuthRequest, res: Response
   if (access === null)  { res.status(404).json({ error: '题库不存在' }); return }
   if (access === false) { res.status(403).json({ error: '无编辑权限' }); return }
 
-  const { question, answer, tags = [] } = req.body
+  const { question, answer, tags = [], note } = req.body
   const difficulty = parseDifficulty(req.body.difficulty)
+  const normalizedNote = normalizeNote(note)
 
   if (!question || !answer) {
     res.status(400).json({ error: '题目和答案不能为空' }); return
   }
 
-  // resolveTagIds 新签名：需要传 quizSetId
   const tagIds = tags.length > 0 ? await resolveTagIds(tags, quizSetId) : []
 
   const quiz = await prisma.quiz.create({
     data: {
       question,
       answer,
+      note: normalizedNote, // ✅ 持久化备注
       quizSetId,
       difficulty,
       tags: {
@@ -253,15 +262,15 @@ router.put('/item/:id', authMiddleware, async (req: AuthRequest, res: Response) 
   const access = await canEdit(quiz.quizSetId, userId)
   if (access === false) { res.status(403).json({ error: '无编辑权限' }); return }
 
-  const { question, answer } = req.body
+  const { question, answer, note } = req.body
   const difficulty = parseDifficulty(req.body.difficulty)
+  const normalizedNote = normalizeNote(note)
 
-  // ↓ 改：优先用 tagIds（id数组），兼容旧的 tags（名字数组）
   let tagIds: number[] = []
   if (Array.isArray(req.body.tagIds) && req.body.tagIds.length > 0) {
-    tagIds = req.body.tagIds                                      // 前端直接传 id 数组
+    tagIds = req.body.tagIds
   } else if (Array.isArray(req.body.tags) && req.body.tags.length > 0) {
-    tagIds = await resolveTagIds(req.body.tags, quiz.quizSetId)   // 兼容旧名字数组
+    tagIds = await resolveTagIds(req.body.tags, quiz.quizSetId)
   }
 
   await prisma.quizTag.deleteMany({ where: { quizId } })
@@ -271,6 +280,7 @@ router.put('/item/:id', authMiddleware, async (req: AuthRequest, res: Response) 
     data: {
       question,
       answer,
+      note: normalizedNote, // ✅ 持久化备注
       difficulty,
       tags: {
         create: tagIds.map((tagId: number) => ({ tagId })),
@@ -282,7 +292,6 @@ router.put('/item/:id', authMiddleware, async (req: AuthRequest, res: Response) 
   })
   res.json(updated)
 })
-
 
 // ── PATCH /quiz/:id/items/reorder — 题目排序 ─────────────────
 // body: { orders: [{ id: number, order: number }] }

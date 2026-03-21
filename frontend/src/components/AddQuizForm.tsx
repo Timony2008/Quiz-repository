@@ -4,6 +4,8 @@ import { difficultyHint } from './DifficultyBadge'
 interface Props {
   question: string
   answer: string
+  note: string
+  onNoteChange: (v: string) => void
   tagInput: string
   difficulty: string
   onQuestionChange: (v: string) => void
@@ -14,8 +16,16 @@ interface Props {
 }
 
 export default function AddQuizForm({
-  question, answer, tagInput, difficulty,
-  onQuestionChange, onAnswerChange, onTagInputChange, onDifficultyChange,
+  question,
+  answer,
+  note,
+  onNoteChange,
+  tagInput,
+  difficulty,
+  onQuestionChange,
+  onAnswerChange,
+  onTagInputChange,
+  onDifficultyChange,
   onSubmit,
 }: Props) {
   return (
@@ -38,6 +48,18 @@ export default function AddQuizForm({
           预览：<MathText text={answer} />
         </div>
       )}
+      <textarea
+        placeholder="备注（可选）"
+        value={note}
+        onChange={e => onNoteChange(e.target.value)}
+        rows={2}
+        style={{ width: '100%', marginBottom: 8, padding: '6px 10px', boxSizing: 'border-box', resize: 'vertical' }}
+      />
+      {note && (
+        <div style={{ fontSize: 13, color: '#555', padding: '4px 8px', background: '#fafafa', borderRadius: 4, marginBottom: 8 }}>
+          预览：<MathText text={note} />
+        </div>
+      )}      
       <input
         placeholder="标签（逗号分隔）" value={tagInput} onChange={e => onTagInputChange(e.target.value)}
         style={{ width: '100%', marginBottom: 8, padding: '6px 10px', boxSizing: 'border-box' }}

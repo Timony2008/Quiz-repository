@@ -1,4 +1,4 @@
-// src/components/DraggableQuizItem.tsx
+import { useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { MathText } from './MathText'
@@ -16,6 +16,7 @@ interface Props {
   isEditing: boolean
   editQuestion: string
   editAnswer: string
+  editNote: string
   editTagInput: string
   editDifficulty: string
   difficultyBadge?: React.ReactNode
@@ -27,6 +28,7 @@ interface Props {
   onEditCancel: () => void
   onEditQuestionChange: (v: string) => void
   onEditAnswerChange: (v: string) => void
+  onEditNoteChange: (v: string) => void
   onEditTagInputChange: (v: string) => void
   onEditDifficultyChange: (v: string) => void
   editTagIds: number[]
@@ -54,13 +56,15 @@ export default function DraggableQuizItem(props: Props) {
   const {
     quiz, canEdit, isTagMode, isSelectMode, isReorderMode,
     isSelected, isRevealed, isEditing,
-    editQuestion, editAnswer, editTagInput, editDifficulty,
+    editQuestion, editAnswer, editNote, editTagInput, editDifficulty,
     difficultyBadge,
     onToggleAnswer, onToggleSelect, onStartEdit, onDelete,
     onEditSave, onEditCancel,
-    onEditQuestionChange, onEditAnswerChange, onEditTagInputChange, onEditDifficultyChange,
+    onEditQuestionChange, onEditAnswerChange, onEditNoteChange, onEditTagInputChange, onEditDifficultyChange,
     editTagIds, tagOptions, onEditTagToggle, onEditTagCreate, canCreate,
   } = props
+
+  const [isNoteRevealed, setIsNoteRevealed] = useState(false)
 
   const {
     attributes, listeners, setNodeRef,
@@ -101,13 +105,21 @@ export default function DraggableQuizItem(props: Props) {
     >
       {isReorderMode && (
         <span
-          {...attributes} {...listeners}
+          {...attributes}
+          {...listeners}
           style={{
-            marginRight: 10, marginTop: 4, cursor: 'grab',
-            color: '#bbb', fontSize: 18, flexShrink: 0, userSelect: 'none'
+            marginRight: 10,
+            marginTop: 4,
+            cursor: 'grab',
+            color: '#bbb',
+            fontSize: 18,
+            flexShrink: 0,
+            userSelect: 'none'
           }}
           title="拖拽排序"
-        >⠿</span>
+        >
+          ⠿
+        </span>
       )}
 
       {(isSelectMode || isTagMode) && (
@@ -127,14 +139,22 @@ export default function DraggableQuizItem(props: Props) {
             onChange={e => onEditQuestionChange(e.target.value)}
             rows={3}
             style={{
-              width: '100%', marginBottom: 6, padding: '5px 8px',
-              boxSizing: 'border-box', resize: 'vertical', fontFamily: 'monospace'
+              width: '100%',
+              marginBottom: 6,
+              padding: '5px 8px',
+              boxSizing: 'border-box',
+              resize: 'vertical',
+              fontFamily: 'monospace'
             }}
           />
           {editQuestion && (
             <div style={{
-              fontSize: 13, color: '#555', padding: '4px 8px',
-              background: '#fafafa', borderRadius: 4, marginBottom: 8
+              fontSize: 13,
+              color: '#555',
+              padding: '4px 8px',
+              background: '#fafafa',
+              borderRadius: 4,
+              marginBottom: 8
             }}>
               预览：<MathText text={editQuestion} />
             </div>
@@ -145,16 +165,50 @@ export default function DraggableQuizItem(props: Props) {
             onChange={e => onEditAnswerChange(e.target.value)}
             rows={3}
             style={{
-              width: '100%', marginBottom: 6, padding: '5px 8px',
-              boxSizing: 'border-box', resize: 'vertical', fontFamily: 'monospace'
+              width: '100%',
+              marginBottom: 6,
+              padding: '5px 8px',
+              boxSizing: 'border-box',
+              resize: 'vertical',
+              fontFamily: 'monospace'
             }}
           />
           {editAnswer && (
             <div style={{
-              fontSize: 13, color: '#555', padding: '4px 8px',
-              background: '#fafafa', borderRadius: 4, marginBottom: 8
+              fontSize: 13,
+              color: '#555',
+              padding: '4px 8px',
+              background: '#fafafa',
+              borderRadius: 4,
+              marginBottom: 8
             }}>
               预览：<MathText text={editAnswer} />
+            </div>
+          )}
+
+          <textarea
+            value={editNote}
+            onChange={e => onEditNoteChange(e.target.value)}
+            rows={2}
+            placeholder="备注（可选）"
+            style={{
+              width: '100%',
+              marginBottom: 6,
+              padding: '5px 8px',
+              boxSizing: 'border-box',
+              resize: 'vertical'
+            }}
+          />
+          {editNote && (
+            <div style={{
+              fontSize: 13,
+              color: '#555',
+              padding: '4px 8px',
+              background: '#fafafa',
+              borderRadius: 4,
+              marginBottom: 8
+            }}>
+              预览：<MathText text={editNote} />
             </div>
           )}
 
@@ -162,7 +216,7 @@ export default function DraggableQuizItem(props: Props) {
             options={tagOptions}
             selectedIds={editTagIds}
             onToggle={onEditTagToggle}
-            onToggleParentOnly={onEditTagToggle} // 编辑态：父标签默认仅选父
+            onToggleParentOnly={onEditTagToggle}
             onCreateNew={(name) => onEditTagCreate(name, quiz.id)}
             canCreate={canCreate}
             placeholder="搜索或添加标签…"
@@ -174,20 +228,21 @@ export default function DraggableQuizItem(props: Props) {
               placeholder="难度（1 ~ 7，如 4.5）"
               value={editDifficulty}
               onChange={e => onEditDifficultyChange(e.target.value)}
-              min={1} max={7} step={0.1}
+              min={1}
+              max={7}
+              step={0.1}
               style={{
-                width: 200, padding: '4px 8px',
-                borderRadius: 4, border: '1px solid #d9d9d9', fontSize: 13
+                width: 200,
+                padding: '4px 8px',
+                borderRadius: 4,
+                border: '1px solid #d9d9d9',
+                fontSize: 13
               }}
             />
             {editDifficulty.trim() !== '' && (
               editDiffValid
-                ? <span style={{ fontSize: 12, color: difficultyColor(editDiffNum) }}>
-                    ⭐ {editDiffNum} Star
-                  </span>
-                : <span style={{ fontSize: 12, color: '#ff4d4f' }}>
-                    请输入 1 ~ 7 的数字
-                  </span>
+                ? <span style={{ fontSize: 12, color: difficultyColor(editDiffNum) }}>⭐ {editDiffNum} Star</span>
+                : <span style={{ fontSize: 12, color: '#ff4d4f' }}>请输入 1 ~ 7 的数字</span>
             )}
           </div>
 
@@ -197,14 +252,15 @@ export default function DraggableQuizItem(props: Props) {
           </div>
         </div>
       ) : (
-        <div style={{
-          flex: 1, display: 'flex',
-          justifyContent: 'space-between', alignItems: 'flex-start'
-        }}>
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div style={{ flex: 1 }}>
             <div style={{
-              fontWeight: 500, marginBottom: 6,
-              display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap'
+              fontWeight: 500,
+              marginBottom: 6,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              flexWrap: 'wrap'
             }}>
               <MathText text={quiz.question} />
               {difficultyBadge ?? (quiz.difficulty != null && (() => {
@@ -213,10 +269,14 @@ export default function DraggableQuizItem(props: Props) {
                 const color = difficultyColor(val)
                 return (
                   <span style={{
-                    fontSize: 12, padding: '2px 8px', borderRadius: 10,
-                    background: color + '1a', color,
+                    fontSize: 12,
+                    padding: '2px 8px',
+                    borderRadius: 10,
+                    background: color + '1a',
+                    color,
                     border: `1px solid ${color}55`,
-                    fontWeight: 500, whiteSpace: 'nowrap'
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap'
                   }}>
                     ⭐ {val} Star
                   </span>
@@ -224,20 +284,57 @@ export default function DraggableQuizItem(props: Props) {
               })())}
             </div>
 
-            <button
-              onClick={e => { e.stopPropagation(); onToggleAnswer() }}
-              style={{
-                fontSize: 12, marginBottom: 6, padding: '2px 10px',
-                borderRadius: 4, cursor: 'pointer',
-                background: '#f5f5f5', border: '1px solid #ddd', color: '#555'
-              }}
-            >
-              {isRevealed ? '隐藏答案' : '显示答案'}
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
+              <button
+                onClick={e => { e.stopPropagation(); onToggleAnswer() }}
+                style={{
+                  fontSize: 12,
+                  padding: '2px 10px',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  background: '#f5f5f5',
+                  border: '1px solid #ddd',
+                  color: '#555'
+                }}
+              >
+                {isRevealed ? '隐藏答案' : '显示答案'}
+              </button>
+
+              {!!quiz.note && (
+                <button
+                  onClick={e => { e.stopPropagation(); setIsNoteRevealed(v => !v) }}
+                  style={{
+                    fontSize: 12,
+                    padding: '2px 10px',
+                    borderRadius: 4,
+                    cursor: 'pointer',
+                    background: '#f5f5f5',
+                    border: '1px solid #ddd',
+                    color: '#555'
+                  }}
+                >
+                  {isNoteRevealed ? '隐藏备注' : '显示备注'}
+                </button>
+              )}
+            </div>
 
             {isRevealed && (
               <div style={{ color: '#555', fontSize: 14, marginBottom: 6 }}>
                 <MathText text={quiz.answer} />
+              </div>
+            )}
+
+            {!!quiz.note && isNoteRevealed && (
+              <div style={{
+                marginTop: 6,
+                fontSize: 13,
+                color: '#666',
+                background: '#fafafa',
+                border: '1px dashed #e5e5e5',
+                borderRadius: 6,
+                padding: '6px 8px'
+              }}>
+                备注：<MathText text={quiz.note} />
               </div>
             )}
 
@@ -255,7 +352,7 @@ export default function DraggableQuizItem(props: Props) {
                         whiteSpace: 'nowrap',
                         background: isGlobal ? '#f5f5f5' : '#e6f4ff',
                         color: isGlobal ? '#666' : '#1677ff',
-                        border: `1px solid ${isGlobal ? '#e0e0e0' : '#91caff'}`,
+                        border: `1px solid ${isGlobal ? '#e0e0e0' : '#91caff'}`
                       }}
                     >
                       {t.tag.name}
@@ -271,14 +368,21 @@ export default function DraggableQuizItem(props: Props) {
               <button
                 onClick={e => { e.stopPropagation(); onStartEdit() }}
                 style={{ fontSize: 13 }}
-              >编辑</button>
+              >
+                编辑
+              </button>
               <button
                 onClick={e => { e.stopPropagation(); onDelete() }}
                 style={{
-                  fontSize: 13, color: '#ff4d4f',
-                  background: 'none', border: 'none', cursor: 'pointer'
+                  fontSize: 13,
+                  color: '#ff4d4f',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer'
                 }}
-              >删除</button>
+              >
+                删除
+              </button>
             </div>
           )}
         </div>

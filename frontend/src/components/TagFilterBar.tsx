@@ -42,7 +42,7 @@ export default function TagFilterBar({
   const activeTagIds = new Set<number>(((filters as any).tagIds ?? []) as number[])
 
   const tagMatchMode: TagMatchMode = ((filters as any).tagMatchMode ?? 'OR') as TagMatchMode
-  const tagViewMode: TagViewMode = ((filters as any).tagViewMode ?? 'ALL') as TagViewMode
+  const tagViewMode: TagViewMode = ((filters as any).tagViewMode ?? 'GROUPED') as TagViewMode
 
   useEffect(() => {
     if (tagViewMode === 'GROUPED') {

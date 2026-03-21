@@ -64,11 +64,13 @@ export default function QuizSetDetail() {
     showAddForm, setShowAddForm,
     question, setQuestion,
     answer, setAnswer,
+    note, setNote,
     tagInput, setTagInput,
     difficulty, setDifficulty,
     editingId, setEditingId,
     editQuestion, setEditQuestion,
     editAnswer, setEditAnswer,
+    editNote, setEditNote,
     editTagInput, setEditTagInput,
     editTagIds, setEditTagIds,
     editDifficulty, setEditDifficulty,
@@ -233,10 +235,14 @@ export default function QuizSetDetail() {
 
       {showAddForm && canEdit && (
         <AddQuizForm
-          question={question} answer={answer}
-          tagInput={tagInput} difficulty={difficulty}
+          question={question}
+          answer={answer}
+          note={note}
+          tagInput={tagInput}
+          difficulty={difficulty}
           onQuestionChange={setQuestion}
           onAnswerChange={setAnswer}
+          onNoteChange={setNote}
           onTagInputChange={setTagInput}
           onDifficultyChange={setDifficulty}
           onSubmit={handleAdd}
@@ -303,6 +309,7 @@ export default function QuizSetDetail() {
                 isEditing={editingId === q.id}
                 editQuestion={editQuestion}
                 editAnswer={editAnswer}
+                editNote={editNote}
                 editTagInput={editTagInput}
                 editDifficulty={editDifficulty}
                 difficultyBadge={<DifficultyBadge difficulty={q.difficulty} />}
@@ -314,6 +321,7 @@ export default function QuizSetDetail() {
                 onEditCancel={() => setEditingId(null)}
                 onEditQuestionChange={setEditQuestion}
                 onEditAnswerChange={setEditAnswer}
+                onEditNoteChange={setEditNote}
                 onEditTagInputChange={setEditTagInput}
                 onEditDifficultyChange={setEditDifficulty}
                 editTagIds={editTagIds}

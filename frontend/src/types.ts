@@ -53,6 +53,7 @@ export interface Quiz {
   tags: { tag: Tag }[]
   order: number                  // ← 补上
   updatedAt: string              // ← 补上
+  note?: string | null
   aiSuggestion?: AITagSuggestion
 }
 

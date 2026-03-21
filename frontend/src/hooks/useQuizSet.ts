@@ -39,7 +39,7 @@ export function useQuizSet(id: string | undefined) {
   const [sortMode, setSortMode] = useState<SortMode>('custom')
   const [filters, setFilters] = useState<QuizFilterParams>({
     tagMatchMode: 'OR',
-    tagViewMode: 'ALL',
+    tagViewMode: 'GROUPED',
   })
   const [isReorderMode, setIsReorderMode] = useState(false)
   const [localQuizzes, setLocalQuizzes] = useState<Quiz[]>([])
