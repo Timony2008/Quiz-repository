@@ -136,9 +136,16 @@ router.get('/:id/quizzes', authMiddleware, async (req: AuthRequest, res: Respons
 // ── POST /api/tag ─ 创建标签 ──────────────────────────────────
 // isGlobal=true 仅管理员可用（后续加权限校验）
 router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const { name, parentId, quizSetId, isGlobal = false, dimension } = req.body
+  const { name, parentId, quizSetId, isGlobal = false, dimension, confirmCreate } = req.body
   if (!name?.trim()) { res.status(400).json({ error: 'name required' }); return }
+  if (!confirmCreate) {
+    res.status(400).json({ error: '缺少创建确认（confirmCreate）' }); return
+  }
 
+  // 先硬性禁止普通流程创建全局标签
+  if (Boolean(isGlobal)) {
+    res.status(403).json({ error: '不允许在此流程创建全局标签' }); return
+  }
   try {
     const tag = await prisma.tag.create({
       data: {

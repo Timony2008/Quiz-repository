@@ -6,7 +6,7 @@ import { authMiddleware, AuthRequest } from '../middleware/auth'
 import { PrismaClient } from '@prisma/client'
 import { parseTexFile } from '../services/texParser'
 import { parsePdfFile } from '../services/pdfParser'
-import { QAPairWithTags } from '../services/aiParser'
+import type { QAPairWithTags } from '../services/aiParser'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
   filename: (_req, file, cb) => {
     const suffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
     cb(null, `${suffix}${path.extname(file.originalname)}`)
-  }
+  },
 })
 
 const upload = multer({
@@ -30,16 +30,20 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase()
-    if (['.tex', '.pdf'].includes(ext)) {
-      cb(null, true)
-    } else {
-      cb(new Error('只支持 .tex 和 .pdf 文件'))
-    }
-  }
+    if (['.tex', '.pdf'].includes(ext)) cb(null, true)
+    else cb(new Error('只支持 .tex 和 .pdf 文件'))
+  },
 })
 
+// ── 小工具：去重字符串数组 ────────────────────────────────────
+function uniqStr(arr: string[]): string[] {
+  return [...new Set(arr.map(s => s.trim()).filter(Boolean))]
+}
+
 // ── 将 AI 推断的标签写入 QuizTag ──────────────────────────────
-// 新逻辑：全部改为按 isGlobal 匹配，不再依赖 dimension
+// 新规则：
+// 1) knowledge/method/source 只匹配“已有全局标签”，不自动创建
+// 2) proposedContext：先匹配全局，不存在则在当前题库创建私有 CONTEXT（isGlobal=false）
 async function applyAITags(
   quizId: number,
   quizSetId: number,
@@ -47,46 +51,72 @@ async function applyAITags(
 ) {
   const tagIds: number[] = []
 
-  // ── 全局标签匹配（knowledge / method / source）─────────────
-  // 只从已有全局标签中匹配，找不到则跳过（不自动创建）
-  const globalNames = [
+  // 1) 三类字典标签：仅全局匹配，不创建
+  const globalNames = uniqStr([
     ...(tags.knowledge ?? []),
-    ...(tags.method    ?? []),
-    ...(tags.source    ? [tags.source] : []),
-  ]
+    ...(tags.method ?? []),
+    ...(tags.source ? [tags.source] : []),
+  ])
 
   for (const name of globalNames) {
     const tag = await prisma.tag.findFirst({
-      where: { name, isGlobal: true }
+      where: { name, isGlobal: true },
+      select: { id: true },
     })
     if (tag) {
       tagIds.push(tag.id)
     } else {
-      console.warn(`[AI Tags] 全局标签不存在，跳过: ${name}`)
+      console.warn(`[AI Tags] 全局标签不存在，已跳过: ${name}`)
     }
   }
 
-  // ── 自由标签（context）─────────────────────────────────────
-  // 全局优先匹配；全局没有则在题库内创建私有标签
-  for (const name of tags.context ?? []) {
+  // 2) 自由候选标签 proposedContext：全局优先，否则创建题库私有
+  // 兼容旧字段 context（防止历史数据）
+  const rawContext = Array.isArray((tags as any).proposedContext)
+    ? (tags as any).proposedContext
+    : (Array.isArray((tags as any).context) ? (tags as any).context : [])
+
+  const contextNames = uniqStr(rawContext.map((x: any) => String(x)))
+
+  for (const name of contextNames) {
+    // 2.1 先找全局 CONTEXT
     let tag = await prisma.tag.findFirst({
-      where: { name, dimension: 'CONTEXT', isGlobal: true }
+      where: { name, dimension: 'CONTEXT', isGlobal: true },
+      select: { id: true },
     })
+
+    // 2.2 找不到再找本题库私有 CONTEXT
     if (!tag) {
-      tag = await prisma.tag.create({
-        data: { name, dimension: 'CONTEXT', isGlobal: true, quizSetId: null }
+      tag = await prisma.tag.findFirst({
+        where: { name, dimension: 'CONTEXT', isGlobal: false, quizSetId },
+        select: { id: true },
       })
     }
+
+    // 2.3 还没有则创建“私有 CONTEXT”
+    if (!tag) {
+      const created = await prisma.tag.create({
+        data: {
+          name,
+          dimension: 'CONTEXT',
+          isGlobal: false,
+          quizSetId,
+        },
+        select: { id: true },
+      })
+      tag = created
+    }
+
     tagIds.push(tag.id)
   }
 
-  // ── 去重后批量写入 QuizTag ────────────────────────────────
+  // 3) 关联 QuizTag（去重）
   const uniqueIds = [...new Set(tagIds)]
   for (const tagId of uniqueIds) {
     await prisma.quizTag.upsert({
-      where:  { quizId_tagId: { quizId, tagId } },
+      where: { quizId_tagId: { quizId, tagId } },
       create: { quizId, tagId },
-      update: {}
+      update: {},
     })
   }
 }
@@ -107,46 +137,43 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
     return
   }
 
-  const quizBankId = parseInt(req.body.quizSetId)
-  if (!quizBankId) {
-    res.status(400).json({ error: '请指定目标题库' })
+  const quizSetId = Number(req.body.quizSetId)
+  if (!Number.isInteger(quizSetId) || quizSetId <= 0) {
+    res.status(400).json({ error: '请指定有效的目标题库' })
     return
   }
 
-  if (!await canEdit(quizBankId, req.userId!)) {
+  if (!(await canEdit(quizSetId, req.userId!))) {
     res.status(403).json({ error: '无权操作该题库' })
     return
   }
 
   const { originalname, path: storedPath } = req.file
-  const ext      = path.extname(originalname).toLowerCase()
+  const ext = path.extname(originalname).toLowerCase()
   const fileType = ext === '.pdf' ? 'PDF' : 'TEX'
 
   const sourceFile = await prisma.sourceFile.create({
-    data: { filename: originalname, storedPath, fileType, status: 'PROCESSING' }
+    data: { filename: originalname, storedPath, fileType, status: 'PROCESSING' },
   })
 
   res.json({ message: '上传成功，正在解析...', sourceFileId: sourceFile.id })
 
-  // ── 异步解析，不阻塞响应 ──────────────────────────────────
+  // 异步处理
   ;(async () => {
     try {
       let parsed: QAPairWithTags[] = []
 
       if (fileType === 'TEX') {
         const content = fs.readFileSync(storedPath, 'utf-8')
-        parsed = await parseTexFile(content) as QAPairWithTags[]
+        parsed = (await parseTexFile(content)) as QAPairWithTags[]
       } else {
-        parsed = await parsePdfFile(storedPath) as QAPairWithTags[]
+        parsed = (await parsePdfFile(storedPath)) as QAPairWithTags[]
       }
 
-      console.log('>>> parsed.length =', parsed.length)
-      console.log('>>> parsed[0] =', JSON.stringify(parsed[0]))
-
-      if (parsed.length === 0) {
+      if (!Array.isArray(parsed) || parsed.length === 0) {
         await prisma.sourceFile.update({
           where: { id: sourceFile.id },
-          data:  { status: 'FAILED', errorMsg: '未能从文件中解析出题目，请检查格式' }
+          data: { status: 'FAILED', errorMsg: '未能从文件中解析出题目，请检查格式' },
         })
         return
       }
@@ -154,16 +181,16 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
       for (const q of parsed) {
         const quiz = await prisma.quiz.create({
           data: {
-            question:     q.question,
-            answer:       q.answer,
-            quizSetId:    quizBankId,
-            sourceFileId: sourceFile.id
-          }
+            question: String(q.question ?? '').trim(),
+            answer: String(q.answer ?? '').trim(), // 允许空答案
+            quizSetId,
+            sourceFileId: sourceFile.id,
+          },
         })
 
         if (q.tags) {
           try {
-            await applyAITags(quiz.id, quizBankId, q.tags)
+            await applyAITags(quiz.id, quizSetId, q.tags)
           } catch (tagErr) {
             console.error(`[AI Tags] quizId=${quiz.id} 标签写入失败:`, tagErr)
           }
@@ -172,17 +199,16 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
 
       await prisma.sourceFile.update({
         where: { id: sourceFile.id },
-        data:  { status: 'DONE', quizCount: parsed.length }
+        data: { status: 'DONE', quizCount: parsed.length },
       })
-
     } catch (err) {
       console.error('解析失败:', err)
       await prisma.sourceFile.update({
         where: { id: sourceFile.id },
-        data:  {
-          status:   'FAILED',
-          errorMsg: err instanceof Error ? err.message : String(err)
-        }
+        data: {
+          status: 'FAILED',
+          errorMsg: err instanceof Error ? err.message : String(err),
+        },
       })
     }
   })()
@@ -190,7 +216,7 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
 
 // ── GET /api/upload/status/:id — 查询解析状态 ───────────────
 router.get('/status/:id', async (req: AuthRequest, res: Response) => {
-  const id         = parseInt(req.params.id as string)
+  const id = Number(req.params.id)
   const sourceFile = await prisma.sourceFile.findUnique({ where: { id } })
   if (!sourceFile) {
     res.status(404).json({ error: '记录不存在' })

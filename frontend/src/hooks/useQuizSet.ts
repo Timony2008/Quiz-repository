@@ -79,10 +79,16 @@ export function useQuizSet(id: string | undefined) {
   }
 
   async function handleSaveReorder() {
-    const items = localQuizzes.map((q, i) => ({ id: q.id, order: i }))
-    await reorderQuizzes(items)
-    setIsReorderMode(false)
-    fetchQuizSet()
+    if (!quizSet) return
+    try {
+      const items = localQuizzes.map((q, i) => ({ id: q.id, order: i }))
+      await reorderQuizzes(quizSet.id, items)
+      setIsReorderMode(false)
+      await fetchQuizSet()
+    } catch (err: any) {
+      console.error('保存排序失败:', err?.response?.status, err?.response?.data || err)
+      alert('保存排序失败，请稍后重试')
+    }
   }
 
   function enterReorderMode() {

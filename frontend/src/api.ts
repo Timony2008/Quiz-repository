@@ -12,10 +12,17 @@ api.interceptors.request.use(config => {
 
 export default api
 
-export function updateVisibility(quizSetId: number, visibility: 'PRIVATE' | 'PUBLIC' | 'PUBLIC_EDIT') {
+export function updateVisibility(
+  quizSetId: number,
+  visibility: 'PRIVATE' | 'PUBLIC' | 'PUBLIC_EDIT'
+) {
   return api.patch(`/quiz/${quizSetId}/visibility`, { visibility })
 }
 
-export function reorderQuizzes(items: { id: number; order: number }[]) {
-  return api.post('/quiz/reorder', items)
+// ✅ 修复：路径 + 方法 + body 结构都对齐后端
+export function reorderQuizzes(
+  quizSetId: number,
+  orders: { id: number; order: number }[]
+) {
+  return api.patch(`/quiz/${quizSetId}/items/reorder`, { orders })
 }

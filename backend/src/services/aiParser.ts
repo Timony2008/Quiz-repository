@@ -19,12 +19,12 @@ export interface QAPair {
 
 export interface QAPairWithTags extends QAPair {
   tags: {
-    knowledge: string[]   // 知识点标签（必须来自字典）
-    method: string[]      // 解题方法标签（必须来自字典）
-    source: string | null // 题目来源（必须来自字典，最多一个）
-    context: string[]     // 自由标签（AI 可自由生成）
+    knowledge: string[]       // 知识点标签（必须来自字典）
+    method: string[]          // 解题方法标签（必须来自字典）
+    source: string | null     // 题目来源（必须来自字典，最多一个）
+    proposedContext: string[] // 候选补充标签（仅建议，不自动创建）
   }
-  confidence: number      // 0.0 ~ 1.0，AI 对标签推断的置信度
+  confidence: number          // 0.0 ~ 1.0
 }
 
 // ── 标签字典加载 ──────────────────────────────────────────────
@@ -38,12 +38,12 @@ interface TagDict {
 async function loadTagDict(): Promise<TagDict> {
   const tags = await prisma.tag.findMany({
     where: { dimension: { in: ['KNOWLEDGE', 'METHOD', 'SOURCE'] } },
-    select: { name: true, dimension: true }
+    select: { name: true, dimension: true },
   })
 
   const knowledge = tags.filter(t => t.dimension === 'KNOWLEDGE').map(t => t.name)
-  const method    = tags.filter(t => t.dimension === 'METHOD').map(t => t.name)
-  const source    = tags.filter(t => t.dimension === 'SOURCE').map(t => t.name)
+  const method = tags.filter(t => t.dimension === 'METHOD').map(t => t.name)
+  const source = tags.filter(t => t.dimension === 'SOURCE').map(t => t.name)
 
   return { knowledge, method, source }
 }
@@ -106,16 +106,65 @@ function chunkText(text: string, maxChars = 6000): string[] {
   return chunks
 }
 
+// ── 返回值清洗 ────────────────────────────────────────────────
+
+function normalizeAIResult(items: any[]): QAPairWithTags[] {
+  if (!Array.isArray(items)) return []
+
+  return items.map((it: any): QAPairWithTags => {
+    const q = String(it?.question ?? '')
+    const a = String(it?.answer ?? '')
+
+    const confidenceRaw = Number(it?.confidence)
+    const confidence = Number.isFinite(confidenceRaw)
+      ? Math.max(0, Math.min(1, confidenceRaw))
+      : 0.5
+
+    const tags = it?.tags ?? {}
+
+    const knowledge: string[] = Array.isArray(tags.knowledge)
+      ? tags.knowledge.map((x: any) => String(x).trim()).filter(Boolean)
+      : []
+
+    const method: string[] = Array.isArray(tags.method)
+      ? tags.method.map((x: any) => String(x).trim()).filter(Boolean)
+      : []
+
+    const sourceVal = tags.source
+    const source: string | null =
+      sourceVal === null || sourceVal === undefined || String(sourceVal).trim() === ''
+        ? null
+        : String(sourceVal).trim()
+
+    // 兼容旧字段 context
+    const pcRaw: any[] = Array.isArray(tags.proposedContext)
+      ? tags.proposedContext
+      : (Array.isArray(tags.context) ? tags.context : [])
+
+    const proposedContext: string[] = [...new Set(
+      pcRaw.map((x: any) => String(x).trim()).filter(Boolean)
+    )]
+
+    return {
+      question: q,
+      answer: a,
+      tags: {
+        knowledge: [...new Set(knowledge)],
+        method: [...new Set(method)],
+        source,
+        proposedContext,
+      },
+      confidence,
+    }
+  })
+}
+
 // ── 单 chunk 解析 ─────────────────────────────────────────────
 
-async function parseChunk(
-  text: string,
-  tagDict: TagDict
-): Promise<QAPairWithTags[]> {
-
+async function parseChunk(text: string, tagDict: TagDict): Promise<QAPairWithTags[]> {
   const knowledgeList = tagDict.knowledge.join('、')
-  const methodList    = tagDict.method.join('、')
-  const sourceList    = tagDict.source.join('、')
+  const methodList = tagDict.method.join('、')
+  const sourceList = tagDict.source.join('、')
 
   const response = await client.chat.completions.create({
     model: 'deepseek-chat',
@@ -136,7 +185,7 @@ async function parseChunk(
     "knowledge": ["知识点1", "知识点2"],
     "method": ["方法1"],
     "source": "来源名称或null",
-    "context": ["自由标签"]
+    "proposedContext": ["候选标签1", "候选标签2"]
   },
   "confidence": 0.85
 }]
@@ -158,7 +207,8 @@ ${methodList}
 **source**（题目来源，最多选一个，必须从以下列表中选择，无法判断则填 null）：
 ${sourceList}
 
-**context**（补充标签，可自由填写，用于年份/赛事届次/其他无法归类的信息，如 "2018年"、"第一轮"）
+**proposedContext**（候选补充标签，可自由填写，用于年份/赛事届次/其他无法归类信息）
+注意：这些只是候选，不代表系统会创建标签。
 
 **confidence**：0.0~1.0，表示你对标签推断的整体置信度
 
@@ -166,7 +216,8 @@ ${sourceList}
 - 禁止使用训练数据中记忆的任何题目内容
 - 禁止对题目文字做任何修改、替换、补充或"纠正"
 - question 字段必须与输入原文逐字一致，只允许添加 LaTeX 标记
-- knowledge / method / source 字段只能从上方列表中选择，不得自造新词`,
+- knowledge / method / source 字段只能从上方列表中选择，不得自造新词
+- 不得假设系统会自动创建任何标签（尤其全局标签）`,
       },
       {
         role: 'user',
@@ -182,9 +233,12 @@ ${sourceList}
   try {
     const cleaned = raw
       .replace(/^```json\s*/i, '')
-      .replace(/```\s*$/, '')
+      .replace(/^```\s*/i, '')
+      .replace(/```\s*$/i, '')
       .trim()
-    return JSON.parse(cleaned) as QAPairWithTags[]
+
+    const parsed = JSON.parse(cleaned)
+    return normalizeAIResult(parsed)
   } catch {
     console.error('AI 返回解析失败:', raw)
     return []
@@ -194,17 +248,14 @@ ${sourceList}
 // ── 主入口 ────────────────────────────────────────────────────
 
 export async function parseWithAI(text: string): Promise<QAPairWithTags[]> {
-  // 1. 预处理文本
   const cleanedText = removeWatermarks(cleanMathUnicode(text))
   console.log('=== 清洗后文本预览 ===\n', cleanedText.slice(0, 500))
 
-  // 2. 从数据库加载标签字典（只查一次）
   const tagDict = await loadTagDict()
   console.log(
     `=== 标签字典加载完成 === knowledge:${tagDict.knowledge.length} method:${tagDict.method.length} source:${tagDict.source.length}`
   )
 
-  // 3. 分块解析
   const chunks = chunkText(cleanedText)
   const results: QAPairWithTags[] = []
 
@@ -216,6 +267,3 @@ export async function parseWithAI(text: string): Promise<QAPairWithTags[]> {
 
   return results
 }
-
-// ── 向后兼容导出（旧代码调用 parseWithAI 仍可用）─────────────
-// QAPair 类型已被 QAPairWithTags 扩展，完全兼容

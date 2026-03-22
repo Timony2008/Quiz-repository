@@ -12,20 +12,20 @@ function normalizeDimension(v: any): TagDimension {
 
 // ── 树节点类型 ────────────────────────────────────────────────
 export interface TagNode {
-  id:         number
-  name:       string
-  dimension:  TagDimension        // ✅ 新增
-  isGlobal:   boolean
-  parentId:   number | null
-  quizSetId:  number | null
-  children:   TagNode[]
-  quizCount:  number
+  id: number
+  name: string
+  dimension: TagDimension
+  isGlobal: boolean
+  parentId: number | null
+  quizSetId: number | null
+  children: TagNode[]
+  quizCount: number
 }
 
 // ── 递归构建全局标签树 ────────────────────────────────────────
 export async function buildTagTree(): Promise<TagNode[]> {
   const all = await prisma.tag.findMany({
-    where:   { isGlobal: true },
+    where: { isGlobal: true },
     include: { _count: { select: { quizzes: true } } },
     orderBy: { name: 'asc' },
   })
@@ -33,13 +33,13 @@ export async function buildTagTree(): Promise<TagNode[]> {
   const map = new Map<number, TagNode>()
   for (const t of all) {
     map.set(t.id, {
-      id:        t.id,
-      name:      t.name,
-      dimension: normalizeDimension((t as any).dimension), // ✅ 新增
-      isGlobal:  t.isGlobal,
-      parentId:  t.parentId,
+      id: t.id,
+      name: t.name,
+      dimension: normalizeDimension((t as any).dimension),
+      isGlobal: t.isGlobal,
+      parentId: t.parentId,
       quizSetId: t.quizSetId,
-      children:  [],
+      children: [],
       quizCount: t._count.quizzes,
     })
   }
@@ -55,39 +55,70 @@ export async function buildTagTree(): Promise<TagNode[]> {
   return roots
 }
 
-// ── 按名字解析标签 id（全局优先，找不到则在题库内创建私有标签）
+// ── 工具：去重 + 清洗标签名 ───────────────────────────────────
+function normalizeTagNames(tagNames: string[]): string[] {
+  return [...new Set(
+    (tagNames || [])
+      .map(n => String(n).trim())
+      .filter(Boolean)
+  )]
+}
+
+// ── 解析结果：已有标签 + 缺失标签（不会创建）────────────────────
+export async function resolveTagDecision(
+  tagNames: string[],
+  quizSetId: number
+): Promise<{ existingTagIds: number[]; missingNames: string[] }> {
+  const names = normalizeTagNames(tagNames)
+  if (names.length === 0) {
+    return { existingTagIds: [], missingNames: [] }
+  }
+
+  const existing = await prisma.tag.findMany({
+    where: {
+      name: { in: names },
+      OR: [
+        { isGlobal: true },
+        { isGlobal: false, quizSetId },
+      ],
+    },
+    select: { id: true, name: true, isGlobal: true },
+  })
+
+  // 全局优先：同名时优先取全局标签 id
+  const bestByName = new Map<string, { id: number; isGlobal: boolean }>()
+  for (const t of existing) {
+    const prev = bestByName.get(t.name)
+    if (!prev || (!prev.isGlobal && t.isGlobal)) {
+      bestByName.set(t.name, { id: t.id, isGlobal: t.isGlobal })
+    }
+  }
+
+  const existingTagIds: number[] = []
+  const missingNames: string[] = []
+
+  for (const name of names) {
+    const hit = bestByName.get(name)
+    if (hit) existingTagIds.push(hit.id)
+    else missingNames.push(name)
+  }
+
+  return { existingTagIds, missingNames }
+}
+
+// ── 兼容旧调用：仅返回已有标签 id（不创建新标签）───────────────
 export async function resolveTagIds(
   tagNames: string[],
   quizSetId: number
 ): Promise<number[]> {
-  const ids = await Promise.all(
-    tagNames.map(async name => {
-      // 1. 先找全局标签
-      const global = await prisma.tag.findFirst({
-        where: { name, isGlobal: true }
-      })
-      if (global) return global.id
-
-      // 2. 再找该题库的私有标签
-      const existing = await prisma.tag.findFirst({
-        where: { name, quizSetId, isGlobal: false }
-      })
-      if (existing) return existing.id
-
-      // 3. 都没有 → 创建私有标签（默认 CONTEXT）
-      const created = await prisma.tag.create({
-        data: { name, isGlobal: false, quizSetId, dimension: 'CONTEXT' }
-      })
-      return created.id
-    })
-  )
-  return ids
+  const { existingTagIds } = await resolveTagDecision(tagNames, quizSetId)
+  return existingTagIds
 }
 
 // ── 递归收集某标签及其所有子孙的 id ──────────────────────────
 export async function collectDescendantIds(tagId: number): Promise<number[]> {
   const children = await prisma.tag.findMany({
-    where:  { parentId: tagId },
+    where: { parentId: tagId },
     select: { id: true },
   })
   const childIds = await Promise.all(children.map(c => collectDescendantIds(c.id)))
