@@ -151,7 +151,7 @@ router.post('/:id/items/tag-check', authMiddleware, async (req: AuthRequest, res
 
   const tags = toStringArray(req.body?.tags)
   const { existingTagIds, missingNames } = await resolveTagDecision(tags, quizSetId)
-  res.json({ existingTagIds, missingNames })
+  res.json({ existingTagIds, missingNames, aiUsed: false })
 })
 
 // ── GET /quiz/:id — 题库详情 ──────────────────────────────────

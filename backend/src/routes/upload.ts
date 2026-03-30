@@ -188,13 +188,7 @@ router.post('/', authMiddleware, upload.single('file'), async (req: AuthRequest,
           },
         })
 
-        if (q.tags) {
-          try {
-            await applyAITags(quiz.id, quizSetId, q.tags)
-          } catch (tagErr) {
-            console.error(`[AI Tags] quizId=${quiz.id} 标签写入失败:`, tagErr)
-          }
-        }
+//目前我们把AI打标签功能删掉了，因为AI实在有点唐氏，误伤率太高，反而增加了人工整理的工作量。后续我们会考虑重做一个更可靠的标签系统，或者提供一个独立的“AI推荐标签”功能，让用户自己选择是否采纳。
       }
 
       await prisma.sourceFile.update({

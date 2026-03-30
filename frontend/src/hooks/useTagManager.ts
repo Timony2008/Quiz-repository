@@ -2,6 +2,8 @@ import { useState } from 'react'
 import api from '../api'
 import type { Tag, QuizFilterParams } from '../types'
 
+type TagDimension = 'KNOWLEDGE' | 'METHOD' | 'SOURCE' | 'CONTEXT'
+
 export function useTagManager(
   onSuccess: () => void,
   filters: QuizFilterParams,
@@ -10,7 +12,7 @@ export function useTagManager(
 ) {
   const [showNewTagInput, setShowNewTagInput] = useState(false)
   const [newTagName, setNewTagName] = useState('')
-  const [newTagDimension, setNewTagDimension] = useState('KNOWLEDGE')
+  const [newTagDimension, setNewTagDimension] = useState<TagDimension>('KNOWLEDGE')
   const [isTagMode, setIsTagMode] = useState(false)
   const [pendingTagId, setPendingTagId] = useState<number | null>(null)
 
@@ -19,25 +21,30 @@ export function useTagManager(
     setPendingTagId(null)
   }
 
-  // 新增：只进入批量打标签模式（不预设标签）
+  // 只进入批量打标签模式（不预设标签）
   function enterTagMode() {
     setIsTagMode(true)
   }
 
-  // 新增：进入批量打标签并指定已有标签
+  // 进入批量打标签并指定已有标签
   function startTagModeWithTag(tagId: number) {
     setIsTagMode(true)
     setPendingTagId(tagId)
   }
 
   async function handleCreateTag(name: string, attachToQuizId?: number) {
-    if (!name.trim()) return
+    const trimmed = name.trim()
+    if (!trimmed) return
+
     try {
       const res = await api.post('/tag', {
-        name: name.trim(),
-        dimension: 'KNOWLEDGE',
+        name: trimmed,
+        dimension: newTagDimension || 'KNOWLEDGE',
         quizSetId: quizSetId ?? null,
+        isGlobal: false,       // 后端普通流程不允许 true
+        confirmCreate: true,   // 关键：后端必填
       })
+
       const createdTag: Tag = res.data
 
       if (attachToQuizId !== undefined) {
@@ -50,8 +57,23 @@ export function useTagManager(
         setPendingTagId(createdTag.id)
         onSuccess()
       }
+
+      // 可选：创建成功后清空输入
+      setNewTagName('')
+      setShowNewTagInput(false)
     } catch (err: any) {
-      if (err?.response?.status === 409) alert('标签已存在')
+      const status = err?.response?.status
+      const msg = err?.response?.data?.error
+
+      if (status === 409) {
+        alert(msg || '标签已存在')
+      } else if (status === 400) {
+        alert(msg || '请求参数错误（400）')
+      } else if (status === 403) {
+        alert(msg || '无权限创建该标签（403）')
+      } else {
+        alert(msg || '创建标签失败，请稍后重试')
+      }
     }
   }
 
@@ -83,6 +105,7 @@ export function useTagManager(
       alert('请先选择至少一道题')
       return
     }
+
     await api.post(`/tag/${pendingTagId}/attach`, { quizIds: Array.from(selectedIds) })
     exitTagMode()
     onSuccess()
@@ -94,9 +117,9 @@ export function useTagManager(
     newTagDimension, setNewTagDimension,
 
     isTagMode, setIsTagMode,
-    pendingTagId, setPendingTagId, // 新增导出 setter，便于页面直接选标签
-    enterTagMode,                   // 新增
-    startTagModeWithTag,            // 新增
+    pendingTagId, setPendingTagId,
+    enterTagMode,
+    startTagModeWithTag,
     exitTagMode,
 
     handleCreateTag,

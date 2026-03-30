@@ -3,10 +3,14 @@ import dotenv from 'dotenv'
 import { PrismaClient } from '@prisma/client'
 dotenv.config()
 
-const client = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com',
-})
+function getAIClient() {
+  if (process.env.AI_ENABLED !== 'true') return null
+  if (!process.env.DEEPSEEK_API_KEY) return null
+  return new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY,
+    baseURL: 'https://api.deepseek.com',
+  })
+}
 
 const prisma = new PrismaClient()
 
@@ -166,6 +170,9 @@ async function parseChunk(text: string, tagDict: TagDict): Promise<QAPairWithTag
   const methodList = tagDict.method.join('、')
   const sourceList = tagDict.source.join('、')
 
+  const client = getAIClient()
+  if (!client) return []
+
   const response = await client.chat.completions.create({
     model: 'deepseek-chat',
     messages: [
@@ -248,6 +255,11 @@ ${sourceList}
 // ── 主入口 ────────────────────────────────────────────────────
 
 export async function parseWithAI(text: string): Promise<QAPairWithTags[]> {
+  if (process.env.AI_ENABLED !== 'true') {
+    console.log('[AI_DISABLED] parseWithAI skipped')
+    return []
+  }
+
   const cleanedText = removeWatermarks(cleanMathUnicode(text))
   console.log('=== 清洗后文本预览 ===\n', cleanedText.slice(0, 500))
 

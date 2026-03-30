@@ -3,16 +3,6 @@ import api from '../api'
 import { toDiffNum } from '../components/DifficultyBadge'
 import type { Quiz } from '../type/quiz'
 
-type TagCheckResp = {
-  existingTagIds: number[]
-  missingNames: string[]
-}
-
-type CreateTagResp = {
-  id: number
-  name: string
-}
-
 export function useQuizEdit(quizSetId: string | undefined, onSuccess: () => void) {
   const [showAddForm, setShowAddForm] = useState(false)
   const [question, setQuestion] = useState('')
@@ -36,7 +26,6 @@ export function useQuizEdit(quizSetId: string | undefined, onSuccess: () => void
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
 
-    // 只强制题目
     if (!question.trim()) return
 
     if (!quizSetId) {
@@ -51,35 +40,24 @@ export function useQuizEdit(quizSetId: string | undefined, onSuccess: () => void
       return
     }
 
-    const checkRes = await api.post<TagCheckResp>(`/quiz/${quizSetId}/items/tag-check`, { tags })
-    const { existingTagIds, missingNames } = checkRes.data
-    let finalTagIds = [...existingTagIds]
-
-    if (missingNames.length > 0) {
-      const ok = confirm(`检测到新标签：${missingNames.join('、')}\n是否创建后再保存？`)
-      if (!ok) return
-
-      for (const name of missingNames) {
-        const created = await api.post<CreateTagResp>('/tag', {
-          name,
-          dimension: 'CONTEXT',
-          quizSetId: Number(quizSetId),
-          isGlobal: false,
-          confirmCreate: true,
-        })
-        finalTagIds.push(created.data.id)
+    // 关键：不做 tag-check，不自动创建，直接交给后端按已有标签解析
+    // 若存在未创建标签，后端会返回 400 + missingNames
+    try {
+      await api.post(`/quiz/${quizSetId}/items`, {
+        question: question.trim(),
+        answer: answer.trim(),
+        note: note.trim() || null,
+        ...(tags.length > 0 ? { tags } : {}),
+        ...(diffVal !== undefined ? { difficulty: diffVal } : {}),
+      })
+    } catch (err: any) {
+      const missingNames = err?.response?.data?.missingNames
+      if (Array.isArray(missingNames) && missingNames.length > 0) {
+        alert(`以下标签不存在，未保存：${missingNames.join('、')}\n请先在标签管理中手动创建。`)
+        return
       }
+      throw err
     }
-
-    finalTagIds = [...new Set(finalTagIds)]
-
-    await api.post(`/quiz/${quizSetId}/items`, {
-      question: question.trim(),
-      answer: answer.trim(), // 可空
-      note: note.trim() || null,
-      tagIds: finalTagIds,
-      ...(diffVal !== undefined ? { difficulty: diffVal } : {}),
-    })
 
     setQuestion('')
     setAnswer('')
@@ -113,9 +91,10 @@ export function useQuizEdit(quizSetId: string | undefined, onSuccess: () => void
       return
     }
 
+    // 编辑保持你原逻辑：传 tagIds（来自已有标签）
     await api.put(`/quiz/item/${quizId}`, {
       question: editQuestion.trim(),
-      answer: editAnswer.trim(), // 可空
+      answer: editAnswer.trim(),
       note: editNote.trim() || null,
       tagIds: editTagIds,
       difficulty: diffVal,
