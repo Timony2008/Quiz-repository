@@ -142,17 +142,13 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
     res.status(400).json({ error: '缺少创建确认（confirmCreate）' }); return
   }
 
-  // 先硬性禁止普通流程创建全局标签
-  if (Boolean(isGlobal)) {
-    res.status(403).json({ error: '不允许在此流程创建全局标签' }); return
-  }
   try {
     const tag = await prisma.tag.create({
       data: {
         name:      name.trim(),
         isGlobal:  Boolean(isGlobal),
         parentId:  parentId  ?? null,
-        quizSetId: quizSetId ?? null,
+        quizSetId: Boolean(isGlobal) ? null : (quizSetId ?? null),
         dimension: normalizeDimension(dimension),
       },
     })

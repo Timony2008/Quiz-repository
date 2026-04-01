@@ -89,6 +89,7 @@ export default function GlobalTagManager() {
         parentId: newParent ?? null,
         quizSetId: null,
         dimension: finalDimension,
+        confirmCreate: true, // ✅ 新增
       })
 
       setNewName('')
